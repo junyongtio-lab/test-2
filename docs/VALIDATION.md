@@ -44,6 +44,8 @@ Machine-readable metadata and the checksum are included next to the APK. The sou
 
 ## Runtime smoke check
 
-The app was installed in an Android 10 / API 29 x86_64 software emulator using direct ADB-over-TCP. The installed package and activity were checked, and a real rendered home screen was captured. See [home screenshot](screenshots/home.png). The cloud host has no KVM acceleration: Android itself booted slowly, briefly displayed a System UI nonresponse dialog, and the first `am start -W` timed out before the UI later rendered. These system-level delays are not recorded as a successful fast-start benchmark. No Palm Remote crash was observed during the limited smoke run.
+The exact delivered APK was installed in an Android 10 / API 29 x86_64 software emulator using direct ADB-over-TCP. Installation returned `Success`; `MainActivity` reached the resumed state, and a clean rendered home screen was captured. The installed `base.apk` was pulled from the emulator and its SHA-256 matched the delivered file exactly; see [installed-artifact verification](../downloads/emulator-verification.json) and [home screenshot](screenshots/home.png).
+
+The cloud host has no KVM acceleration: Android itself booted slowly, briefly displayed a System UI nonresponse dialog, and the first cold `am start -W` timed out before the UI later rendered. The final smoke run showed the app resumed without a dialog. These system-level delays are not recorded as a successful fast-start benchmark. No Palm Remote crash was observed during the limited smoke run.
 
 This smoke check establishes installation and application startup only. Actual TV commands, Wi-Fi discovery on a home LAN, IR emission and Astro decoder responses remain **unverified on physical hardware**. Astro requires a compatible user-supplied learned IR profile; none is bundled. No iOS app, Play publication, backend deployment, payment or all-model compatibility is claimed.
