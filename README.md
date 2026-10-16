@@ -1,49 +1,51 @@
 # Palm Remote for Android
 
-An account-free Android remote for **Samsung, LG, Panasonic, Hisense and Astro/NJOI**. No app registration, paid tiers, advertisements, analytics or backend.
+Version **1.1.0** adds **PRISM+ and Daewoo TV remotes** and a searchable air-conditioner infrared catalogue. No app registration, paid account, subscriptions, advertisements or analytics. Existing Samsung/LG/Panasonic/Hisense and Astro features remain available.
 
-This is a native Java Android application. Flutter's artifact host was unavailable in the build environment, so the requested installable Android app was implemented using the Android SDK directly.
+## Download and install
 
-## Install
+Download [PalmRemote.apk](downloads/PalmRemote.apk) on an Android phone (Android 6.0 or later), open it and allow installation from that source if prompted. This is a development-signed APK, not a Google Play production release. It uses the previous app's package and signing certificate, so it can update version 1.0.0 while keeping saved devices. APKs do not run on iPhone.
 
-Download [`downloads/PalmRemote.apk`](downloads/PalmRemote.apk) to your Android phone (Android 6.0 or later), open it and allow installation from that source if Android prompts. This development APK is debug-signed; it is not a Google Play production release. It does not run on iPhone.
+## Included controls
 
-## Connect a device
-
-Tap **+**, choose the brand and choose a connection:
-
-| Brand | Implemented connection | Requirements and limits |
+| Device | Implemented connection | Requirements and limits |
 | --- | --- | --- |
-| Samsung | Official SmartThings API; sourced IR profiles | SmartThings needs an existing Samsung account, authorized device access, internet and a personal access token. No Palm account. IR needs a phone emitter and matching handset profile. |
-| LG | Local webOS pairing; sourced IR profiles | Same trusted LAN, TV approval, and a webOS model accepting port 3000. Secure-only models are not supported by this transport. |
-| Panasonic | Sourced IR profiles | Matching handset profile and Android consumer IR hardware. No all-model public manufacturer API verified. |
-| Hisense | Sourced IR profiles | Matching handset profile and Android consumer IR hardware. VIDAA/Google TV/Roku are different platforms; no universal brand API claimed. |
-| Astro/NJOI | Learned IR profile import and transmission | **No verified Malaysian decoder IR profile is bundled.** Supply a legitimately learned profile for your decoder and an IR-equipped Android phone. No unofficial decoder Wi-Fi interface is used. |
+| Samsung TV | Official SmartThings API; IR profiles | SmartThings requires an existing Samsung account, authorized token and internet. No Palm account. Only capabilities exposed by the TV are enabled. |
+| LG TV | Local webOS pairing; IR profiles | Same trusted LAN, TV approval and a model accepting port 3000. Secure-only models are outside this transport. |
+| Panasonic / Hisense TV | Matching IR profiles | Android consumer IR emitter and matching handset/model. No brand-wide Wi-Fi API is claimed. |
+| PRISM+ TV | Sourced IR handset profile, 14 commands | Power, volume, mute and navigation on matching models; no Bluetooth voice control. |
+| Daewoo TV | Three IR handset profiles, 42 commands total | Generic, R-40A15 and R-43A08 profiles. Missing source buttons stay disabled. |
+| Astro / NJOI | Learned IR profile import/transmission | Compatible owner-supplied decoder capture required; no Astro codes bundled. |
+| Air conditioners: adjustable controls | 141 documented remote/protocol profiles across 79 brand labels and 65 encoded protocol families | Sends full requested AC state through the genuine IRremoteESP8266 encoders: power, temperature, mode, fan and vertical swing where supported. |
+| Air conditioners: recorded controls | 158 handset profiles across 96 source brand labels, 1,656 recorded commands | Replays exact recorded states/commands; cannot generate arbitrary settings. Some source-category devices are air coolers or ventilation devices. |
+| Other AC brands/models | Learned IR import for any AC manufacturer | Add a legitimately learned waveform profile with category `air_conditioner`. |
 
-**Not every model is supported.** The app disables unavailable commands and checks for an IR emitter. Physical-device compatibility was not tested in the cloud. See [device support](docs/SUPPORTED_DEVICES.md), [integration sources](docs/API_INTEGRATIONS.md), and [validation evidence](docs/VALIDATION.md).
+The AC picker combines **147 distinct searchable brand labels** from encoded and recorded profiles. This covers the available documented catalogue, **not every brand/model ever sold**. All physical TV/AC/decoder compatibility is untested in this cloud environment. Brand names identify compatibility and do not imply endorsement.
 
-### Samsung authorization
+## Use the app
 
-Use Samsung's official developer portal to create a SmartThings personal access token with device read and execute permissions for your TV: <https://account.smartthings.com/tokens>. Add the TV to your existing SmartThings account first. Token policies and expiration are controlled by Samsung; current tokens may expire after 24 hours. Re-add the connection when a token expires. Only TV-related capabilities returned by the API are exposed. D-pad and numeric buttons are not invented when the API does not offer them.
+Tap **+ → Television / Astro decoder** to choose a TV brand, or **+ → Air conditioner** and search a manufacturer/model. AC entries marked **Adjustable** use a full-state protocol encoder; entries marked **Recorded** replay captured signals. Point the phone's emitter at the appliance.
 
-### Infrared and Astro
+For adjustable AC controls, choose power, temperature, mode, fan and swing, then tap **Send AC settings**. The app stores only the last successfully transmitted request; it cannot read the unit's actual state. Unsupported settings may be clamped or ignored by the selected protocol. Reset the last-sent state after using another remote. Toggle-based remotes can require synchronization.
 
-Most Android phones have no IR emitter; iPhones have none. Merely installing an app cannot add this hardware. Selected TV handset profiles include provenance in the APK's assets. Astro support is a transmission/import engine, **not a claim of a ready-made compatible Astro code set**. See [learned profile format](docs/IR_PROFILE_FORMAT.md). External USB/Wi-Fi IR hubs are not implemented in this build.
+**Most Android phones have no IR emitter.** The app detects this and disables transmission. Installing an APK cannot add hardware; external IR hubs and iPhone control are not implemented.
 
-## Build and test
+Samsung SmartThings is optional manufacturer authorization, not app registration. Use the [official token portal](https://account.smartthings.com/tokens) with device read/execute permissions; token lifetime is controlled by Samsung. Add the TV to your SmartThings account first.
 
-Install JDK 21 and Android SDK platform 35/build-tools 35.0.0. Set `ANDROID_HOME` or create an untracked `local.properties` with `sdk.dir`. Then:
+## Build and validation
+
+Install JDK 21, Android SDK Platform 35, Build Tools 35.0.0, NDK 27.0.12077973 and CMake 3.22.1, then run:
 
 ```sh
-./gradlew --no-daemon testDebugUnitTest lintDebug assembleDebug
+./gradlew --no-daemon testDebugUnitTest lintDebug assembleDebug assembleDebugAndroidTest
+bash native_ir/tests/ac/run.sh
+python3 -m unittest discover -s native_ir/tests -p 'test_tv_extra.py' -v
 ```
 
-The APK is generated at `app/build/outputs/apk/debug/app-debug.apk`. A cloud-specific activated toolchain is available with `source /workspace/toolchains/env.sh` in the prepared environment. Do not commit local SDK paths, credentials or signing keys.
+Output: `app/build/outputs/apk/debug/app-debug.apk`. Prepared cloud tasks can first source `/workspace/toolchains/env.sh`. See [build instructions](docs/BUILD_INSTRUCTIONS.md), [validation](docs/VALIDATION.md), [supported devices](docs/SUPPORTED_DEVICES.md) and [known limits](docs/KNOWN_LIMITATIONS.md). The app is native Java with a native C++ AC encoder.
 
-## Privacy
+## Privacy and source
 
-Device names and imported IR profiles are stored only on the phone. Pairing credentials and Samsung tokens are encrypted using Android Keystore. Android backup is disabled. Samsung control sends authorized HTTPS requests to `api.smartthings.com`; LG control goes to the selected TV on the trusted local network. Remove a remote or clear app storage to delete its saved credentials. No customer email database exists because the app has no registration.
+Device names, IR profiles and requested AC state stay on the phone. Pairing keys and SmartThings tokens use Android Keystore encryption. Android backup is disabled. Samsung requests go to `api.smartthings.com`; LG control goes to the selected private-LAN TV. Removing a saved device deletes its associated credential.
 
-## Source and license
-
-Application code is MIT licensed. Dependencies and IR data retain their own licenses; see the IR asset attribution. Brand names identify compatibility and do not imply endorsement.
+Application code is MIT except the LGPL native AC adapter/library. [IRremoteESP8266 source, license and relink instructions](third_party/IRremoteESP8266/PALMREMOTE.md) are included. Numerical capture facts include exact provenance; legacy capture source licenses are accurately marked `NOASSERTION`, not CC0. Original legacy capture-file text is not bundled. See [IR attribution](app/src/main/assets/ir/ATTRIBUTION.md) and [API sources](docs/API_INTEGRATIONS.md).

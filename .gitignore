@@ -6,3 +6,8 @@ local.properties
 .idea/
 captures/
 artifacts/
+.cxx/
+**/.cxx/
+native_ir/.cache/
+__pycache__/
+*.py[cod]

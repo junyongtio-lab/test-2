@@ -1,0 +1,5 @@
+INSTRUMENTATION_RESULT: catalogChecks=7
+INSTRUMENTATION_RESULT: checks=423
+INSTRUMENTATION_RESULT: stream=PASS 423 device-side JNI checks across 141 AC profiles; 7 Android catalogue checks
+
+INSTRUMENTATION_CODE: -1

@@ -25,5 +25,11 @@ python3 native_ir/tools/build_catalog.py
 ```
 
 These checks validate bytes, timing conversion and input bounds. They do not
-establish physical compatibility or IR hardware performance. Provenance and CC0
-license are bundled alongside the catalog.
+establish physical compatibility or IR hardware performance. Source provenance
+and accurate legacy rights metadata are bundled alongside the catalog. Legacy
+capture files are not treated as CC0; only generated numerical/functional facts
+are bundled, with source license metadata marked NOASSERTION.
+
+The stateful AC encoder is a separate LGPL native library. Its source,
+corresponding license and relink instructions are under
+`third_party/IRremoteESP8266`; tests are in `native_ir/tests/ac`.

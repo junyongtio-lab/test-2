@@ -1,12 +1,15 @@
 # Known limitations
 
-- Android APK only. An iPhone app requires a separate iOS implementation, Apple development/signing tools and testing; an APK cannot be installed on iOS.
-- No all-model claim. The four TV manufacturers do not share a universal public remote API. See the supported-device matrix.
-- Samsung SmartThings requires existing manufacturer authorization and internet access. Tokens can expire. Only capabilities actually exposed by a selected device are offered.
-- LG uses the published Connect SDK's local webOS SSAP transport on port 3000. Encrypted-only models and TLS certificate pairing are not implemented. Use only a trusted private network; this legacy local protocol is unencrypted.
-- Panasonic and Hisense Wi-Fi adapters are not shipped as functioning controls because an appropriate public, permitted manufacturer interface was not verified. Roku ECP is excluded from the mobile app.
-- Astro/NJOI is supported through validated learned IR import/transmission only. A compatible decoder profile is not bundled; no Astro physical tests were performed.
-- IR needs built-in Android Consumer IR hardware. There is no hub, USB, Bluetooth or generic RF transport in this build.
-- No physical TV/decoder was available. Software tests and emulator launch do not prove hardware compatibility.
-- The delivered APK uses Android development signing. Google Play release signing, AAB publishing, Apple distribution and store approval are separate tasks.
-- UI is English. Bahasa Malaysia translation, custom layouts, rooms and routines are not included in this narrowed first build.
+- Android APK only: Android 6.0+, ARM64/ARMv7/x86_64. No iPhone app or external IR hub.
+- Most phones have no IR emitter. The app detects this; installing software cannot add hardware.
+- Catalogue coverage is broad, not every brand/model ever sold. Exact appliance/remote matching matters; physical TVs, decoders and ACs were not available for testing.
+- Samsung SmartThings needs existing manufacturer authorization, an appropriate token and internet. Tokens expire. There is no Palm account or subscription.
+- LG local pairing uses the published legacy port-3000 SSAP interface on a trusted LAN. Secure-only sets need a different certificate-pairing implementation. Power turns the TV off; wake behavior is model dependent.
+- Panasonic, Hisense, PRISM+ and Daewoo TV controls here use IR profiles, not an invented brand-wide network API. Voice/Bluetooth features are not implemented.
+- Astro/NJOI requires a compatible learned decoder profile; no Astro codes are bundled.
+- Adjustable AC controls send requested full-state frames. Unsupported modes, fan/swing options and temperature ranges may be ignored/clamped by the selected upstream protocol. The app cannot read the actual AC state.
+- Last-sent state is only an estimate. A physical remote, missed IR frame or manual control can desynchronize toggle protocols; reset and check the unit.
+- Recorded AC buttons replay captures. Names such as Temp+, Mode or Fan may set several properties together, not apply relative changes. Some source-category devices are air coolers/ventilation devices.
+- One Botti Power capture (5.59 seconds) is excluded intact. IR frames exceeding 1.9 seconds, 2,000 timings or supported carrier bounds are rejected rather than truncated.
+- Upstream York stateful sending is unfinished and excluded. TEKNOPOINT uses its dedicated encoder to correct the upstream generic timing dispatch. Common-API KELON168/Hisense encoding is not claimed.
+- Development signing only; production Play signing, store publishing and an iOS build are separate tasks. English UI; Bahasa Malaysia translation is not included.

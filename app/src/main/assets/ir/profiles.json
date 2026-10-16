@@ -8,15 +8,17 @@
       "id": "samsung_bn59",
       "brand": "Samsung",
       "model": "BN59-01315B",
-      "transport": "ir",
-      "hardwareTested": false,
       "source": {
         "url": "https://github.com/Lucaslhm/Flipper-IRDB/blob/d126fb1b6f1e114c52b4a8c19839ea65e3a9c24d/TVs/Samsung/Samsung_BN59-01315B.ir",
         "commit": "d126fb1b6f1e114c52b4a8c19839ea65e3a9c24d",
         "path": "TVs/Samsung/Samsung_BN59-01315B.ir",
-        "license": "CC0-1.0",
-        "sha256": "940636bcb1f4666fc9466fa91110d6b4b13e099d73531b7fccf6647f650ee17c"
+        "license": "NOASSERTION",
+        "sha256": "940636bcb1f4666fc9466fa91110d6b4b13e099d73531b7fccf6647f650ee17c",
+        "sourceLicenseNote": "Upstream README: \"Commits prior to 2319685 are not covered.\" These captures predate that 2025-08-07 cutoff; no source license grant is asserted. Only factual command labels and numeric protocol or timing parameters are reproduced."
       },
+      "category": "tv",
+      "transport": "ir",
+      "hardwareTested": false,
       "commands": {
         "power": {
           "label": "Power",
@@ -3292,15 +3294,17 @@
       "id": "lg_akb75375604",
       "brand": "LG",
       "model": "AKB75375604",
-      "transport": "ir",
-      "hardwareTested": false,
       "source": {
         "url": "https://github.com/Lucaslhm/Flipper-IRDB/blob/d126fb1b6f1e114c52b4a8c19839ea65e3a9c24d/TVs/LG/LG_TV_AKB75375604.ir",
         "commit": "d126fb1b6f1e114c52b4a8c19839ea65e3a9c24d",
         "path": "TVs/LG/LG_TV_AKB75375604.ir",
-        "license": "CC0-1.0",
-        "sha256": "00770645b5ecf3d2c5c1d8e559da5e6bad6e6b8da963cfd86e963acc68f08f2e"
+        "license": "NOASSERTION",
+        "sha256": "00770645b5ecf3d2c5c1d8e559da5e6bad6e6b8da963cfd86e963acc68f08f2e",
+        "sourceLicenseNote": "Upstream README: \"Commits prior to 2319685 are not covered.\" These captures predate that 2025-08-07 cutoff; no source license grant is asserted. Only factual command labels and numeric protocol or timing parameters are reproduced."
       },
+      "category": "tv",
+      "transport": "ir",
+      "hardwareTested": false,
       "commands": {
         "power": {
           "label": "Power",
@@ -6956,15 +6960,17 @@
       "id": "panasonic_viera",
       "brand": "Panasonic",
       "model": "Viera",
-      "transport": "ir",
-      "hardwareTested": false,
       "source": {
         "url": "https://github.com/Lucaslhm/Flipper-IRDB/blob/d126fb1b6f1e114c52b4a8c19839ea65e3a9c24d/TVs/Panasonic/Panasonic_Viera.ir",
         "commit": "d126fb1b6f1e114c52b4a8c19839ea65e3a9c24d",
         "path": "TVs/Panasonic/Panasonic_Viera.ir",
-        "license": "CC0-1.0",
-        "sha256": "276192478d5d15b824814e6f8ccb7e4c2601a6a1ca94d8129c7337cde8d31f2f"
+        "license": "NOASSERTION",
+        "sha256": "276192478d5d15b824814e6f8ccb7e4c2601a6a1ca94d8129c7337cde8d31f2f",
+        "sourceLicenseNote": "Upstream README: \"Commits prior to 2319685 are not covered.\" These captures predate that 2025-08-07 cutoff; no source license grant is asserted. Only factual command labels and numeric protocol or timing parameters are reproduced."
       },
+      "category": "tv",
+      "transport": "ir",
+      "hardwareTested": false,
       "commands": {
         "power": {
           "label": "On_off",
@@ -11076,15 +11082,17 @@
       "id": "panasonic_th43hs550k",
       "brand": "Panasonic",
       "model": "TH-43HS550K / HS550K / GX650K",
-      "transport": "ir",
-      "hardwareTested": false,
       "source": {
         "url": "https://github.com/Lucaslhm/Flipper-IRDB/blob/d126fb1b6f1e114c52b4a8c19839ea65e3a9c24d/TVs/Panasonic/Panasonic_TH-43HS550K.ir",
         "commit": "d126fb1b6f1e114c52b4a8c19839ea65e3a9c24d",
         "path": "TVs/Panasonic/Panasonic_TH-43HS550K.ir",
-        "license": "CC0-1.0",
-        "sha256": "9abd611e9f559812412821ebf3fa7c1d3e1ce1fce6ee0f8835f6929b0fc5d42a"
+        "license": "NOASSERTION",
+        "sha256": "9abd611e9f559812412821ebf3fa7c1d3e1ce1fce6ee0f8835f6929b0fc5d42a",
+        "sourceLicenseNote": "Upstream README: \"Commits prior to 2319685 are not covered.\" These captures predate that 2025-08-07 cutoff; no source license grant is asserted. Only factual command labels and numeric protocol or timing parameters are reproduced."
       },
+      "category": "tv",
+      "transport": "ir",
+      "hardwareTested": false,
       "commands": {
         "power": {
           "label": "Power",
@@ -14434,15 +14442,17 @@
       "id": "hisense_en3y39h",
       "brand": "Hisense",
       "model": "EN3Y39H",
-      "transport": "ir",
-      "hardwareTested": false,
       "source": {
         "url": "https://github.com/Lucaslhm/Flipper-IRDB/blob/d126fb1b6f1e114c52b4a8c19839ea65e3a9c24d/TVs/Hisense/Hisense_EN3Y39H.ir",
         "commit": "d126fb1b6f1e114c52b4a8c19839ea65e3a9c24d",
         "path": "TVs/Hisense/Hisense_EN3Y39H.ir",
-        "license": "CC0-1.0",
-        "sha256": "2e8c4682936d169358a7eba48504b3f23fa3da453470aae1073d9fe930543661"
+        "license": "NOASSERTION",
+        "sha256": "2e8c4682936d169358a7eba48504b3f23fa3da453470aae1073d9fe930543661",
+        "sourceLicenseNote": "Upstream README: \"Commits prior to 2319685 are not covered.\" These captures predate that 2025-08-07 cutoff; no source license grant is asserted. Only factual command labels and numeric protocol or timing parameters are reproduced."
       },
+      "category": "tv",
+      "transport": "ir",
+      "hardwareTested": false,
       "commands": {
         "power": {
           "label": "Power",
@@ -18326,15 +18336,17 @@
       "id": "hisense_en3ah39h",
       "brand": "Hisense",
       "model": "EN3AH39H",
-      "transport": "ir",
-      "hardwareTested": false,
       "source": {
         "url": "https://github.com/Lucaslhm/Flipper-IRDB/blob/d126fb1b6f1e114c52b4a8c19839ea65e3a9c24d/TVs/Hisense/Hisense_EN3AH39H.ir",
         "commit": "d126fb1b6f1e114c52b4a8c19839ea65e3a9c24d",
         "path": "TVs/Hisense/Hisense_EN3AH39H.ir",
-        "license": "CC0-1.0",
-        "sha256": "7377868ed7d45ed219476aa001810bfde92bf3e12072479b77c38d0517b4ad93"
+        "license": "NOASSERTION",
+        "sha256": "7377868ed7d45ed219476aa001810bfde92bf3e12072479b77c38d0517b4ad93",
+        "sourceLicenseNote": "Upstream README: \"Commits prior to 2319685 are not covered.\" These captures predate that 2025-08-07 cutoff; no source license grant is asserted. Only factual command labels and numeric protocol or timing parameters are reproduced."
       },
+      "category": "tv",
+      "transport": "ir",
+      "hardwareTested": false,
       "commands": {
         "power": {
           "label": "Powa",
@@ -22218,15 +22230,17 @@
       "id": "hisense_u7g",
       "brand": "Hisense",
       "model": "U7G",
-      "transport": "ir",
-      "hardwareTested": false,
       "source": {
         "url": "https://github.com/Lucaslhm/Flipper-IRDB/blob/d126fb1b6f1e114c52b4a8c19839ea65e3a9c24d/TVs/Hisense/Hisense_U7G.ir",
         "commit": "d126fb1b6f1e114c52b4a8c19839ea65e3a9c24d",
         "path": "TVs/Hisense/Hisense_U7G.ir",
-        "license": "CC0-1.0",
-        "sha256": "5d4c8fadf6e4ef727310e504cbb81fcea19968d4d86ef6b724e56aef1893455b"
+        "license": "NOASSERTION",
+        "sha256": "5d4c8fadf6e4ef727310e504cbb81fcea19968d4d86ef6b724e56aef1893455b",
+        "sourceLicenseNote": "Upstream README: \"Commits prior to 2319685 are not covered.\" These captures predate that 2025-08-07 cutoff; no source license grant is asserted. Only factual command labels and numeric protocol or timing parameters are reproduced."
       },
+      "category": "tv",
+      "transport": "ir",
+      "hardwareTested": false,
       "commands": {
         "power": {
           "label": "Power",
@@ -24134,15 +24148,17 @@
       "id": "hisense_55u6k",
       "brand": "Hisense",
       "model": "55U6K (2023)",
-      "transport": "ir",
-      "hardwareTested": false,
       "source": {
         "url": "https://github.com/Lucaslhm/Flipper-IRDB/blob/d126fb1b6f1e114c52b4a8c19839ea65e3a9c24d/TVs/Hisense/Hisense_55U6K.ir",
         "commit": "d126fb1b6f1e114c52b4a8c19839ea65e3a9c24d",
         "path": "TVs/Hisense/Hisense_55U6K.ir",
-        "license": "CC0-1.0",
-        "sha256": "1259becc68fb065e1c8d6d7587acbc7945c6b3678dcb841f4fe967d8f6f2a033"
+        "license": "NOASSERTION",
+        "sha256": "1259becc68fb065e1c8d6d7587acbc7945c6b3678dcb841f4fe967d8f6f2a033",
+        "sourceLicenseNote": "Upstream README: \"Commits prior to 2319685 are not covered.\" These captures predate that 2025-08-07 cutoff; no source license grant is asserted. Only factual command labels and numeric protocol or timing parameters are reproduced."
       },
+      "category": "tv",
+      "transport": "ir",
+      "hardwareTested": false,
       "commands": {
         "power": {
           "label": "Power",

@@ -57,7 +57,17 @@ Panasonic VIERA's commonly described `X_SendKey` SOAP interface and Hisense VIDA
 
 Roku ECP is excluded from this mobile application. Its [official documentation](https://developer.roku.com/docs/developer-program/dev-tools/external-control-api.md) and current third-party mobile-use terms must be checked before any future addition; an accessible port is not sufficient evidence of permitted use. The official Roku documentation host was unavailable under this cloud environment's network policy, so this build does not claim a current terms review.
 
-Selected Panasonic and Hisense handset profiles are available through **infrared**, as described in the device matrix and the profile asset's provenance. The eight bundled TV profiles are community data from [Flipper-IRDB at the pinned source revision](https://github.com/Lucaslhm/Flipper-IRDB/tree/d126fb1b6f1e114c52b4a8c19839ea65e3a9c24d), published under CC0-1.0; original files and provenance are included in the APK assets. IR handset data is not a manufacturer-published network API.
+Selected Panasonic, Hisense, PRISM+ and Daewoo TV profiles use infrared. Their numeric functional parameters have exact provenance in the assets. Legacy capture sources are marked `NOASSERTION`; no blanket CC0 claim or original capture-file text is bundled. IR data is distinct from a manufacturer-published network API.
+
+## Stateful and recorded air-conditioner IR
+
+The native encoder uses the complete unmodified source of [IRremoteESP8266 v2.9.0](https://github.com/crankyoldgit/IRremoteESP8266/tree/1e2f0f3ef0a93cbf2a8ddb2e95130f8f4c584b3f), pinned to commit `1e2f0f3ef0a93cbf2a8ddb2e95130f8f4c584b3f`. Its portable sending interface is connected to a hardware-free timing collector, then Android ConsumerIrManager transmits the result. Genuine upstream state conversion, checksums and repeated frames are used.
+
+The Java catalogue exposes 141 documented remote/model profiles across 65 implemented stateful families. Source mappings are in AcProfiles.java with model notes. This community implementation is not a manufacturer certification or a claim of universal model support. York's unfinished common dispatcher is excluded; Teknopoint calls its dedicated upstream encoder to avoid incorrect generic TCL timings.
+
+The separately labelled recorded catalogue has 158 handset profiles / 96 source brand labels / 1,656 signals. Recorded complete frames are replayed, not treated as an arbitrary-temperature state engine. One excessive-duration capture is excluded intact. Import accepts a learned profile for any AC brand.
+
+IRremoteESP8266 and the native adapter are LGPL-2.1-or-later, dynamically linked in libpalmac.so. The corresponding source, copyright notices, license and relink instructions are included in third_party/IRremoteESP8266 and app/src/main/cpp. The APK also includes its LGPL license. Legacy numerical capture facts retain accurate source rights metadata without asserting a missing license.
 
 ## Astro/NJOI and infrared
 

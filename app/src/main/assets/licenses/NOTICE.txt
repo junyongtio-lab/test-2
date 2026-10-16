@@ -5,5 +5,13 @@ Their license texts are included in this directory.
 https://github.com/square/okhttp/tree/parent-3.14.9
 https://github.com/square/okio/tree/okio-parent-1.17.2
 
-Infrared source data has separate CC0-1.0 attribution in assets/ir/.
+The stateful AC engine includes IRremoteESP8266 v2.9.0, LGPL-2.1-or-later,
+pinned upstream commit 1e2f0f3ef0a93cbf2a8ddb2e95130f8f4c584b3f.
+Its license is included here. Corresponding source, the local LGPL bridge,
+and Android build/relink instructions are published with the app at:
+https://github.com/junyongtio-lab/test-2/tree/main/third_party/IRremoteESP8266
+https://github.com/junyongtio-lab/test-2/tree/main/app/src/main/cpp
+
+Infrared numerical capture facts have source attribution and rights metadata
+in assets/ir/. Legacy capture source licenses are NOASSERTION, not CC0.
 No manufacturer endorsement or physical compatibility certification is implied.

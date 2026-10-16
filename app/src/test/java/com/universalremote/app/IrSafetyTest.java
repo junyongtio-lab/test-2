@@ -49,4 +49,60 @@ public class IrSafetyTest {
         try{IrCatalog.read(new ByteArrayInputStream(new byte[512*1024+1]));fail("Oversized import accepted");}
         catch(IllegalArgumentException expected){assertTrue(expected.getMessage().contains("512 KB"));}
     }
+    @Test public void everyNewCatalogueEntryIsSafeAndHasHonestProvenance() throws Exception {
+        Set<String> ids=new HashSet<>(),tvBrands=new HashSet<>(),acBrands=new HashSet<>();
+        int count=0;
+        for(String asset:new String[]{"profiles.json","tv_extra/profiles.json","ac_captures/profiles.json"}) {
+            JSONObject root;
+            try(FileInputStream stream=new FileInputStream("src/main/assets/ir/"+asset)) {
+                root=new JSONObject(IrCatalog.readBounded(stream,8*1024*1024));
+            }
+            JSONArray profiles=root.getJSONArray("profiles");
+            for(int i=0;i<profiles.length();i++) {
+                JSONObject profile=profiles.getJSONObject(i);
+                assertTrue("Cross-catalogue IDs must be unique",ids.add(profile.getString("id")));
+                assertFalse(profile.getBoolean("hardwareTested"));
+                assertEquals("Legacy capture licenses must not be fabricated","NOASSERTION",profile.getJSONObject("source").getString("license"));
+                assertTrue(profile.getJSONObject("source").getString("url").startsWith("https://"));
+                if(profile.getString("category").equals("air_conditioner")) {
+                    assertTrue("Captured AC commands are not an arbitrary-temperature encoder",profile.getBoolean("fixedState"));
+                    acBrands.add(profile.getString("brand"));
+                } else {assertEquals("tv",profile.getString("category"));tvBrands.add(profile.getString("brand"));}
+                JSONObject commands=profile.getJSONObject("commands");assertTrue(commands.length()>0);
+                java.util.Iterator<String> keys=commands.keys();
+                while(keys.hasNext()){IrCatalog.checkedPattern(commands.getJSONObject(keys.next()));count++;}
+            }
+        }
+        assertTrue(tvBrands.contains("PRISM+"));assertTrue(tvBrands.contains("Daewoo"));
+        assertTrue(acBrands.contains("Panasonic"));assertTrue(acBrands.contains("Daikin"));
+        assertTrue(acBrands.size()>=96);assertTrue(count>=2039);
+    }
+    private JSONObject imported(String brand,String category) throws Exception {
+        return new JSONObject().put("profiles",new JSONArray().put(new JSONObject()
+            .put("brand",brand).put("category",category).put("model","Owner's captured remote")
+            .put("hardwareTested",true).put("commands",new JSONObject().put("cool_24",
+                new JSONObject().put("carrierHz",38000).put("pattern",new JSONArray("[9000,4500,560]"))))));
+    }
+    @Test public void anyAcManufacturerCanImportWithoutPretendingItsTvIsSupported() throws Exception {
+        JSONObject input=imported("New AC manufacturer","air_conditioner");
+        JSONObject saved=IrCatalog.validateImport(input).get(0);
+        assertEquals("New AC manufacturer",saved.getString("brand"));assertTrue(saved.getBoolean("fixedState"));
+        assertFalse(saved.getBoolean("hardwareTested"));assertTrue(input.getJSONArray("profiles").getJSONObject(0).getBoolean("hardwareTested"));
+        try{IrCatalog.validateImport(imported("New AC manufacturer","tv"));fail("Unknown TV brand accepted");}
+        catch(IllegalArgumentException expected){assertTrue(expected.getMessage().contains("TV brand"));}
+    }
+    @Test public void expandedImportsRejectWrongCategoriesAndUnsafeTimings() throws Exception {
+        for(String category:new String[]{"fan","ac"}) {
+            try{IrCatalog.validateImport(imported("Daewoo",category));fail("Unknown category accepted");}
+            catch(IllegalArgumentException expected){assertTrue(expected.getMessage().contains("Category"));}
+        }
+        JSONObject data=imported("PRISM+","tv");
+        data.getJSONArray("profiles").getJSONObject(0).getJSONObject("commands").getJSONObject("cool_24").put("pattern",new JSONArray("[9000,-1,560]"));
+        try{IrCatalog.validateImport(data);fail("Unsafe import accepted");}catch(IllegalArgumentException expected){/* Invalid input never reaches storage or hardware. */}
+    }
+    @Test public void prismNamesCanonicalizeAndOldCategorylessImportsStillWork() throws Exception {
+        assertEquals("PRISM+",IrCatalog.validateImport(imported("PrismPlus","tv")).get(0).getString("brand"));
+        JSONObject old=imported("Samsung","tv");old.getJSONArray("profiles").getJSONObject(0).remove("category");
+        assertEquals("tv",IrCatalog.validateImport(old).get(0).getString("category"));
+    }
 }

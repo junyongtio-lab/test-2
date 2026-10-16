@@ -1,7 +1,8 @@
 # Build and validate Palm Remote
 
 The project builds a native Java Android app. It requires JDK 17 or newer,
-Android SDK Platform 35, Android Build Tools 35.0.0, and Gradle 8.13. The checked-in
+Android SDK Platform 35, Android Build Tools 35.0.0, NDK 27.0.12077973,
+CMake 3.22.1 and Gradle 8.13. The checked-in
 Gradle wrapper downloads the correct Gradle release and verifies its SHA256.
 No API keys, account registration, database, or hosted backend are required.
 
@@ -11,7 +12,7 @@ Open the repository in Android Studio and let it install SDK Platform 35 and
 Build Tools 35.0.0. Alternatively, set `ANDROID_HOME` to an existing SDK and run:
 
 ```sh
-./gradlew --no-daemon assembleDebug lint test
+./gradlew --no-daemon assembleDebug lintDebug testDebugUnitTest assembleDebugAndroidTest
 ```
 
 On Windows, use `gradlew.bat` instead. The installable debug APK is written to
@@ -37,7 +38,7 @@ The current cloud machine has a workspace-local toolchain:
 ```sh
 source /workspace/toolchains/env.sh
 cd /workspace/test-2
-./gradlew --no-daemon assembleDebug lint test
+./gradlew --no-daemon assembleDebug lintDebug testDebugUnitTest assembleDebugAndroidTest
 ```
 
 The source checkout already belongs to an isolated cloud task; use this checkout
@@ -96,3 +97,24 @@ Platform Tools 37.0.1 tries to create `$HOME/.android` even when
 cloud smoke validation uses a workspace-local Python `adb-shell` client connected
 directly to the emulator's `127.0.0.1:5555` ADB endpoint. Normal Android Studio and
 device development on a writable user home can use the regular `adb` commands.
+
+## Air-conditioner native engine
+
+Install the pinned native tools if Android Studio has not installed them:
+
+```sh
+sdkmanager 'ndk;27.0.12077973' 'cmake;3.22.1'
+bash native_ir/tests/ac/run.sh
+python3 native_ir/tests/ac/profile_catalog.py --check
+```
+
+The app builds libpalmac.so for arm64-v8a, armeabi-v7a and x86_64. NDK 27 flexible-page-size support and CMake compile/link job pools are configured. Vendored source and relink instructions are in third_party/IRremoteESP8266.
+
+Device-side encoder/asset checks do not send IR:
+
+```sh
+adb install -r app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+adb shell am instrument -w -r com.universalremote.app.test/com.universalremote.app.ac.AcEngineInstrumentation
+```
+
+The prepared cloud setup helper now also installs the pinned NDK and CMake. Version 1.1.0 retains version 1.0.0's package, profile IDs and debug signing key for in-place upgrades. Keep private signing keys outside Git.

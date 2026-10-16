@@ -1,43 +1,40 @@
-# Supported-device scope
+# Supported-device scope, version 1.1.0
 
-The deliverable is an **Android APK for Android 6.0 or newer**. An APK cannot be installed on an iPhone. This repository does not contain an iOS application or an Apple-signed build.
+This is an Android APK for Android 6.0 or newer, with ARM64, ARMv7 and x86_64 native builds. It cannot run on iPhone. No physical appliance was attached; implemented protocols and source labels are not hardware certification.
 
-No physical TV or Astro decoder was available during development. The entries below describe implemented transports and prerequisites, not certified model compatibility. Support must be confirmed on the exact TV/decoder model, region and firmware. There is no all-model guarantee.
+## Televisions and decoders
 
-| Device family | Implemented route | What is required | Limits |
-| --- | --- | --- | --- |
-| Samsung TVs available to SmartThings | Official SmartThings cloud API | Existing Samsung account, TV registered in SmartThings, internet and a token permitting device read/command execution | Only capabilities actually advertised by the device are offered. Token expiry and TV standby settings apply. No universal navigation/numeric keypad. |
-| LG webOS TVs accepting port 3000 | Published Connect SDK local SSAP subset | Phone and powered TV on the same private LAN; remote/mobile-control setting enabled; approve TV pairing prompt | Legacy unencrypted connection only. Secure-only port-3001 models and pre-webOS NetCast sets are outside this transport's scope. |
-| Selected Samsung TV handsets | Bundled IR profile or imported profile | Android phone with built-in consumer IR emitter, supported carrier frequency, matching handset profile and line of sight | Profile similarity is not an all-model guarantee. Commands absent from the selected profile remain unavailable. |
-| Selected LG TV handsets | Bundled IR profile or imported profile | Same IR requirements | Matching a brand alone does not establish matching IR codes. |
-| Selected Panasonic TV handsets | Bundled IR profile or imported profile | Same IR requirements | No Panasonic Wi-Fi control is shipped; network availability does not change this. |
-| Selected Hisense TV handsets | Bundled IR profile or imported profile | Same IR requirements | No VIDAA, Google TV or Roku network-control adapter is shipped. |
-| Astro/NJOI decoder | User-supplied learned IR profile | A legitimately obtained profile for the exact decoder and an Android consumer IR emitter | **No compatible Astro decoder profile is bundled.** Profile import/transmission does not establish decoder compatibility. |
+| Family | Route | Coverage and requirements |
+| --- | --- | --- |
+| Samsung | Official SmartThings API; IR | Existing manufacturer authorization for the API; only returned capabilities. IR profile BN59-01315B or matching learned profile. |
+| LG | Published webOS SSAP subset; IR | Private LAN, TV approval, legacy port 3000. IR handset AKB75375604. Secure-only and pre-webOS sets are not covered by this Wi-Fi transport. |
+| Panasonic | IR | Viera and TH-43HS550K / HS550K / GX650K source profiles. |
+| Hisense | IR | EN3Y39H, EN3AH39H, U7G and 55U6K (2023) source profiles. No VIDAA, Google TV or Roku network adapter. |
+| PRISM+ | IR | Manufacturer-labelled community capture, exact TV model unspecified; 14 commands include power, volume, mute and navigation. Voice/Bluetooth features are not IR commands. |
+| Daewoo | IR | Community generic (6 commands), R-40A15 (15) and R-43A08 (21) handsets. R-40A15 has no identified power command; it is not invented. |
+| Astro/NJOI | Learned IR import | Compatible owner-supplied decoder profile required. No verified Astro decoder codes are bundled. |
 
-The bundled IR catalog records handset labels and source provenance in [profiles.json](../app/src/main/assets/ir/profiles.json). These are the source's profile labels, not a tested list of TV models:
+The 12 bundled TV/handset profiles contain 383 commands. Select the correct profile and test the specific model. The old eight profile IDs are preserved so saved devices remain valid after an upgrade.
 
-| Brand | Bundled source labels |
-| --- | --- |
-| Samsung | `BN59-01315B` |
-| LG | `AKB75375604` |
-| Panasonic | `Viera`; `TH-43HS550K / HS550K / GX650K` |
-| Hisense | `EN3Y39H`; `EN3AH39H`; `U7G`; `55U6K (2023)` |
-| Astro/NJOI | None; compatible user-supplied capture required |
+## Air conditioners
 
-These eight profiles come from the community [Flipper-IRDB](https://github.com/Lucaslhm/Flipper-IRDB/tree/d126fb1b6f1e114c52b4a8c19839ea65e3a9c24d), pinned to commit `d126fb1b6f1e114c52b4a8c19839ea65e3a9c24d` under CC0-1.0. Source originals and provenance are included with the catalog. Every bundled profile is marked physically untested. Community handset data is distinct from a manufacturer-published API; a profile's label does not establish compatibility with every device sharing that label or brand.
+The searchable picker combines 147 distinct brand labels from two different sources:
 
-## Setup
+- **Adjustable:** 141 documented remote/model profiles, 79 manufacturer/protocol labels and 65 stateful sending families. Full-state generation comes from the genuine IRremoteESP8266 v2.9.0 implementation, including protocol checksums and repeats. See [exact encoded profile list](../app/src/main/java/com/universalremote/app/ac/AcProfiles.java).
+- **Recorded:** 158 community handset profiles, 96 source brand labels and 1,656 exact signals. See [full brand/model CSV](../app/src/main/assets/ir/ac_captures/coverage.csv) and [brand summary](../app/src/main/assets/ir/ac_captures/summary.json). Some source files describe air coolers, ventilation devices or humidifiers; model identifiers are retained.
 
-For Samsung SmartThings, associate the TV with your existing SmartThings account, obtain an appropriately scoped personal access token through Samsung's portal, then choose **Add → Samsung → SmartThings**. The app lists devices the token may access and enables supported commands. There is no account registration or paid plan for this app. Samsung authorization remains necessary for this route.
+The encoded and recorded lists overlap; their brand counts must not be added. A catalogue label is not evidence that every appliance sold under that brand uses the same protocol. For unsupported brands, import a learned profile with category `air_conditioner`; the importer accepts any AC manufacturer name. This is extensibility for learned signals, not automatic compatibility with every brand/model.
 
-For LG local control, put the phone and TV on the same trusted Wi-Fi/LAN, enable the TV's mobile/remote-control option if present, and choose the LG Wi-Fi route. Select a discovered TV or enter its local IP address. Approve the prompt on the television. Guest Wi-Fi, client isolation or a sleeping TV can prevent discovery/connection. Use manual entry when discovery is unavailable. A firmware requiring secure port 3001 cannot connect with this build.
+Encoded profiles include documented families/models for Daikin, Panasonic, Mitsubishi Electric and Heavy Industries, Midea, Gree, Haier, LG, Samsung, Sharp, Toshiba, Hitachi, Fujitsu, Carrier, AUX, Daewoo and many others. Hisense and York recorded profiles remain available; the incomplete upstream stateful York dispatcher and unsupported common-API KELON168/Hisense mapping are deliberately excluded. No PRISM+ AC mapping is invented.
 
-For infrared, the phone must actually contain an IR emitter. Most Android phones do not; iPhones do not provide a consumer IR emitter. Select the matching handset profile, point the phone's emitter toward the device and test a harmless command such as volume. Profiles may have only a subset of buttons. External USB, Bluetooth and Wi-Fi IR hubs are not implemented.
+Use **+ → Air conditioner**, search a brand, then select an **Adjustable** or **Recorded** entry. Adjustable controls send the requested power, temperature, mode, fan and vertical swing when Send is pressed. Unsupported settings can be clamped/ignored by that protocol. Recorded commands preserve source labels and may set several properties together; a captured Temp+ button is not assumed to calculate a new temperature.
 
-For Astro, obtain a compatible learned profile, import it using **Devices → Import learned IR profile**, then save it as an Astro infrared remote. Capturing a signal requires an IR receiver or learning device; this app's transmission engine cannot perform the capture. The supported import structure is in [IR profile format](IR_PROFILE_FORMAT.md).
+The app stores a last-sent request, not measured appliance state. Other remotes can desynchronize toggle protocols. Reset the last-sent state when needed and check the actual unit. No external USB, Bluetooth, Wi-Fi IR or RF hub is implemented.
 
-## How to report a tested model
+## Hardware and source facts
 
-Record manufacturer, exact model, region, firmware, phone model/Android version, chosen transport/profile and the commands tested. Check pairing/reconnection, volume, mute, channel, navigation and standby behavior separately. A successful socket connection or transmitted IR frame is not proof that the TV performed a command.
+All direct IR paths require an Android phone with a built-in consumer IR transmitter, a supported carrier and line of sight. Most Android phones and all iPhones lack this hardware. Buttons remain disabled when no emitter is detected.
 
-See [integration sources](API_INTEGRATIONS.md), [known limitations](KNOWN_LIMITATIONS.md) and [validation evidence](VALIDATION.md).
+TV and AC numerical capture facts come from pinned community source revision `d126fb1b6f1e114c52b4a8c19839ea65e3a9c24d`. Per-profile URLs, hashes and source rights notes are bundled. Legacy source licenses are **NOASSERTION**, not CC0; original legacy capture text is excluded. Encoders are separately licensed source code, with the LGPL native library and relink instructions included.
+
+Record exact appliance model, region, firmware, handset, phone/Android version, profile and commands before reporting physical compatibility. See [validation](VALIDATION.md), [API sources](API_INTEGRATIONS.md) and [limits](KNOWN_LIMITATIONS.md).

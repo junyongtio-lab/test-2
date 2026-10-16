@@ -1,4 +1,19 @@
 {
-  "expected_sha256": "f385f117dc59e4d1fb4402877ff67929ba67e819a0bc2cbdad89e5a83f9b62ef",
-  "installed_sha256": "f385f117dc59e4d1fb4402877ff67929ba67e819a0bc2cbdad89e5a83f9b62ef"
+  "expected_sha256": "77b3a78e81220a42fd8ce33404c41b27070c301808957bcd84de6189b6e2f9ee",
+  "installed_sha256": "77b3a78e81220a42fd8ce33404c41b27070c301808957bcd84de6189b6e2f9ee",
+  "package": "com.universalremote.app",
+  "versionName": "1.1.0",
+  "versionCode": 2,
+  "install": "Success (in-place update)",
+  "launch": "Status: ok",
+  "uiChecks": [
+    "PRISM+ and Daewoo in TV picker",
+    "PRISM+ profile saved and remote opened",
+    "No-IR hardware status shown",
+    "Searchable Daikin AC profiles",
+    "Adjustable AC controls rendered",
+    "Send disabled without IR hardware",
+    "Both saved devices retained"
+  ],
+  "physicalHardwareTested": false
 }

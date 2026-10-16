@@ -1,51 +1,36 @@
-# Validation evidence
+# Version 1.1.0 validation
 
-Validated on 16 October 2026 in the prepared Linux cloud environment. No physical television, decoder or phone was attached.
+Validated in the prepared cloud environment on 16 October 2026. No physical TV, AC, decoder or phone was attached.
 
-## Build and automated checks
+## Build and software checks
 
-The final application source passed:
+`./gradlew --no-daemon testDebugUnitTest lintDebug assembleDebug assembleDebugAndroidTest` completed **BUILD SUCCESSFUL**. Android lint reports **No issues found**. Compiler/deprecation warnings in upstream/build tooling do not change that outcome.
 
-```sh
-source /workspace/toolchains/env.sh
-./gradlew --no-daemon assembleDebug lintDebug testDebugUnitTest
-```
+| Check | Outcome |
+| --- | --- |
+| JVM unit/protocol tests | 43 passed; zero failures, errors or skips |
+| Separate IR encoder known-vector/invalid-input checks | 28 passed |
+| PRISM+/Daewoo source-fact/vector tests | 8 passed |
+| Native AC host checks | 17,360 passed across 65 stateful families and 141 advertised remote profiles |
+| Android native/JNI encoding | 423 passed across all 141 profiles, with first-send and power on/off |
+| Actual Android asset-loader/category/old-ID checks | 7 passed |
 
-Result: **BUILD SUCCESSFUL**, 39 tests executed, zero failures/errors/skips.
+The JVM tests exercise real local mock HTTP/WebSocket servers, TV approval/rejection, command failures, endpoint validation, SmartThings capabilities, redirects and imported IR bounds. The expanded catalogue test validates all 170 capture profiles and 2,039 commands, including unique IDs, category separation, honest source metadata and Android timing limits. Captured AC frames remain fixed-state; no relative-temperature behavior is invented.
 
-| Suite | Passed |
-| --- | ---: |
-| SmartThings client contracts | 17 |
-| LG webOS mock-TV integration | 14 |
-| Local endpoint and SSDP validation | 5 |
-| Packaged IR profiles and hostile input bounds | 3 |
+Native host checks cover each advertised model and requested mode/temperature/fan/swing combination. Eleven representative stateful families are decoded back through the upstream decoder to verify protocol, power/mode/temperature and changed-temperature frames. A known published Gree checksum vector and Teknopoint regression are included. Native encoding is checked on an Android 10 x86_64 emulator through the real JNI library, without transmitting IR.
 
-The protocol tests run actual local HTTP/WebSocket fake services. They exercise pairing approval/rejection, saved pairing keys, input messages, command errors, socket failure, live mute state, destination validation and cancellation. SmartThings contracts cover authorization, device capability filtering, live toggle state, channel/input commands, pagination, malformed responses and token redirect protection. They do not authenticate against a real Samsung account or pair with a real LG television.
+## Artifact and upgrade
 
-The separate Java IR encoder test runner executed **28 passing checks** for known frame bytes, NEC/Samsung/Kaseikyo encoding, raw bounds and Pronto parsing. All eight packaged profiles (327 commands) include provenance and valid transmission patterns. None is marked physically tested.
-
-Android lint exits successfully with zero errors. It retains one advisory asking for a legacy backup XML resource; this app explicitly sets `allowBackup=false` and `fullBackupContent=false`, with Android 12+ cloud/device-transfer exclusion rules. No lint baseline or disabled assertions are used.
-
-The workspace-local setup helper was rerun successfully against the installed toolchain, and Gradle wrapper activation was exercised. Build dependencies preserve TLS verification; downloaded toolchain archives were checksum-verified.
-
-## APK
-
-- File: [`downloads/PalmRemote.apk`](../downloads/PalmRemote.apk)
+- APK: [downloads/PalmRemote.apk](../downloads/PalmRemote.apk)
 - Package: `com.universalremote.app`
-- Version: `1.0.0` / code `1`
-- Minimum Android: API 23 (Android 6.0)
-- Target Android: API 35
-- Size: 394,443 bytes
-- SHA-256: `f385f117dc59e4d1fb4402877ff67929ba67e819a0bc2cbdad89e5a83f9b62ef`
-- `apksigner verify`: successful (v1 and v2 signatures)
-- Signing: Android development certificate, not production Google Play signing
+- Version: `1.1.0` / versionCode `2`; minimum API 23, target API 35
+- Size: 5,186,407 bytes
+- SHA-256: `77b3a78e81220a42fd8ce33404c41b27070c301808957bcd84de6189b6e2f9ee`
+- APK signatures verified; certificate matches version 1.0.0 (`75e8320e…b9e4e64`)
+- Native libraries included for ARM64, ARMv7 and x86_64; 16 KB APK ZIP alignment and ARM64/x86_64 ELF LOAD alignment checks passed
+- Original legacy capture text and the former incorrect CC0 license asset are absent; numerical facts have exact provenance and NOASSERTION source rights metadata
+- The APK includes the LGPL native-library license; full corresponding source and relink instructions are in this repository
 
-Machine-readable metadata and the checksum are included next to the APK. The source and APK contain no shared manufacturer token or private signing key.
+The existing package was updated in place using `pm install -r`, preserving its data. All eight original TV profile IDs remain present. A real Android emulator launch returned `Status: ok`; direct IR is disabled because this emulator has no emitter. The installed APK was pulled back and its SHA-256 exactly matched the delivery file. See [TV brands](screenshots/tv-brands.png), [PRISM+ remote](screenshots/prism-remote.png), [AC profile picker](screenshots/ac-profile-picker.png), [AC remote](screenshots/ac-remote.png), [AC controls](screenshots/ac-controls.png), [saved devices](screenshots/saved-devices.png), [installed-byte verification](../downloads/emulator-verification.json) and [raw JNI test output](../downloads/native-validation.txt). Seven UI flow checks passed, including disabled sending on a phone without IR. A software-emulator System UI nonresponse dialog was dismissed during automation; the app itself remained resumed and the completed screen checks were clean.
 
-## Runtime smoke check
-
-The exact delivered APK was installed in an Android 10 / API 29 x86_64 software emulator using direct ADB-over-TCP. Installation returned `Success`; `MainActivity` reached the resumed state, and a clean rendered home screen was captured. The installed `base.apk` was pulled from the emulator and its SHA-256 matched the delivered file exactly; see [installed-artifact verification](../downloads/emulator-verification.json) and [home screenshot](screenshots/home.png).
-
-The cloud host has no KVM acceleration: Android itself booted slowly, briefly displayed a System UI nonresponse dialog, and the first cold `am start -W` timed out before the UI later rendered. The final smoke run showed the app resumed without a dialog. These system-level delays are not recorded as a successful fast-start benchmark. No Palm Remote crash was observed during the limited smoke run.
-
-This smoke check establishes installation and application startup only. Actual TV commands, Wi-Fi discovery on a home LAN, IR emission and Astro decoder responses remain **unverified on physical hardware**. Astro requires a compatible user-supplied learned IR profile; none is bundled. No iOS app, Play publication, backend deployment, payment or all-model compatibility is claimed.
+Emulator execution establishes build, installation, library loading, catalogue/UI behavior and encoder output. It does not establish physical appliance responses, Wi-Fi pairing in a home network, universal brand/model support, iPhone support, Astro code availability or Google Play publication. Samsung still needs manufacturer authorization; Astro still needs an imported learned decoder profile.
