@@ -1,0 +1,44 @@
+{
+  "applicationId": "com.universalremote.app",
+  "versionName": "1.0.0",
+  "versionCode": 1,
+  "minSdk": 23,
+  "targetSdk": 35,
+  "buildType": "debug",
+  "signing": "Android development certificate (not Play release signing)",
+  "apkBytes": 394443,
+  "sha256": "f385f117dc59e4d1fb4402877ff67929ba67e819a0bc2cbdad89e5a83f9b62ef",
+  "buildDate": "2026-10-16",
+  "automatedTests": [
+    {
+      "name": "com.universalremote.app.IrSafetyTest",
+      "tests": "3",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.universalremote.app.protocols.EndpointDiscoveryTest",
+      "tests": "5",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.universalremote.app.protocols.NetworkRemoteTest",
+      "tests": "14",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.universalremote.app.smartthings.SmartThingsClientTest",
+      "tests": "17",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    }
+  ],
+  "standaloneIrChecks": 28,
+  "physicalHardwareTested": false
+}

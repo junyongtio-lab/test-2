@@ -1,0 +1,9 @@
+Palm Remote uses OkHttp 3.14.9 and Okio 1.17.2 by Square, Inc.
+Both libraries are distributed under the Apache License, Version 2.0.
+Their license texts are included in this directory.
+
+https://github.com/square/okhttp/tree/parent-3.14.9
+https://github.com/square/okio/tree/okio-parent-1.17.2
+
+Infrared source data has separate CC0-1.0 attribution in assets/ir/.
+No manufacturer endorsement or physical compatibility certification is implied.
