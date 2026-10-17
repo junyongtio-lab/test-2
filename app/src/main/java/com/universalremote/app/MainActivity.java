@@ -120,7 +120,7 @@ public final class MainActivity extends Activity {
         if (selected==null) {
             LinearLayout c=card("TVs, decoders & air conditioners.","Samsung, LG, Panasonic, Hisense, PRISM+, Daewoo and Astro. Add an air conditioner from the searchable IR catalogue. No account, subscriptions or ads.");
             gap(c,16); full(c,action("Add your first remote",this::addBrand,true),54);
-            card("The right connection", "Samsung: official SmartThings API. LG: supported webOS Wi-Fi pairing. Infrared: a compatible Android phone and a matching remote profile. Astro needs a learned IR profile.");
+            card("The right connection", "Samsung: official SmartThings API. LG: supported webOS Wi-Fi pairing. Infrared: a compatible Android phone and a matching remote profile. Supplied Astro Ultra Box profiles are built in; no phone JSON import is needed. Physical decoder compatibility is untested.");
             card("Built for your Android phone", "An APK cannot run on iPhone. Most Android phones also have no IR transmitter; check your phone before choosing infrared.");
             if (!notice.isEmpty()) card("Notice",notice);
             return;
@@ -131,6 +131,8 @@ public final class MainActivity extends Activity {
         statusText=text(status,13,connected?MINT:MUTED,false);gap(device,8);device.addView(statusText);
         statusText.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
         gap(device,10);full(device,action("Switch device  ▾",this::pickDevice,false),44);
+        JSONObject irProfile=selected.optString("mode").equals("ir")&&infrared!=null?infrared.find(selected.optString("profile")):null;
+        if(irProfile!=null&&!irProfile.optString("notice").trim().isEmpty())card("Profile guidance",irProfile.optString("notice"));
         LinearLayout top=row(); command(top,"⏻  Power","power",true);command(top,"Input","input",false); content.addView(top);
         gap(content,12);
         LinearLayout pad=column(); pad.setPadding(dp(8),dp(8),dp(8),dp(8));pad.setBackground(shape(CARD,28));
@@ -150,12 +152,17 @@ public final class MainActivity extends Activity {
             command(playback,"Play","play",false);command(playback,"Pause","pause",false);
         } else command(playback,"Play / pause","play_pause",false);
         command(playback,"Forward","fast_forward",false);content.addView(playback);
+        if(hasIrCommand("record")) {LinearLayout recording=row();command(recording,"Record","record",false);content.addView(recording);}
+        LinearLayout colors=row();
+        for(String color:new String[]{"red","green","yellow","blue"})if(hasIrCommand(color))
+            command(colors,color.substring(0,1).toUpperCase(Locale.ROOT)+color.substring(1),color,false);
+        if(colors.getChildCount()>0)content.addView(colors);
         LinearLayout guide=row();command(guide,"Guide","guide",false);guide.addView(action("123  Keypad",this::keypad,false),new LinearLayout.LayoutParams(0,dp(56),1));content.addView(guide);
         gap(content,14);
         full(content,action("Reconnect",this::connect,false),48);
         gap(content,14);
         content.addView(text(selected.optString("mode").equals("ir")?
-            "Aim your phone at the device. Sending IR cannot confirm that the device responded. Profiles have not been tested on physical TVs here.":
+            "Aim your phone at the device. Sending IR cannot confirm that the device responded. Profiles have not been tested on physical TVs or decoders here.":
             "Only buttons supported by this connection are enabled. Pairing and model support depend on your TV.",12,MUTED,false));
         if (!notice.isEmpty()) {gap(content,10);content.addView(text(notice,13,MUTED,false));}
         refreshButtons();
@@ -169,6 +176,9 @@ public final class MainActivity extends Activity {
         Button b=action(label,()->send(code),primary); b.setContentDescription(labelFor(code));commandButtons.put(b,code);return b;
     }
     private String labelFor(String code) { return code.replace('_',' '); }
+    private boolean hasIrCommand(String code) {
+        return selected!=null&&selected.optString("mode").equals("ir")&&infrared!=null&&infrared.supports(selected.optString("profile"),code);
+    }
     private RemoteCommand networkCommand(String code) {
         String name=code.equals("ok")?"SELECT":code.equals("input")?"SOURCE":code.toUpperCase(Locale.ROOT);
         try{return RemoteCommand.valueOf(name);}catch(Exception e){return null;}
@@ -262,7 +272,7 @@ public final class MainActivity extends Activity {
         card("PRISM+ & Daewoo TVs", "Select a matching sourced infrared remote profile. These routes require an Android phone with an IR emitter. TV pairing, Bluetooth voice commands and every model are not covered by these IR profiles.");
         card("Air conditioners", "Choose an encoded protocol family for adjustable power, temperature, mode, fan and swing, or a recorded handset profile for captured commands. Settings are requested states, not readings from the unit. A brand match alone does not guarantee model compatibility; unknown brands can import a learned IR profile.");
         card("AC state and synchronization", "Only the last successfully transmitted requested state is stored. The app cannot read the AC state. If someone uses the original remote, reset the last-sent state in this app. Some protocols use toggles or normalize temperature, mode, fan or swing options; test the exact model.");
-        card("Astro / NJOI", "No verified Malaysian Astro IR codes were available for bundling. Import a legitimately learned profile for your exact decoder. This build does not claim tested Astro compatibility or use an unofficial Wi-Fi decoder interface.");
+        card("Astro Ultra Box / Ulti Box", "The supplied decoder profiles are built in; no phone JSON import is needed. Start with the default profile and try the alternate if there is no response. These codes have not been tested on a physical decoder. The supplied Power/Blue and Mute/Right pairs transmit identical signals. An Android phone with an IR transmitter is required.");
         card("Infrared hardware", infrared!=null&&infrared.hasEmitter()?"An infrared transmitter was detected. Aim it at the device and use the exact or compatible handset profile.":"No infrared transmitter detected. IR buttons will stay disabled. Most Android phones and all iPhones lack a built-in consumer IR transmitter. This app does not support USB or external IR hubs.");
         card("Your data stays yours", "Device names and imported profiles stay in private app storage. Pairing keys and SmartThings tokens use Android Keystore encryption. Samsung commands go to api.smartthings.com; LG commands go directly to your TV. Android backup is disabled. Remove devices or clear app data to delete saved credentials.");
         card("Test status", "Automated build and protocol tests do not establish physical device compatibility. No TV, decoder or physical phone was attached during development. This APK is Android-only; iOS requires separate development and signing.");
@@ -430,9 +440,12 @@ public final class MainActivity extends Activity {
         new AlertDialog.Builder(this).setTitle(brand+" infrared profile").setItems(labels,(dialog,index)->{
             if(index==profiles.size()){importIr();return;}
             JSONObject profile=profiles.get(index);
-            if(!infrared.hasEmitter()) {
-                new AlertDialog.Builder(this).setTitle("No IR transmitter detected").setMessage("You can save this remote, but this phone cannot send infrared commands. Wi-Fi alternatives are available only for supported Samsung and LG models.")
-                    .setPositiveButton("Save anyway",(d,w)->saveIr(brand,profile)).setNegativeButton("Cancel",null).show();
+            boolean emitter=infrared.hasEmitter();
+            String guidance=profile.optString("notice").trim();
+            if(!emitter||!guidance.isEmpty()) {
+                if(!emitter)guidance+=(guidance.isEmpty()?"":"\n\n")+"You can save this remote, but this phone cannot send infrared commands. Wi-Fi alternatives are available only for supported Samsung and LG models.";
+                new AlertDialog.Builder(this).setTitle(emitter?"About this IR profile":"No IR transmitter detected").setMessage(guidance)
+                    .setPositiveButton(emitter?"Save remote":"Save anyway",(d,w)->saveIr(brand,profile)).setNegativeButton("Cancel",null).show();
             }else saveIr(brand,profile);
         }).setNegativeButton("Cancel",null).show();
     }

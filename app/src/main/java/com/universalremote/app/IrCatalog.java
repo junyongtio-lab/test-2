@@ -23,6 +23,9 @@ final class IrCatalog {
         for(String asset:new String[]{"ir/profiles.json","ir/tv_extra/profiles.json","ir/ac_captures/profiles.json"}) {
             try (InputStream in = context.getAssets().open(asset)) { add(new JSONObject(readBounded(in,8*1024*1024))); }
         }
+        try (InputStream in = context.getAssets().open("astro_ultrabox.json")) {
+            add(AstroProfiles.fromSource(new JSONObject(readBounded(in,512*1024))));
+        }
         add(new JSONObject(prefs.getString("custom", "{\"profiles\":[]}")));
     }
     static String read(InputStream input) throws Exception {

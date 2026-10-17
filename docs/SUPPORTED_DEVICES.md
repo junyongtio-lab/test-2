@@ -1,4 +1,4 @@
-# Supported-device scope, version 1.1.0
+# Supported-device scope, version 1.1.1
 
 This is an Android APK for Android 6.0 or newer, with ARM64, ARMv7 and x86_64 native builds. It cannot run on iPhone. No physical appliance was attached; implemented protocols and source labels are not hardware certification.
 
@@ -12,9 +12,13 @@ This is an Android APK for Android 6.0 or newer, with ARM64, ARMv7 and x86_64 na
 | Hisense | IR | EN3Y39H, EN3AH39H, U7G and 55U6K (2023) source profiles. No VIDAA, Google TV or Roku network adapter. |
 | PRISM+ | IR | Manufacturer-labelled community capture, exact TV model unspecified; 14 commands include power, volume, mute and navigation. Voice/Bluetooth features are not IR commands. |
 | Daewoo | IR | Community generic (6 commands), R-40A15 (15) and R-43A08 (21) handsets. R-40A15 has no identified power command; it is not invented. |
-| Astro/NJOI | Learned IR import | Compatible owner-supplied decoder profile required. No verified Astro decoder codes are bundled. |
+| Astro Ultra Box / Ulti Box | Bundled user-supplied NEC IR; learned IR import remains available | 29 supplied commands, exposed through default and alternate bit-order profiles. No smartphone JSON import is needed for these entries. Decoder compatibility is physically untested; no coverage of all Astro/NJOI models is claimed. |
 
-The 12 bundled TV/handset profiles contain 383 commands. Select the correct profile and test the specific model. The old eight profile IDs are preserved so saved devices remain valid after an upgrade.
+The 14 bundled TV/decoder profile entries contain 441 command entries. This includes two interpretations of the same 29 Astro codes, not two independently captured decoder remotes. Select the correct profile and test the specific model. The old eight profile IDs are preserved so saved devices remain valid after an upgrade.
+
+For Astro, choose **+ → Television / Astro decoder → Astro → Infrared → Ultra Box / Ulti Box** and save the default entry. The alternate entry changes bit order if the default does not work. Both provide navigation, volume, channel, numeric, Guide, Record and colour controls from the supplied file. Missing commands remain disabled.
+
+The original [astro_ultrabox.json](../app/src/main/assets/astro_ultrabox.json) is preserved in the APK. It identifies NEC at 38 kHz but omits the 32-bit code convention. The default interprets the hexadecimal values as classic raw NEC32 values transmitted most-significant-bit first; the alternate transmits each byte least-significant-bit first. Neither interpretation has been tested on a physical decoder. Power/Blue and Mute/Right are duplicate code pairs in the supplied data and therefore transmit identical signals. Corrected captures are needed to make each pair perform distinct actions.
 
 ## Air conditioners
 
@@ -35,6 +39,6 @@ The app stores a last-sent request, not measured appliance state. Other remotes 
 
 All direct IR paths require an Android phone with a built-in consumer IR transmitter, a supported carrier and line of sight. Most Android phones and all iPhones lack this hardware. Buttons remain disabled when no emitter is detected.
 
-TV and AC numerical capture facts come from pinned community source revision `d126fb1b6f1e114c52b4a8c19839ea65e3a9c24d`. Per-profile URLs, hashes and source rights notes are bundled. Legacy source licenses are **NOASSERTION**, not CC0; original legacy capture text is excluded. Encoders are separately licensed source code, with the LGPL native library and relink instructions included.
+The community TV and AC numerical capture facts come from pinned source revision `d126fb1b6f1e114c52b4a8c19839ea65e3a9c24d`. Per-profile URLs, hashes and source rights notes are bundled. Legacy source licenses are **NOASSERTION**, not CC0; original legacy capture text is excluded. The Astro JSON was separately supplied by the repository owner; it is not a manufacturer-published profile. Encoders are separately licensed source code, with the LGPL native library and relink instructions included.
 
 Record exact appliance model, region, firmware, handset, phone/Android version, profile and commands before reporting physical compatibility. See [validation](VALIDATION.md), [API sources](API_INTEGRATIONS.md) and [limits](KNOWN_LIMITATIONS.md).

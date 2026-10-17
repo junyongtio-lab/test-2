@@ -1,7 +1,7 @@
 {
   "applicationId": "com.universalremote.app",
-  "versionName": "1.1.0",
-  "versionCode": 2,
+  "versionName": "1.1.1",
+  "versionCode": 3,
   "minSdk": 23,
   "targetSdk": 35,
   "abis": [
@@ -12,10 +12,17 @@
   "buildType": "debug",
   "signing": "Same Android development certificate as version 1.0.0; not Play release signing",
   "signingCertificateSha256": "75e8320e3978d0cc65f0fb98c0bb82354a05dd02e1c34d96823d883cab9e4e64",
-  "apkBytes": 5186407,
-  "sha256": "77b3a78e81220a42fd8ce33404c41b27070c301808957bcd84de6189b6e2f9ee",
-  "buildDate": "2026-10-16",
+  "apkBytes": 5184892,
+  "sha256": "57ee9270d7eda6eb0ed308ad59ce3548186f7534b21d6f2e5ea96f12a38674d8",
+  "buildDate": "2026-10-17",
   "automatedTests": [
+    {
+      "name": "com.universalremote.app.AstroProfilesTest",
+      "tests": "6",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
     {
       "name": "com.universalremote.app.IrSafetyTest",
       "tests": "7",
@@ -45,13 +52,9 @@
       "skipped": "0"
     }
   ],
-  "standaloneIrChecks": 28,
   "extraTvTests": 8,
-  "nativeAcHostChecks": 17360,
-  "nativeAcDeviceChecks": 423,
-  "androidCatalogueChecks": 7,
-  "tvProfiles": 12,
-  "tvCommands": 383,
+  "tvProfiles": 14,
+  "tvCommands": 441,
   "statefulAcProfiles": 141,
   "statefulAcFamilies": 65,
   "statefulAcBrandLabels": 79,
@@ -62,7 +65,18 @@
   "physicalHardwareTested": false,
   "elfPageAlignmentBytes": 16384,
   "apk16kZipAlignment": true,
+  "astroSuppliedCommands": 29,
+  "astroBitOrderInterpretations": 2,
+  "astroSourceSha256": "1daa99e6a4be4407ef1830c733b0522830e635683f902334b1022f582b15d747",
+  "previousValidation": {
+    "versionName": "1.1.0",
+    "standaloneIrChecks": 28,
+    "nativeAcHostChecks": 17360,
+    "note": "Native AC libraries and shared IR encoder unchanged; all three APK native libraries are byte-identical to v1.1.0. Host sweep not repeated for this JSON/UI update."
+  },
+  "nativeAcDeviceChecks": 423,
+  "androidCatalogueChecks": 11,
   "emulatorApi": 29,
   "emulatorAbi": "x86_64",
-  "uiChecksPassed": 7
+  "uiChecksPassed": 9
 }

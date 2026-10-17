@@ -1,19 +1,25 @@
 {
-  "expected_sha256": "77b3a78e81220a42fd8ce33404c41b27070c301808957bcd84de6189b6e2f9ee",
-  "installed_sha256": "77b3a78e81220a42fd8ce33404c41b27070c301808957bcd84de6189b6e2f9ee",
+  "expected_sha256": "57ee9270d7eda6eb0ed308ad59ce3548186f7534b21d6f2e5ea96f12a38674d8",
+  "installed_sha256": "57ee9270d7eda6eb0ed308ad59ce3548186f7534b21d6f2e5ea96f12a38674d8",
   "package": "com.universalremote.app",
-  "versionName": "1.1.0",
-  "versionCode": 2,
+  "versionName": "1.1.1",
+  "versionCode": 3,
   "install": "Success (in-place update)",
   "launch": "Status: ok",
   "uiChecks": [
-    "PRISM+ and Daewoo in TV picker",
-    "PRISM+ profile saved and remote opened",
+    "Both bundled Astro interpretations available without importing JSON",
+    "Duplicate-code and untested guidance shown before saving",
+    "Default Astro profile saved and remote opened",
     "No-IR hardware status shown",
-    "Searchable Daikin AC profiles",
-    "Adjustable AC controls rendered",
-    "Send disabled without IR hardware",
-    "Both saved devices retained"
+    "Record, colour and Guide buttons visible and disabled without IR",
+    "Numeric keypad opened",
+    "Alternate Astro profile saved",
+    "Previously saved devices retained",
+    "Installed APK bytes match delivered APK"
   ],
+  "previousSavedDeviceCount": 2,
+  "androidCatalogueChecks": 11,
+  "nativeAcDeviceChecks": 423,
+  "systemUiWaitDialogs": 1,
   "physicalHardwareTested": false
 }

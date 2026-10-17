@@ -1,10 +1,10 @@
 # Palm Remote for Android
 
-Version **1.1.0** adds **PRISM+ and Daewoo TV remotes** and a searchable air-conditioner infrared catalogue. No app registration, paid account, subscriptions, advertisements or analytics. Existing Samsung/LG/Panasonic/Hisense and Astro features remain available.
+Version **1.1.1** bundles the supplied **Astro Ultra Box / Ulti Box JSON profile**, so a smartphone file import is no longer needed for that profile. PRISM+, Daewoo, Samsung, LG, Panasonic and Hisense TV controls and the searchable air-conditioner infrared catalogue remain available. No app registration, paid account, subscriptions, advertisements or analytics.
 
 ## Download and install
 
-Download [PalmRemote.apk](downloads/PalmRemote.apk) on an Android phone (Android 6.0 or later), open it and allow installation from that source if prompted. This is a development-signed APK, not a Google Play production release. It uses the previous app's package and signing certificate, so it can update version 1.0.0 while keeping saved devices. APKs do not run on iPhone.
+Download [PalmRemote.apk](downloads/PalmRemote.apk) on an Android phone (Android 6.0 or later), open it and allow installation from that source if prompted. This is a development-signed APK, not a Google Play production release. It uses the previous app's package and signing certificate, so it can update versions 1.0.0 and 1.1.0 while keeping saved devices. APKs do not run on iPhone.
 
 ## Included controls
 
@@ -15,7 +15,7 @@ Download [PalmRemote.apk](downloads/PalmRemote.apk) on an Android phone (Android
 | Panasonic / Hisense TV | Matching IR profiles | Android consumer IR emitter and matching handset/model. No brand-wide Wi-Fi API is claimed. |
 | PRISM+ TV | Sourced IR handset profile, 14 commands | Power, volume, mute and navigation on matching models; no Bluetooth voice control. |
 | Daewoo TV | Three IR handset profiles, 42 commands total | Generic, R-40A15 and R-43A08 profiles. Missing source buttons stay disabled. |
-| Astro / NJOI | Learned IR profile import/transmission | Compatible owner-supplied decoder capture required; no Astro codes bundled. |
+| Astro Ultra Box / Ulti Box | Bundled user-supplied NEC IR profile, 29 commands | No file import needed. Two bit-order interpretations are available because the supplied JSON does not specify bit order. Physical decoder compatibility is unverified; see the caveats below. Other Astro/NJOI models can use a compatible learned profile. |
 | Air conditioners: adjustable controls | 141 documented remote/protocol profiles across 79 brand labels and 65 encoded protocol families | Sends full requested AC state through the genuine IRremoteESP8266 encoders: power, temperature, mode, fan and vertical swing where supported. |
 | Air conditioners: recorded controls | 158 handset profiles across 96 source brand labels, 1,656 recorded commands | Replays exact recorded states/commands; cannot generate arbitrary settings. Some source-category devices are air coolers or ventilation devices. |
 | Other AC brands/models | Learned IR import for any AC manufacturer | Add a legitimately learned waveform profile with category `air_conditioner`. |
@@ -25,6 +25,10 @@ The AC picker combines **147 distinct searchable brand labels** from encoded and
 ## Use the app
 
 Tap **+ → Television / Astro decoder** to choose a TV brand, or **+ → Air conditioner** and search a manufacturer/model. AC entries marked **Adjustable** use a full-state protocol encoder; entries marked **Recorded** replay captured signals. Point the phone's emitter at the appliance.
+
+For the bundled decoder profile, choose **+ → Television / Astro decoder → Astro → Infrared**, then select the **Ultra Box / Ulti Box** default profile and save. It includes navigation, volume, channels, Guide, numeric entry, Record and the four colour buttons. If the decoder does not respond, try the alternate bit-order profile. Both entries use the same 29 supplied codes; the alternate changes only their transmission order.
+
+The original [astro_ultrabox.json](app/src/main/assets/astro_ultrabox.json) is bundled unchanged. It is user-provided data, not a manufacturer-published or physically verified Astro code set. **Power and Blue share one code; Mute and Right share another.** Those pairs send identical signals and cannot perform distinct actions until corrected codes are supplied. Bundling this file removes the import step but does not establish compatibility with a real decoder.
 
 For adjustable AC controls, choose power, temperature, mode, fan and swing, then tap **Send AC settings**. The app stores only the last successfully transmitted request; it cannot read the unit's actual state. Unsupported settings may be clamped or ignored by the selected protocol. Reset the last-sent state after using another remote. Toggle-based remotes can require synchronization.
 

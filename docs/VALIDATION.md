@@ -1,36 +1,45 @@
-# Version 1.1.0 validation
+# Version 1.1.1 validation
 
-Validated in the prepared cloud environment on 16 October 2026. No physical TV, AC, decoder or phone was attached.
+Validated in the prepared cloud environment on 17 October 2026. No physical decoder, TV, AC or phone was attached. The owner confirmed that the supplied Astro codes have not been tested; they are bundled unchanged.
 
 ## Build and software checks
 
-`./gradlew --no-daemon testDebugUnitTest lintDebug assembleDebug assembleDebugAndroidTest` completed **BUILD SUCCESSFUL**. Android lint reports **No issues found**. Compiler/deprecation warnings in upstream/build tooling do not change that outcome.
+`./gradlew --no-daemon testDebugUnitTest lintDebug assembleDebug assembleDebugAndroidTest` completed **BUILD SUCCESSFUL**. Android lint reports **No issues found**.
 
 | Check | Outcome |
 | --- | --- |
-| JVM unit/protocol tests | 43 passed; zero failures, errors or skips |
-| Separate IR encoder known-vector/invalid-input checks | 28 passed |
-| PRISM+/Daewoo source-fact/vector tests | 8 passed |
-| Native AC host checks | 17,360 passed across 65 stateful families and 141 advertised remote profiles |
-| Android native/JNI encoding | 423 passed across all 141 profiles, with first-send and power on/off |
-| Actual Android asset-loader/category/old-ID checks | 7 passed |
+| JVM unit/protocol tests | 49 passed; zero failures, errors or skips |
+| Astro adapter tests (included in JVM total) | 6 passed: exact uploaded bytes, literal MSB/LSB wire vectors, all 29 commands, collision preservation and invalid-source rejection |
+| PRISM+/Daewoo source-fact/vector tests | 8 passed, including deterministic catalogue regeneration |
+| Android native/JNI encoding | 423 passed across all 141 AC profiles |
+| Actual Android asset-loader/category/old-ID checks | 11 passed, including both built-in Astro entries and their supplied buttons |
 
-The JVM tests exercise real local mock HTTP/WebSocket servers, TV approval/rejection, command failures, endpoint validation, SmartThings capabilities, redirects and imported IR bounds. The expanded catalogue test validates all 170 capture profiles and 2,039 commands, including unique IDs, category separation, honest source metadata and Android timing limits. Captured AC frames remain fixed-state; no relative-temperature behavior is invented.
+The original `astro_ultrabox.json` is in the APK with SHA-256 `1daa99e6a4be4407ef1830c733b0522830e635683f902334b1022f582b15d747`, matching the uploaded file exactly. Its adapter generates two explicit interpretations because bit order was not specified. Independent literal vectors verify Power, Home and digit 1 in each interpretation; every resulting frame has 67 durations at 38 kHz and lasts 67,980 microseconds. Power/Blue and Mute/Right remain identical as supplied. No commands were invented to separate these pairs.
 
-Native host checks cover each advertised model and requested mode/temperature/fan/swing combination. Eleven representative stateful families are decoded back through the upstream decoder to verify protocol, power/mode/temperature and changed-temperature frames. A known published Gree checksum vector and Teknopoint regression are included. Native encoding is checked on an Android 10 x86_64 emulator through the real JNI library, without transmitting IR.
+Existing HTTP/WebSocket, endpoint, SmartThings, IR-bound and catalogue safety tests also passed. The bundled catalogue has 14 TV/decoder entries with 441 command entries, including the same 29 Astro source codes interpreted twice. Recorded AC coverage remains 158 profiles and 1,656 commands; adjustable AC coverage remains 141 profiles and 65 families.
 
 ## Artifact and upgrade
 
 - APK: [downloads/PalmRemote.apk](../downloads/PalmRemote.apk)
 - Package: `com.universalremote.app`
-- Version: `1.1.0` / versionCode `2`; minimum API 23, target API 35
-- Size: 5,186,407 bytes
-- SHA-256: `77b3a78e81220a42fd8ce33404c41b27070c301808957bcd84de6189b6e2f9ee`
-- APK signatures verified; certificate matches version 1.0.0 (`75e8320e…b9e4e64`)
-- Native libraries included for ARM64, ARMv7 and x86_64; 16 KB APK ZIP alignment and ARM64/x86_64 ELF LOAD alignment checks passed
-- Original legacy capture text and the former incorrect CC0 license asset are absent; numerical facts have exact provenance and NOASSERTION source rights metadata
-- The APK includes the LGPL native-library license; full corresponding source and relink instructions are in this repository
+- Version: `1.1.1` / versionCode `3`; minimum API 23, target API 35
+- Size: 5,184,892 bytes
+- SHA-256: `57ee9270d7eda6eb0ed308ad59ce3548186f7534b21d6f2e5ea96f12a38674d8`
+- APK signatures verified; certificate matches the earlier APK (`75e8320e3978d0cc65f0fb98c0bb82354a05dd02e1c34d96823d883cab9e4e64`)
+- Native ARM64, ARMv7 and x86_64 libraries are included; 16 KB APK ZIP alignment passed
+- All three native libraries are byte-identical to version 1.1.0, retaining their previously checked ELF page alignment
+- The exact uploaded Astro JSON is packaged as an asset and loaded by the actual Android catalogue without a phone file import
 
-The existing package was updated in place using `pm install -r`, preserving its data. All eight original TV profile IDs remain present. A real Android emulator launch returned `Status: ok`; direct IR is disabled because this emulator has no emitter. The installed APK was pulled back and its SHA-256 exactly matched the delivery file. See [TV brands](screenshots/tv-brands.png), [PRISM+ remote](screenshots/prism-remote.png), [AC profile picker](screenshots/ac-profile-picker.png), [AC remote](screenshots/ac-remote.png), [AC controls](screenshots/ac-controls.png), [saved devices](screenshots/saved-devices.png), [installed-byte verification](../downloads/emulator-verification.json) and [raw JNI test output](../downloads/native-validation.txt). Seven UI flow checks passed, including disabled sending on a phone without IR. A software-emulator System UI nonresponse dialog was dismissed during automation; the app itself remained resumed and the completed screen checks were clean.
+The package installed using `pm install -r` and launched with `Status: ok` on Android 10 / API 29 x86_64. Device-side checks exercised the real JNI library and packaged assets without sending infrared. Raw output is in [native-validation.txt](../downloads/native-validation.txt).
 
-Emulator execution establishes build, installation, library loading, catalogue/UI behavior and encoder output. It does not establish physical appliance responses, Wi-Fi pairing in a home network, universal brand/model support, iPhone support, Astro code availability or Google Play publication. Samsung still needs manufacturer authorization; Astro still needs an imported learned decoder profile.
+## Astro setup and Android UI
+
+Nine UI/artifact checks passed: both Astro choices appeared without importing JSON; supplied-code guidance appeared before saving; the default remote opened; missing IR hardware was reported; Record, colour and Guide controls were visible and disabled without an emitter; the numeric keypad opened; the alternate profile saved; both previously saved devices were retained; and the installed APK was pulled back and its SHA-256 matched the delivery file exactly.
+
+See the [built-in profile picker](screenshots/astro-profiles.png), [profile guidance](screenshots/astro-guidance.png), [Astro remote](screenshots/astro-remote.png), [decoder controls](screenshots/astro-decoder-buttons.png) and [installed-byte verification](../downloads/emulator-verification.json). The software emulator displayed one System UI nonresponse dialog; automation chose Wait and the completed app checks passed.
+
+## Unchanged-code baseline
+
+Version 1.1.0 previously passed 28 standalone IR encoder checks and 17,360 native host AC checks, including model/state combinations, decoder round trips, the Gree checksum vector and the Teknopoint regression. Those separate host sweeps were not repeated for this JSON/UI update; their source code is unchanged, native binaries match byte for byte, and the 423 Android JNI checks were rerun. Numerical legacy capture facts retain provenance and `NOASSERTION` source-rights metadata; the LGPL library license, corresponding source and relink instructions remain included.
+
+Emulator execution establishes installation, library loading, catalogue behavior and encoder output. It does not establish real Astro decoder responses, physical appliance compatibility, home Wi-Fi pairing, support for every model, iPhone support or Google Play publication. An Android IR emitter and correct decoder codes are still required.

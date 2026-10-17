@@ -71,7 +71,11 @@ IRremoteESP8266 and the native adapter are LGPL-2.1-or-later, dynamically linked
 
 ## Astro/NJOI and infrared
 
-Astro support consists of validated learned-profile import and Android infrared transmission. No verified Malaysian Astro/NJOI decoder profile is bundled. The user must supply a compatible profile captured using appropriate learning hardware or another legitimate source. No private decoder network API, service credentials or conditional-access mechanism is used.
+Version 1.1.1 embeds the repository owner's supplied [astro_ultrabox.json](../app/src/main/assets/astro_ultrabox.json) unchanged and converts its 29 hexadecimal commands to Android infrared patterns. Select Astro's bundled Ultra Box / Ulti Box profile without importing a file on the smartphone. Learned-profile import remains available for corrected captures and other decoder models.
+
+The JSON specifies NEC at 38 kHz but no bit-order convention. The default profile treats each complete 32-bit hexadecimal value as a classic raw NEC32 code transmitted most-significant-bit first. The explicitly labelled alternate transmits each byte least-significant-bit first. Both retain the supplied hexadecimal values. This is an ambiguity in the supplied data, not evidence that either interpretation works with a physical Astro decoder.
+
+Power and Blue both contain `0x00FF02FD`; Mute and Right both contain `0x00FF52AD`. These pairs emit identical signals until the source codes are corrected. The supplied data is not a manufacturer-published API or verified Malaysian Astro/NJOI capture. No private decoder network API, service credentials or conditional-access mechanism is used.
 
 Android's [ConsumerIrManager API](https://developer.android.com/reference/android/hardware/ConsumerIrManager) provides an emitter capability check, supported carrier ranges and transmission of alternating mark/space timings. It cannot add missing IR hardware or learn a remote through an emitter. The app checks hardware and validates imported patterns before transmission. See [IR profile format](IR_PROFILE_FORMAT.md).
 
