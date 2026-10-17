@@ -49,38 +49,32 @@ Sources bearing LG Electronics copyright:
 
 SDK publication is evidence of the interface, not evidence that every LG model or firmware accepts it. Pre-webOS NetCast sets, other platforms and secure-only sets are not covered by this transport.
 
-## Panasonic and Hisense
+## Mi Remote JSON infrared source
 
-No suitable all-model, manufacturer-published phone remote API was verified for these brands during this build. Network adapters are therefore not presented as working Panasonic or Hisense integrations.
+All bundled IR data in version 1.2.0 comes exclusively from the published GitHub JSON archive of [ysard/mi_remote_database](https://github.com/ysard/mi_remote_database), release [v2.1](https://github.com/ysard/mi_remote_database/releases/tag/v2.1). The archive is pinned by SHA-256 `44dcf13d815383c907884f7cdb294afcd085b7063c1de4780589e0626cb61895`; upstream format documentation is pinned to commit `8a60b419506e8c407f2b756ec8ab4b4bc446678d`.
 
-Panasonic VIERA's commonly described `X_SendKey` SOAP interface and Hisense VIDAA's commonly described local MQTT interfaces appear in community integrations. Those integrations alone do not establish the requested manufacturer-published API contract. Hisense televisions also ship with different platforms, including VIDAA, Google TV and Roku; one platform's protocol does not cover the brand.
+The archive is committed under `tools/mi_catalogue/source/` for reproducible offline conversion. The standalone generator verifies the archive and input JSON hashes, decodes supported encrypted/compressed raw timing arrays and preserves the exact carrier in hertz and timings in microseconds. It never contacts Xiaomi or executes embedded source definitions. Android receives only the converted JSON assets and uses `ConsumerIrManager` to transmit them. The source's TVKill output uses carrier-cycle counts and is not used as Android timings.
 
-Roku ECP is excluded from this mobile application. Its [official documentation](https://developer.roku.com/docs/developer-program/dev-tools/external-control-api.md) and current third-party mobile-use terms must be checked before any future addition; an accessible port is not sufficient evidence of permitted use. The official Roku documentation host was unavailable under this cloud environment's network policy, so this build does not claim a current terms review.
+The app includes source categories 1 (TV), 2 (set-top box), 3 (AC), 6 (fan), 11 (cable/satellite) and 12 (internet box). Set-top box categories are combined without inventing brand aliases. Exact source brand-to-keyset associations are retained, including repeated waveform/button associations. Source model identifiers denote code sets, not independently verified retail models. See [coverage and source paths](../app/src/main/assets/ir/mi/index.json) and the [input/output hash manifest](../tools/mi_catalogue/source-manifest.json).
 
-Selected Panasonic, Hisense, PRISM+ and Daewoo TV profiles use infrared. Their numeric functional parameters have exact provenance in the assets. Legacy capture sources are marked `NOASSERTION`; no blanket CC0 claim or original capture-file text is bundled. IR data is distinct from a manufacturer-published network API.
+The upstream repository carries AGPL-3.0-or-later notices. Its license is included in the APK at `licenses/mi_remote_database-LICENSE.txt`. The standalone generator also uses AGPL-3.0-or-later and is outside the Android runtime. Source data is not relicensed under the application's MIT license. See [attribution](../app/src/main/assets/ir/ATTRIBUTION.md) and [offline tool instructions](../tools/mi_catalogue/README.md). This is a community database, not a manufacturer-published remote API or manufacturer endorsement.
 
-## Stateful and recorded air-conditioner IR
+## Air conditioners, fans and unavailable formats
 
-The native encoder uses the complete unmodified source of [IRremoteESP8266 v2.9.0](https://github.com/crankyoldgit/IRremoteESP8266/tree/1e2f0f3ef0a93cbf2a8ddb2e95130f8f4c584b3f), pinned to commit `1e2f0f3ef0a93cbf2a8ddb2e95130f8f4c584b3f`. Its portable sending interface is connected to a hardware-free timing collector, then Android ConsumerIrManager transmits the result. Genuine upstream state conversion, checksums and repeated frames are used.
+The previous native IRremoteESP8266 stateful AC engine and all non-Mi captures have been removed. AC and fan remotes now replay only accepted raw commands from the Mi JSON. They cannot generate arbitrary temperature/mode/fan combinations or read appliance state. One command may set several properties simultaneously.
 
-The Java catalogue exposes 141 documented remote/model profiles across 65 implemented stateful families. Source mappings are in AcProfiles.java with model notes. This community implementation is not a manufacturer certification or a claim of universal model support. York's unfinished common dispatcher is excluded; Teknopoint calls its dedicated upstream encoder to avoid incorrect generic TCL timings.
+Most upstream AC definitions use proprietary templates, unsupported representations or executable Lua/Java fragments. The generator excludes these rather than executing them or fabricating a waveform. Invalid carrier frequencies and empty model responses are also excluded. Accepted counts and exclusion reasons appear in the index; the upstream README's broad totals are not a claim that every source model is usable in Android.
 
-The separately labelled recorded catalogue has 158 handset profiles / 96 source brand labels / 1,656 signals. Recorded complete frames are replayed, not treated as an arbitrary-temperature state engine. One excessive-duration capture is excluded intact. Import accepts a learned profile for any AC brand.
+## Astro, NJOI, PRISM+ and other brands
 
-IRremoteESP8266 and the native adapter are LGPL-2.1-or-later, dynamically linked in libpalmac.so. The corresponding source, copyright notices, license and relink instructions are included in third_party/IRremoteESP8266 and app/src/main/cpp. The APK also includes its LGPL license. Legacy numerical capture facts retain accurate source rights metadata without asserting a missing license.
+No Astro, NJOI, PRISM+ or PrismPlus brand was found in the included release categories. The prior repository-owner Astro JSON and its two unverified bit-order interpretations have been deleted. This build therefore has no Astro Ultra Box / Ulti Box profile. A different receiver brand must not be relabelled Astro without a verified source association.
 
-## Astro/NJOI and infrared
+No suitable all-model, manufacturer-published phone remote API was verified for Panasonic, Hisense, Daewoo or PRISM+ during the original build. Their presence in an IR database does not establish a network API. Hisense televisions also use multiple platforms; one platform's protocol cannot cover the entire brand. Roku ECP is not implemented in this build.
 
-Version 1.1.1 embeds the repository owner's supplied [astro_ultrabox.json](../app/src/main/assets/astro_ultrabox.json) unchanged and converts its 29 hexadecimal commands to Android infrared patterns. Select Astro's bundled Ultra Box / Ulti Box profile without importing a file on the smartphone. Learned-profile import remains available for corrected captures and other decoder models.
+## Android infrared and verification
 
-The JSON specifies NEC at 38 kHz but no bit-order convention. The default profile treats each complete 32-bit hexadecimal value as a classic raw NEC32 code transmitted most-significant-bit first. The explicitly labelled alternate transmits each byte least-significant-bit first. Both retain the supplied hexadecimal values. This is an ambiguity in the supplied data, not evidence that either interpretation works with a physical Astro decoder.
+Android's [ConsumerIrManager API](https://developer.android.com/reference/android/hardware/ConsumerIrManager) exposes emitter detection, supported carrier ranges and alternating mark/space transmission. An emitter does not provide learning capability or add missing hardware. External IR accessories are not supported.
 
-Power and Blue both contain `0x00FF02FD`; Mute and Right both contain `0x00FF52AD`. These pairs emit identical signals until the source codes are corrected. The supplied data is not a manufacturer-published API or verified Malaysian Astro/NJOI capture. No private decoder network API, service credentials or conditional-access mechanism is used.
+The persistent hardware indicator remains independent of catalogue loading. **IR ready** means an emitter was detected, **No IR transmitter detected** means Android exposes none, and **IR check unavailable** means the query failed. **Check IR** reports the phone/app versions and carrier details without transmitting. These states do not verify that a chosen appliance responds.
 
-Android's [ConsumerIrManager API](https://developer.android.com/reference/android/hardware/ConsumerIrManager) provides an emitter capability check, supported carrier ranges and transmission of alternating mark/space timings. It cannot add missing IR hardware or learn a remote through an emitter. The app checks hardware and validates imported patterns before transmission. See [IR profile format](IR_PROFILE_FORMAT.md).
-
-## Verification status
-
-Sources above were reviewed on 16 October 2026. The official LG and SmartThings GitHub sources were retrieved successfully. Manufacturer documentation hosts outside the configured network allowlist returned proxy denials; those links are provided for follow-up verification, not represented as successfully fetched documentation.
-
-Cloud software checks cannot verify physical TV/decoder behavior. See [validation evidence](VALIDATION.md) and [supported devices](SUPPORTED_DEVICES.md) before describing a specific model as tested.
+The source archive and software decoding can be checked reproducibly; no physical television, decoder, AC or fan was available in the cloud. See [validation evidence](VALIDATION.md), [supported devices](SUPPORTED_DEVICES.md) and [known limitations](KNOWN_LIMITATIONS.md).

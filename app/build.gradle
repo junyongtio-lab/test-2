@@ -3,18 +3,13 @@ plugins { id 'com.android.application' }
 android {
     namespace 'com.universalremote.app'
     compileSdk 35
-    ndkVersion '27.0.12077973'
     defaultConfig {
         applicationId 'com.universalremote.app'
         minSdk 23
         targetSdk 35
-        versionCode 4
-        versionName '1.1.2'
-        testInstrumentationRunner 'com.universalremote.app.ac.AcEngineInstrumentation'
-        ndk { abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86_64' }
-        externalNativeBuild {
-            cmake { arguments '-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON' }
-        }
+        versionCode 5
+        versionName '1.2.0'
+        testInstrumentationRunner 'com.universalremote.app.CatalogInstrumentation'
     }
     buildTypes {
         release { minifyEnabled false }
@@ -25,12 +20,6 @@ android {
     }
     testOptions { unitTests.returnDefaultValues = true }
     lint { abortOnError true }
-    externalNativeBuild {
-        cmake {
-            path file('src/main/cpp/CMakeLists.txt')
-            version '3.22.1'
-        }
-    }
 }
 
 dependencies {

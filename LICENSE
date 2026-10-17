@@ -21,7 +21,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 Third-party libraries and device data retain their respective licenses.
-See app/src/main/assets/ir/ for infrared data attribution.
-The stateful AC bridge in app/src/main/cpp and its IRremoteESP8266 dependency
-use LGPL-2.1-or-later; their source, license and relink instructions are included.
-Legacy numerical capture facts have source rights metadata marked NOASSERTION.
+The MIT license above covers the independently written application code;
+it does not relicense the Mi Remote database or standalone conversion tooling.
+The data from ysard/mi_remote_database and tools/mi_catalogue retain their
+AGPL-3.0-or-later notices. See app/src/main/assets/ir/ATTRIBUTION.md,
+app/src/main/assets/licenses/NOTICE.txt, and tools/mi_catalogue/README.md.
+The upstream AGPL license is included in the APK and repository.

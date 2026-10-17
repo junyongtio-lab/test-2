@@ -1,120 +1,87 @@
 # Build and validate Palm Remote
 
-The project builds a native Java Android app. It requires JDK 17 or newer,
-Android SDK Platform 35, Android Build Tools 35.0.0, NDK 27.0.12077973,
-CMake 3.22.1 and Gradle 8.13. The checked-in
-Gradle wrapper downloads the correct Gradle release and verifies its SHA256.
-No API keys, account registration, database, or hosted backend are required.
+The app uses Java and Android's consumer IR service. The tested build toolchain is JDK 21, Android SDK Platform 35, Build Tools 35.0.0 and Gradle 8.13. The checked-in Gradle wrapper downloads the pinned Gradle release and verifies its SHA-256. Version 1.2.0 has no native AC encoder: NDK and CMake are no longer required. No API keys, app registration or hosted backend are needed to build it.
 
-## Build using Android Studio or an existing SDK
+## Build and install
 
-Open the repository in Android Studio and let it install SDK Platform 35 and
-Build Tools 35.0.0. Alternatively, set `ANDROID_HOME` to an existing SDK and run:
+Open the repository in Android Studio and install SDK Platform 35 and Build Tools 35.0.0. Alternatively, set `ANDROID_HOME` to an existing SDK and run from the repository root:
 
 ```sh
-./gradlew --no-daemon assembleDebug lintDebug testDebugUnitTest assembleDebugAndroidTest
+./gradlew --no-daemon testDebugUnitTest lintDebug assembleDebug assembleDebugAndroidTest
 ```
 
-On Windows, use `gradlew.bat` instead. The installable debug APK is written to
-`app/build/outputs/apk/debug/app-debug.apk` and signed with a development key.
-Preserve the same signing key when distributing future updates; use a private
-release signing key for publication. Never commit signing keys or passwords.
+On Windows, use `gradlew.bat`. The installable development-signed APK is written to `app/build/outputs/apk/debug/app-debug.apk`. Preserve the same signing key for compatible updates; use a private release key for store publication. Never commit signing keys or passwords.
 
-On a connected Android device, install with Android Studio or:
+Install on a connected Android device:
 
 ```sh
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 adb shell am start -n com.universalremote.app/.MainActivity
 ```
 
-The app supports Android 6.0 (API 23) and newer. A successful emulator launch checks
-Android app startup and navigation. Real TV pairing and infrared transmission
-require compatible physical hardware on the user's network.
+The app requires Android 6.0 (API 23) or newer. Emulator checks validate startup, catalogue access, migration and screen behavior; real appliance response requires physical hardware. A built-in Android consumer IR emitter is required for transmission.
+
+## Verify or regenerate the Mi-only catalogue
+
+The source archive is committed as `tools/mi_catalogue/source/database_dump-v2.1.tar.xz`. Its 7,892,348 bytes must have SHA-256 `44dcf13d815383c907884f7cdb294afcd085b7063c1de4780589e0626cb61895`. The generator performs this check before extracting JSON, runs offline and never executes embedded AC programs.
+
+```sh
+python3 -m venv /tmp/mi-catalogue-venv
+/tmp/mi-catalogue-venv/bin/pip install -r tools/mi_catalogue/requirements.txt
+/tmp/mi-catalogue-venv/bin/python tools/mi_catalogue/generate.py --check
+/tmp/mi-catalogue-venv/bin/python -m unittest discover -s tools/mi_catalogue -p 'test_*.py'
+```
+
+`--check` regenerates the catalogue in temporary storage and compares the complete assets and manifest byte for byte without modifying the checkout. To regenerate checked-in outputs deliberately, run the generator without `--check`. PyCryptodome 3.23.0 is the pinned offline-tool dependency; it is not part of the Android app. See [tool instructions](../tools/mi_catalogue/README.md) for explicit archive/database path options, source licensing and decoding boundaries.
+
+The Android APK build consumes the checked-in JSON assets and does not need Python or contact Xiaomi. Keep the per-input/per-output hashes in `tools/mi_catalogue/source-manifest.json` synchronized when regenerating data.
+
+## Android catalogue checks
+
+The instrumentation runner checks bundled catalogue loading without sending IR:
+
+```sh
+adb install -r app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+adb shell am instrument -w -r com.universalremote.app.test/com.universalremote.app.CatalogInstrumentation
+```
+
+The persistent **IR ready**, **No IR transmitter detected** and **IR check unavailable** indicators remain available before adding devices. **Check IR** reports the installed version, phone model and carrier support. A hardware-free emulator normally reports no transmitter.
+
+An update keeps the application ID and signing identity. After the new catalogue validates, previous imported profiles, saved old IR remotes and generated AC remotes are removed. Samsung SmartThings/LG Wi-Fi devices and their encrypted credentials remain. New remotes must be selected from the bundled Mi JSON; there is no phone import step.
 
 ## Prepared cloud environment
 
-The current cloud machine has a workspace-local toolchain:
+The managed cloud machine has a workspace-local toolchain:
 
 ```sh
 source /workspace/toolchains/env.sh
 cd /workspace/test-2
-./gradlew --no-daemon assembleDebug lintDebug testDebugUnitTest assembleDebugAndroidTest
+./gradlew --no-daemon testDebugUnitTest lintDebug assembleDebug assembleDebugAndroidTest
 ```
 
-The source checkout already belongs to an isolated cloud task; use this checkout
-directly. Do not create another Git worktree unless specifically requested.
-All build caches and generated Java/Android settings use `/workspace/toolchains`.
-The environment script retains the inherited network proxy and configures Java
-to trust the cloud environment's installed CA certificates. TLS validation remains
-enabled. No secrets are stored in the toolchain or required for the build.
+Use this checkout directly. Tool caches and generated Android/Java settings use `/workspace/toolchains`. The environment script retains the session proxy and Java trust in the installed cloud CA certificates; TLS validation remains enabled. Existing NDK/CMake installations may remain in the cache but are not used by this version.
 
-The setup helper `/workspace/toolchains/setup-android.sh` verifies pinned archives
-before extraction, installs the SDK through Google's SDK manager, and prints the
-installed versions. It expects `/workspace/toolchains/env.sh` alongside it; both
-files are reusable cloud setup artifacts rather than app runtime dependencies.
-
-| Tool | Tested version | Artifact verification |
+| Tool | Tested version | Verification |
 | --- | --- | --- |
-| Temurin JDK | 21.0.8+9 | Publisher SHA256 sidecar |
-| Gradle | 8.13 | Publisher SHA256 sidecar, pinned in wrapper |
-| Android command-line tools | 23.0, build 16111833 | Google's repository XML SHA1 |
-| Android SDK | Platform 35 revision 2 | SDK manager verified metadata/download |
-| Android Build Tools | 35.0.0 | SDK manager verified metadata/download |
-| Android Platform Tools | 37.0.1 | SDK manager verified metadata/download |
+| Temurin JDK | 21.0.8+9 | Publisher SHA-256 sidecar |
+| Gradle | 8.13 | SHA-256 pinned in wrapper |
+| Android command-line tools | 23.0, build 16111833 | Google repository metadata |
+| Android SDK | Platform 35 revision 2 | SDK manager metadata/download verification |
+| Android Build Tools | 35.0.0 | SDK manager metadata/download verification |
+| Android Platform Tools | 37.0.1 | SDK manager metadata/download verification |
 
-Archive sources and checksums used during setup:
-
-* JDK: [Temurin 21.0.8+9 release](https://github.com/adoptium/temurin21-binaries/releases/tag/jdk-21.0.8%2B9),
-  `OpenJDK21U-jdk_x64_linux_hotspot_21.0.8_9.tar.gz` SHA256
-  `f2dc5418092c43003db8f9005c4a286e1c0104fea96ccdd49e8ebd037cac9219`.
-* Gradle: [gradle-8.13-bin.zip](https://downloads.gradle.org/distributions/gradle-8.13-bin.zip),
-  SHA256 `20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78`.
-* Android tools: [commandlinetools-linux-16111833_latest.zip](https://dl.google.com/android/repository/commandlinetools-linux-16111833_latest.zip),
-  publisher SHA1 `e025545c62a8e64c7559119566a569fb1dec5f60` from
-  [Google repository metadata](https://dl.google.com/android/repository/repository2-1.xml).
-  The verified archive's additional SHA256 is
-  `0877a1d048fe4a24efe2eff536ca4223f7adeb58648bb81909d33c446918cfa8`.
+The reusable `/workspace/toolchains/setup-android.sh` and `env.sh` files belong to cloud setup; they are not app runtime dependencies. No credential values are needed in the repository.
 
 ## Optional cloud emulator
 
-The machine has no `/dev/kvm`; Android can run with slower software CPU emulation.
-Optional validation uses Android Emulator 37.2.12 and the default Android 29
-x86_64 system image revision 8. Neither is required to build the APK.
+The current machine has no `/dev/kvm`; software CPU emulation is slower. Android Emulator 37.2.12 with the default Android 29 x86_64 system image revision 8 is used for optional device checks. Neither is needed to build the APK.
 
 ```sh
 source /workspace/toolchains/env.sh
 sdkmanager 'emulator' 'system-images;android-29;default;x86_64'
-printf 'no\n' | avdmanager create avd --name PalmRemoteAPI29 \
-  --package 'system-images;android-29;default;x86_64' \
-  --path "$ANDROID_AVD_HOME/PalmRemoteAPI29.avd" --device pixel
 emulator -avd PalmRemoteAPI29 -no-window -no-audio -no-boot-anim \
-  -no-snapshot -accel off -gpu swiftshader -memory 1536 -cores 2 \
+  -no-snapshot -accel off -gpu swiftshader -memory 2048 -cores 2 \
   -camera-back none -camera-front none -port 5554
 ```
 
-Platform Tools 37.0.1 tries to create `$HOME/.android` even when
-`ANDROID_USER_HOME` is set. The managed cloud home is read-only. Therefore the
-cloud smoke validation uses a workspace-local Python `adb-shell` client connected
-directly to the emulator's `127.0.0.1:5555` ADB endpoint. Normal Android Studio and
-device development on a writable user home can use the regular `adb` commands.
-
-## Air-conditioner native engine
-
-Install the pinned native tools if Android Studio has not installed them:
-
-```sh
-sdkmanager 'ndk;27.0.12077973' 'cmake;3.22.1'
-bash native_ir/tests/ac/run.sh
-python3 native_ir/tests/ac/profile_catalog.py --check
-```
-
-The app builds libpalmac.so for arm64-v8a, armeabi-v7a and x86_64. NDK 27 flexible-page-size support and CMake compile/link job pools are configured. Vendored source and relink instructions are in third_party/IRremoteESP8266.
-
-Device-side encoder/asset checks do not send IR:
-
-```sh
-adb install -r app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
-adb shell am instrument -w -r com.universalremote.app.test/com.universalremote.app.ac.AcEngineInstrumentation
-```
-
-The prepared cloud setup helper now also installs the pinned NDK and CMake. Version 1.1.2 retains the earlier versions' package, profile IDs and debug signing key for in-place upgrades. Its Astro JSON is an app asset and requires no separate installation or phone import. The Check IR dialog shows the installed app version and phone hardware results. Keep private signing keys outside Git.
+Create the `PalmRemoteAPI29` AVD first with Android Studio or `avdmanager` if it does not exist. Platform Tools 37.0.1 may try to write `$HOME/.android` despite `ANDROID_USER_HOME`. In a managed cloud home that is read-only, smoke checks use a workspace-local Python `adb-shell` client connected to the emulator's `127.0.0.1:5555`. Normal development on a writable home can use standard `adb` commands.

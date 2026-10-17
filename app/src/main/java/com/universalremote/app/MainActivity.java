@@ -2,9 +2,6 @@ package com.universalremote.app;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Intent;
-import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.net.wifi.WifiManager;
@@ -16,9 +13,7 @@ import android.view.WindowInsets;
 import android.widget.*;
 import com.universalremote.app.protocols.*;
 import com.universalremote.app.smartthings.SmartThingsClient;
-import com.universalremote.app.ac.AcEngine;
 import org.json.JSONObject;
-import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -40,7 +35,7 @@ public final class MainActivity extends Activity {
     private TextView statusText;
     private TextView irHardwareTitle, irHardwareDetail;
     private Button irHardwareButton;
-    private String currentPage="Remote", status="Choose a device to get started", notice="";
+    private String currentPage="Remote", status="Choose a device to get started", notice="", irProfileError="";
     private boolean connected, busy, destroyed, hardwareChecking, irCatalogFailed;
     private long connectionGeneration;
     private final Map<View,String> commandButtons = new HashMap<>();
@@ -55,7 +50,20 @@ public final class MainActivity extends Activity {
         worker.execute(()->{
             try {
                 IrCatalog loaded=new IrCatalog(this);
-                ui(()->{infrared=loaded;render();if(selected!=null)connect();});
+                ui(()->{
+                    infrared=loaded;
+                    try {
+                        String selectedId=selected==null?"":selected.optString("id");
+                        int removed=store.removeUnavailableIrDevices(loaded);
+                        if(removed>0) {
+                            devices.clear();devices.addAll(store.load());selected=null;
+                            for(JSONObject device:devices)if(device.optString("id").equals(selectedId))selected=device;
+                            if(selected==null&&!devices.isEmpty())selected=devices.get(0);
+                            notice=removed+" previous IR remote(s) removed. Add a matching remote from the Mi Remote catalogue. Wi-Fi devices and credentials were retained.";
+                        }
+                    }catch(Exception error){notice="Could not update saved IR remotes: "+error.getMessage();}
+                    render();if(selected!=null)connect();
+                });
             } catch(Exception error) {
                 ui(()->{irCatalogFailed=true;notice="IR profiles could not load: "+error.getMessage();render();if(selected!=null)connect();});
             }
@@ -95,14 +103,18 @@ public final class MainActivity extends Activity {
             .setPositiveButton("Done",null).setNeutralButton("Check again",(dialog,which)->checkIrHardware(true)).show();
     }
     private boolean selectedUsesIr() {
-        return selected!=null&&(selected.optString("mode").equals("ir")||selected.optString("mode").equals("ac"));
+        return selected!=null&&selected.optString("mode").equals("ir");
     }
     private void updateIrRemoteAvailability() {
         if(!selectedUsesIr())return;
         if(infrared==null) {
-            updateStatus(irCatalogFailed?"IR profiles could not load. Restart the app to retry.":"IR profiles are loading…",false);
-        } else if(selected.optString("mode").equals("ac")&&!AcEngine.isAvailable()) {
-            updateStatus("AC encoder is unavailable on this Android architecture.",false);
+            updateStatus(irCatalogFailed?"IR catalogue could not load. Restart the app to retry.":"IR catalogue is loading…",false);
+        } else if(infrared.find(selected.optString("profile"))==null) {
+            updateStatus("This remote is no longer in the Mi Remote catalogue. Add a matching remote again.",false);
+        } else if(!irProfileError.isEmpty()) {
+            updateStatus(irProfileError,false);
+        } else if(!infrared.isLoaded(selected.optString("profile"))) {
+            updateStatus("Loading Mi Remote signals…",false);
         } else updateStatus(irHardware.title+(irHardware.hasEmitter?" · device response unverified":""),irHardware.hasEmitter);
     }
     private int dp(float value) { return (int)(value*getResources().getDisplayMetrics().density+.5f); }
@@ -177,21 +189,19 @@ public final class MainActivity extends Activity {
     }
     private void remotePage() {
         if (selected==null) {
-            LinearLayout c=card("TVs, decoders & air conditioners.","Samsung, LG, Panasonic, Hisense, PRISM+, Daewoo and Astro. Add an air conditioner from the searchable IR catalogue. No account, subscriptions or ads.");
+            LinearLayout c=card("TVs, decoders, ACs & fans.","Choose a matching remote from the Mi Remote IR catalogue. No Palm account, subscriptions or ads.");
             gap(c,16); full(c,action("Add your first remote",this::addBrand,true),54);
-            card("The right connection", "Samsung: official SmartThings API. LG: supported webOS Wi-Fi pairing. Infrared: a compatible Android phone and a matching remote profile. Supplied Astro Ultra Box profiles are built in; no phone JSON import is needed. Physical decoder compatibility is untested.");
+            card("The right connection", "Infrared requires a compatible Android phone and a matching Mi Remote keyset. Samsung SmartThings and supported LG webOS Wi-Fi pairing are also available. Astro, NJOI and PRISM+ were not found in this database snapshot.");
             card("Built for your Android phone", "An APK cannot run on iPhone. Most Android phones also have no IR transmitter; check your phone before choosing infrared.");
             if (!notice.isEmpty()) card("Notice",notice);
             return;
         }
-        if(selected.optString("mode").equals("ac")){acRemotePage();return;}
-        if(selected.optString("category","tv").equals("air_conditioner")){capturedAcPage();return;}
+        if(selected.optString("mode").equals("ir")){recordedIrPage();return;}
+        if(!usesNetwork(selected)){legacyUnavailablePage();return;}
         LinearLayout device=card(selected.optString("name"), selected.optString("brand")+"  ·  "+connectionLabel(selected));
         statusText=text(status,13,connected?MINT:MUTED,false);gap(device,8);device.addView(statusText);
         statusText.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
         gap(device,10);full(device,action("Switch device  ▾",this::pickDevice,false),44);
-        JSONObject irProfile=selected.optString("mode").equals("ir")&&infrared!=null?infrared.find(selected.optString("profile")):null;
-        if(irProfile!=null&&!irProfile.optString("notice").trim().isEmpty())card("Profile guidance",irProfile.optString("notice"));
         LinearLayout top=row(); command(top,"⏻  Power","power",true);command(top,"Input","input",false); content.addView(top);
         gap(content,12);
         LinearLayout pad=column(); pad.setPadding(dp(8),dp(8),dp(8),dp(8));pad.setBackground(shape(CARD,28));
@@ -211,41 +221,41 @@ public final class MainActivity extends Activity {
             command(playback,"Play","play",false);command(playback,"Pause","pause",false);
         } else command(playback,"Play / pause","play_pause",false);
         command(playback,"Forward","fast_forward",false);content.addView(playback);
-        if(hasIrCommand("record")) {LinearLayout recording=row();command(recording,"Record","record",false);content.addView(recording);}
-        LinearLayout colors=row();
-        for(String color:new String[]{"red","green","yellow","blue"})if(hasIrCommand(color))
-            command(colors,color.substring(0,1).toUpperCase(Locale.ROOT)+color.substring(1),color,false);
-        if(colors.getChildCount()>0)content.addView(colors);
         LinearLayout guide=row();command(guide,"Guide","guide",false);guide.addView(action("123  Keypad",this::keypad,false),new LinearLayout.LayoutParams(0,dp(56),1));content.addView(guide);
         gap(content,14);
         full(content,action("Reconnect",this::connect,false),48);
         gap(content,14);
-        content.addView(text(selected.optString("mode").equals("ir")?
-            "Aim your phone at the device. Sending IR cannot confirm that the device responded. Profiles have not been tested on physical TVs or decoders here.":
-            "Only buttons supported by this connection are enabled. Pairing and model support depend on your TV.",12,MUTED,false));
+        content.addView(text("Only buttons supported by this connection are enabled. Pairing and model support depend on your TV.",12,MUTED,false));
         if (!notice.isEmpty()) {gap(content,10);content.addView(text(notice,13,MUTED,false));}
         refreshButtons();
     }
+    private boolean usesNetwork(JSONObject device) {
+        String mode=device.optString("mode");return mode.equals("lg")||mode.equals("smartthings");
+    }
+    private void legacyUnavailablePage() {
+        updateStatus("This saved remote is unavailable in the Mi Remote catalogue.",false);
+        deviceHeading();
+        card("Choose a replacement remote", "This older remote cannot send commands in this version. Add a recorded remote from the Mi Remote catalogue for your appliance. You can remove this old entry from Devices.");
+        full(content,action("Add a recorded remote",this::addBrand,true),54);gap(content,12);
+        full(content,action("Open saved devices",()->{currentPage="Devices";render();},false),48);
+    }
     private String connectionLabel(JSONObject device) {
-        switch(device.optString("mode")) { case "ir":return "Infrared"; case "ac":return "Stateful AC infrared";case "lg":return "Local Wi-Fi"; default:return "SmartThings cloud"; }
+        switch(device.optString("mode")) { case "ir":return "Mi Remote infrared";case "lg":return "Local Wi-Fi";case "smartthings":return "SmartThings cloud";default:return "Unavailable legacy remote"; }
     }
     private void spacer(LinearLayout row) { row.addView(new View(this),new LinearLayout.LayoutParams(0,dp(58),1)); }
     private void command(LinearLayout row,String label,String code,boolean primary) { weighted(row,key(label,code,primary),58); }
     private Button key(String label,String code,boolean primary) {
-        Button b=action(label,()->send(code),primary); b.setContentDescription(labelFor(code));commandButtons.put(b,code);return b;
+        Button b=action(label,()->send(code),primary); b.setContentDescription(label);commandButtons.put(b,code);return b;
     }
     private String labelFor(String code) { return code.replace('_',' '); }
-    private boolean hasIrCommand(String code) {
-        return selected!=null&&selected.optString("mode").equals("ir")&&infrared!=null&&infrared.supports(selected.optString("profile"),code);
-    }
     private RemoteCommand networkCommand(String code) {
         String name=code.equals("ok")?"SELECT":code.equals("input")?"SOURCE":code.toUpperCase(Locale.ROOT);
         try{return RemoteCommand.valueOf(name);}catch(Exception e){return null;}
     }
     private boolean supports(String code) {
         if (selected==null || !connected || busy) return false;
-        if(code.equals("__ac_send"))return selected.optString("mode").equals("ac")&&AcEngine.isAvailable();
         if (selected.optString("mode").equals("ir")) return infrared!=null && infrared.supports(selected.optString("profile"),code);
+        if(!usesNetwork(selected))return false;
         RemoteCommand command=networkCommand(code);if(command==null)return false;
         if (cloud!=null && cloudDevice!=null) {
             if(code.equals("input")) return cloudDevice.getCapabilities().contains("mediaInputSource");
@@ -276,18 +286,33 @@ public final class MainActivity extends Activity {
                 else if (targetCloud!=null) targetCloud.send(networkCommand(command),targetCloudDevice);
                 else if(targetNetwork!=null) targetNetwork.send(networkCommand(command));
                 else throw new IllegalStateException("Connect the TV first.");
-                ui(()->{if(generation==connectionGeneration)updateStatus(device.optString("mode").equals("ir")?"IR sent · "+labelFor(command):"Command sent · "+labelFor(command),true);});
+                ui(()->{if(generation==connectionGeneration)updateStatus(device.optString("mode").equals("ir")?"IR sent · "+commandLabel(device,command):"Command sent · "+labelFor(command),true);});
             }catch(Exception error){ui(()->{if(generation==connectionGeneration) {updateStatus(error.getMessage(),connected);message(error.getMessage());}});}
-            finally {ui(()->{busy=false;refreshButtons();});}
+            finally {ui(()->{if(generation==connectionGeneration){busy=false;refreshButtons();}});}
         });
     }
     private void connect() {
         connectionGeneration++; final long generation=connectionGeneration;
         if (network!=null) network.dispose(); network=null;cloud=null;cloudDevice=null;connected=false;busy=false;
+        irProfileError="";
         if(selected==null)return;
         JSONObject device=selected;
-        if(device.optString("mode").equals("ir")||device.optString("mode").equals("ac")) {
-            updateIrRemoteAvailability();return;
+        if(device.optString("mode").equals("ir")) {
+            updateIrRemoteAvailability();
+            if(infrared==null||infrared.isLoaded(device.optString("profile")))return;
+            final IrCatalog catalogue=infrared;
+            worker.execute(()->{
+                try {
+                    catalogue.loadProfile(device.optString("profile"));
+                    ui(()->{if(generation==connectionGeneration){render();updateIrRemoteAvailability();}});
+                }catch(Exception error){
+                    ui(()->{if(generation==connectionGeneration){irProfileError="Signals could not load: "+error.getMessage();render();updateIrRemoteAvailability();}});
+                }
+            });
+            return;
+        }
+        if(!usesNetwork(device)) {
+            updateStatus("This saved remote is unavailable in the Mi Remote catalogue.",false);return;
         }
         updateStatus("Connecting…",false);
         worker.execute(()->{
@@ -310,7 +335,7 @@ public final class MainActivity extends Activity {
         });
     }
     private void devicesPage() {
-        card("Your devices",devices.isEmpty()?"Add a TV, decoder or air conditioner. Your device list stays on this phone.":"Saved on this phone. Tap a device to open its remote.");
+        card("Your devices",devices.isEmpty()?"Add a TV, decoder, air conditioner or fan. Your device list stays on this phone.":"Saved on this phone. Tap a device to open its remote.");
         for(JSONObject device:devices) {
             LinearLayout c=card(device.optString("name"),device.optString("brand")+" · "+connectionLabel(device));
             LinearLayout actions=row();weighted(actions,action("Open",()->select(device),true),48);
@@ -320,29 +345,47 @@ public final class MainActivity extends Activity {
                     if(selected==device){selected=devices.isEmpty()?null:devices.get(0);connect();}render();}).show(),false),48);c.addView(actions);
         }
         full(content,action("+ Add a remote",this::addBrand,true),54);gap(content,12);
-        full(content,action("Import learned IR profile",this::importIr,false),54);
     }
     private void helpPage() {
-        card("More devices. No Palm account.","Samsung · LG · Panasonic · Hisense · PRISM+ · Daewoo · Astro / NJOI, plus a broad air-conditioner IR catalogue.\nNo subscriptions, advertisements, analytics or app registration.");
+        card("Mi Remote infrared catalogue", "All bundled IR signals come from the JSON database published by github.com/ysard/mi_remote_database. Previous bundled IR datasets, user-imported profiles and generated AC protocols are removed. There is no profile-import step. No Palm account, subscriptions, advertisements or analytics.");
+        if(infrared!=null)card("Available remote keysets",infrared.profileCount()+" keysets across televisions, set-top boxes, air conditioners and fans. Search by the database brand, then try a recorded remote on your appliance. Source keyset IDs are not retail model numbers; a brand match alone does not establish compatibility.");
+        card("Astro, NJOI and PRISM+", "These names were not found in the bundled Mi Remote snapshot. The previous unverified Astro codes have been removed. This build does not provide an Astro Ultra Box / Ulti Box profile. A decoder profile from another brand must not be assumed compatible.");
+        card("Recorded buttons", "Every remote shows the actual decoded command labels from its source JSON. Only those captured signals are available. The app does not invent missing buttons or generate arbitrary temperatures, modes or fan speeds. Some source files cannot be decoded and are excluded.");
+        card("Air conditioners and fans", "A recorded AC command may change several settings at once. Labels describe the source capture, not readings from the appliance. Choose the matching keyset and test each command. The app cannot read or synchronize appliance state.");
         card("Samsung", "Use the published SmartThings API with an existing Samsung account and a token permitted to read devices and execute commands. Only capabilities exposed by your TV are enabled. Power-on depends on TV network settings.");
         card("LG webOS", "Connect the phone and TV to the same trusted Wi-Fi. Enter the TV’s local IP and approve the pairing prompt. This build uses LG’s published Connect SDK protocol on port 3000. Secure-only models are not supported by this transport.");
-        card("Panasonic & Hisense", "This build includes selected sourced infrared handset profiles. There is no verified public manufacturer API covering every model. VIDAA, Google TV and Roku are different platforms; brand alone does not establish compatibility.");
-        card("PRISM+ & Daewoo TVs", "Select a matching sourced infrared remote profile. These routes require an Android phone with an IR emitter. TV pairing, Bluetooth voice commands and every model are not covered by these IR profiles.");
-        card("Air conditioners", "Choose an encoded protocol family for adjustable power, temperature, mode, fan and swing, or a recorded handset profile for captured commands. Settings are requested states, not readings from the unit. A brand match alone does not guarantee model compatibility; unknown brands can import a learned IR profile.");
-        card("AC state and synchronization", "Only the last successfully transmitted requested state is stored. The app cannot read the AC state. If someone uses the original remote, reset the last-sent state in this app. Some protocols use toggles or normalize temperature, mode, fan or swing options; test the exact model.");
-        card("Astro Ultra Box / Ulti Box", "The supplied decoder profiles are built in; no phone JSON import is needed. Start with the default profile and try the alternate if there is no response. These codes have not been tested on a physical decoder. The supplied Power/Blue and Mute/Right pairs transmit identical signals. An Android phone with an IR transmitter is required.");
         card("Check this phone's infrared", "The hardware indicator above stays visible on every tab, even before adding a device. Tap Check IR to see this phone's model, app version and supported carrier frequencies. IR ready confirms Android detected a built-in emitter; it does not confirm the device responded. No IR transmitter detected means Android exposes no built-in emitter to this app. If a hardware query fails, IR check unavailable is shown instead.");
-        card("Your data stays yours", "Device names and imported profiles stay in private app storage. Pairing keys and SmartThings tokens use Android Keystore encryption. Samsung commands go to api.smartthings.com; LG commands go directly to your TV. Android backup is disabled. Remove devices or clear app data to delete saved credentials.");
-        card("Test status", "Automated build and protocol tests do not establish physical device compatibility. No TV, decoder or physical phone was attached during development. This APK is Android-only; iOS requires separate development and signing.");
-        full(content,action("Import learned IR profile",this::importIr,false),54);
+        card("Your data stays yours", "Device names stay in private app storage. Pairing keys and SmartThings tokens use Android Keystore encryption. Samsung commands go to api.smartthings.com; LG commands go directly to your TV. Android backup is disabled. Remove devices or clear app data to delete saved credentials.");
+        card("Test status", "Automated build and protocol tests do not establish physical device compatibility. This APK needs an Android phone with a supported built-in IR transmitter for infrared. It cannot run on iPhone, and external IR accessories are not supported.");
     }
     private void addBrand() {
-        new AlertDialog.Builder(this).setTitle("Add a device").setItems(new String[]{"Television / Astro decoder","Air conditioner · infrared"},
-            (dialog,index)->{if(index==1)addAirConditioner();else tvBrands();}).setNegativeButton("Cancel",null).show();
+        String[] labels={"Television","Set-top box / decoder","Air conditioner","Fan"};
+        String[] categories={"tv","set_top_box","air_conditioner","fan"};
+        new AlertDialog.Builder(this).setTitle("Add a device").setItems(labels,(dialog,index)->{
+            String category=categories[index];
+            if(category.equals("set_top_box")) {
+                new AlertDialog.Builder(this).setTitle("Mi Remote decoder catalogue")
+                    .setMessage("Astro and NJOI were not found in this database snapshot. Browse the listed brands for a matching remote; no Astro profile is bundled.")
+                    .setPositiveButton("Browse brands",(d,w)->categoryBrands(category)).setNegativeButton("Cancel",null).show();
+            }else categoryBrands(category);
+        }).setNegativeButton("Cancel",null).show();
     }
-    private void tvBrands() {
-        String[] brands={"Samsung","LG","Panasonic","Hisense","PRISM+","Daewoo","Astro"};
-        new AlertDialog.Builder(this).setTitle("TV / decoder brand").setItems(brands,(dialog,index)->chooseMethod(brands[index])).setNegativeButton("Cancel",null).show();
+    private String categoryLabel(String category) {
+        switch(category){case "set_top_box":return "Decoder";case "air_conditioner":return "Air-conditioner";case "fan":return "Fan";default:return "TV";}
+    }
+    private void categoryBrands(String category) {
+        if(infrared==null){message(irCatalogFailed?"The IR catalogue could not load. Restart the app to retry.":"The IR catalogue is loading. Try again in a moment.");return;}
+        Set<String> brands=new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        brands.addAll(infrared.brands(category));
+        // These two connection options remain available independently of the IR catalogue.
+        if(category.equals("tv")){brands.add("Samsung");brands.add("LG");}
+        List<Choice> options=new ArrayList<>();
+        for(String brand:brands)options.add(new Choice(brand,()->{
+            if(category.equals("tv")&&(brand.equalsIgnoreCase("Samsung")||brand.equalsIgnoreCase("LG")))chooseMethod(brand);
+            else irSetup(brand,category);
+        }));
+        if(options.isEmpty()){message("No decoded "+categoryLabel(category).toLowerCase(Locale.ROOT)+" profiles are available in this snapshot.");return;}
+        choices(categoryLabel(category)+" brand · Mi Remote",options);
     }
     private static final class Choice {
         final String label;final Runnable action;
@@ -351,7 +394,7 @@ public final class MainActivity extends Activity {
     }
     private void choices(String title,List<Choice> options) {
         LinearLayout body=column();body.setPadding(dp(18),0,dp(18),0);
-        EditText search=input("Search brand or model",false);body.addView(search);
+        EditText search=input("Search this list",false);body.addView(search);
         ListView list=new ListView(this);body.addView(list,new LinearLayout.LayoutParams(-1,dp(330)));
         List<Choice> filtered=new ArrayList<>(options);
         ArrayAdapter<Choice> adapter=new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,filtered);list.setAdapter(adapter);
@@ -369,147 +412,88 @@ public final class MainActivity extends Activity {
         dialog.show();
         dialog.getWindow().setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
     }
-    private void addAirConditioner() {
-        if(infrared==null){message("The IR catalogue is loading. Try again in a moment.");return;}
-        Set<String> brands=new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-        for(AcEngine.Profile profile:AcEngine.profiles())brands.add(profile.brand);
-        brands.addAll(infrared.brands("air_conditioner"));
-        List<Choice> options=new ArrayList<>();
-        for(String brand:brands)options.add(new Choice(brand,()->acProfiles(brand)));
-        options.add(new Choice("Other brand · import a learned AC profile",this::importIr));
-        choices("Air-conditioner manufacturer",options);
-    }
-    private void acProfiles(String brand) {
-        List<Choice> options=new ArrayList<>();
-        for(AcEngine.Profile profile:AcEngine.profiles())if(profile.brand.equalsIgnoreCase(brand))
-            options.add(new Choice("Adjustable · "+profile.name,()->saveAc(profile)));
-        for(JSONObject profile:infrared.forBrand(brand,"air_conditioner"))
-            options.add(new Choice("Recorded · "+profile.optString("model"),()->saveIr(brand,profile)));
-        options.add(new Choice("Import learned "+brand+" AC profile",this::importIr));
-        choices(brand+" AC remote / protocol",options);
-    }
-    private void saveAc(AcEngine.Profile profile) {
-        if(!AcEngine.isAvailable()){message("The stateful encoder is unavailable on this architecture. Choose a recorded profile.");return;}
-        try {
-            JSONObject device=baseDevice(profile.brand,"ac",profile.brand+" · "+profile.name);
-            device.put("category","air_conditioner");device.put("profile",profile.id);
-            device.put("acDraft",stateJson(new AcEngine.State(true,24,AcEngine.MODE_COOL,AcEngine.FAN_AUTO,false)));
-            saveDevice(device);
-        }catch(Exception e){message(e.getMessage());}
-    }
-    private AcEngine.State acState(JSONObject json) {
-        if(json==null)return new AcEngine.State(true,24,AcEngine.MODE_COOL,AcEngine.FAN_AUTO,false);
-        return new AcEngine.State(json.optBoolean("power",true),json.optInt("temperature",24),json.optInt("mode",AcEngine.MODE_COOL),json.optInt("fan",AcEngine.FAN_AUTO),json.optBoolean("swing",false));
-    }
-    private JSONObject stateJson(AcEngine.State state) throws Exception {
-        return new JSONObject().put("power",state.power).put("temperature",state.temperatureC).put("mode",state.mode).put("fan",state.fan).put("swing",state.swing);
-    }
-    private void changeAc(AcEngine.State state) {
-        try{selected.put("acDraft",stateJson(state));store.save(devices);render();}
-        catch(Exception error){message(error.getMessage());}
-    }
     private void deviceHeading() {
         LinearLayout device=card(selected.optString("name"),selected.optString("brand")+" · "+connectionLabel(selected));
         statusText=text(status,13,connected?MINT:MUTED,false);statusText.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
         gap(device,8);device.addView(statusText);gap(device,10);full(device,action("Switch device  ▾",this::pickDevice,false),44);
     }
-    private void acRemotePage() {
-        deviceHeading();
-        AcEngine.Profile profile=AcEngine.find(selected.optString("profile"));
-        if(profile==null){card("Missing AC profile","Choose an AC protocol again from Add a device.");return;}
-        AcEngine.State state;
-        try{state=acState(selected.optJSONObject("acDraft"));}catch(Exception e){state=acState(null);}
-        final AcEngine.State s=state;
-        card("Requested AC settings",profile.notes+"\nAdjust settings, then press Send. The app cannot read the appliance state.");
-        LinearLayout temperature=card("TEMPERATURE","");
-        TextView value=text(s.temperatureC+"°C",54,MINT,true);value.setGravity(Gravity.CENTER);temperature.addView(value);
-        LinearLayout adjust=row();
-        weighted(adjust,action("−",()->changeAc(new AcEngine.State(s.power,Math.max(16,s.temperatureC-1),s.mode,s.fan,s.swing)),false),54);
-        weighted(adjust,action("+",()->changeAc(new AcEngine.State(s.power,Math.min(32,s.temperatureC+1),s.mode,s.fan,s.swing)),false),54);temperature.addView(adjust);
-        full(content,action("Power setting: "+(s.power?"ON":"OFF"),()->changeAc(new AcEngine.State(!s.power,s.temperatureC,s.mode,s.fan,s.swing)),false),52);gap(content,10);
-        String[] modes={"Auto","Cool","Heat","Dry","Fan only"};
-        full(content,action("Mode: "+modes[s.mode],()->new AlertDialog.Builder(this).setTitle("Requested mode").setItems(modes,
-            (d,index)->changeAc(new AcEngine.State(s.power,s.temperatureC,index,s.fan,s.swing))).show(),false),52);gap(content,10);
-        String[] fans={"Auto","Low","Medium","High"};int[] fanValues={AcEngine.FAN_AUTO,AcEngine.FAN_LOW,AcEngine.FAN_MEDIUM,AcEngine.FAN_HIGH};
-        String fanName=s.fan==0?"Auto":s.fan<=2?"Low":s.fan==3?"Medium":"High";
-        full(content,action("Fan: "+fanName,()->new AlertDialog.Builder(this).setTitle("Requested fan speed").setItems(fans,
-            (d,index)->changeAc(new AcEngine.State(s.power,s.temperatureC,s.mode,fanValues[index],s.swing))).show(),false),52);gap(content,10);
-        full(content,action("Vertical swing: "+(s.swing?"AUTO":"OFF"),()->changeAc(new AcEngine.State(s.power,s.temperatureC,s.mode,s.fan,!s.swing)),false),52);gap(content,16);
-        Button send=action("Send AC settings",this::sendAc,true);commandButtons.put(send,"__ac_send");full(content,send,58);gap(content,14);
-        content.addView(text("Point the phone’s IR emitter at the AC. Unsupported modes, fan/swing options and temperatures may be normalized by this protocol. Requested settings and last-sent settings do not confirm the AC’s actual state.",13,MUTED,false));gap(content,14);
-        full(content,action("Reset last-sent state",()->{
-            selected.remove("acLastSent");store.save(devices);message("Last-sent state cleared. First-send toggle behavior depends on the actual AC state.");
-        },false),48);refreshButtons();
-    }
-    private void capturedAcPage() {
+    private void recordedIrPage() {
         deviceHeading();
         JSONObject profile=infrared==null?null:infrared.find(selected.optString("profile"));
-        if(profile==null){card("Profile unavailable","Import the saved handset profile again.");return;}
-        card("Recorded AC commands","Each button replays its captured signal and may change several settings at once. Labels describe the source capture; this profile does not generate arbitrary temperatures or modes.");
-        JSONObject commands=profile.optJSONObject("commands");if(commands==null)return;
-        Iterator<String> keys=commands.keys();
-        while(keys.hasNext()){
-            String key=keys.next();JSONObject signal=commands.optJSONObject(key);
-            String label=signal==null?labelFor(key):signal.optString("label",labelFor(key));
-            full(content,key(label.length()>120?label.substring(0,120):label,key,false),54);gap(content,8);
+        if(profile==null) {
+            card("Remote unavailable",infrared==null?"The Mi Remote catalogue is loading…":"Add this remote again from the Mi Remote catalogue.");
+        }else {
+            String category=profile.optString("category","tv");
+            String guidance="Signals and button labels come from the Mi Remote JSON keyset. Aim the phone's IR emitter at the appliance. Sending cannot confirm a response; exact model compatibility is untested.";
+            if(category.equals("air_conditioner"))guidance+=" Each recorded AC command may change several settings at once. Arbitrary temperature or mode generation is unavailable.";
+            card("Recorded "+categoryLabel(category).toLowerCase(Locale.ROOT)+" commands",guidance);
+            content.addView(text("Source keyset: "+profile.optString("model",profile.optString("id")),12,MUTED,false));gap(content,10);
+            JSONObject commands=profile.optJSONObject("commands");
+            if(commands==null)card("Signals",irProfileError.isEmpty()?"Loading this keyset’s recorded signals…":irProfileError);
+            else {
+                List<String> keys=new ArrayList<>();Iterator<String> names=commands.keys();while(names.hasNext())keys.add(names.next());
+                // Stable source-key ordering retains every actual command, including uncommon controls.
+                Collections.sort(keys);
+                LinearLayout line=null;
+                for(int index=0;index<keys.size();index++) {
+                    if(index%2==0){line=row();content.addView(line,new LinearLayout.LayoutParams(-1,-2));}
+                    String code=keys.get(index);JSONObject signal=commands.optJSONObject(code);
+                    String label=signal==null?code:signal.optString("label",signal.optString("sourceKey",code));
+                    Button button=key(label,code,false);button.setMinHeight(dp(64));button.setMinimumHeight(dp(64));
+                    button.setPadding(dp(8),dp(10),dp(8),dp(10));
+                    LinearLayout.LayoutParams params=new LinearLayout.LayoutParams(0,-2,1);params.setMargins(dp(4),dp(4),dp(4),dp(4));line.addView(button,params);
+                }
+                if(keys.size()%2==1)line.addView(new View(this),new LinearLayout.LayoutParams(0,1,1));
+                if(keys.isEmpty())card("No decoded buttons","This keyset has no available commands. Choose another matching keyset.");
+            }
         }
-        gap(content,10);content.addView(text("An IR-equipped Android phone and a matching appliance model are required. Transmission does not confirm a response. Physical compatibility is untested.",13,MUTED,false));refreshButtons();
+        gap(content,14);full(content,action("Reload remote",this::connect,false),48);
+        if(!notice.isEmpty()){gap(content,10);content.addView(text(notice,13,MUTED,false));}
+        refreshButtons();
     }
-    private void sendAc() {
-        if(selected==null||busy||!connected){message("An available IR emitter and AC protocol are required.");return;}
-        final JSONObject device=selected;final long generation=connectionGeneration;
-        final AcEngine.Profile profile=AcEngine.find(device.optString("profile"));
-        final AcEngine.State desired,previous;
-        try{desired=acState(device.optJSONObject("acDraft"));previous=device.has("acLastSent")?acState(device.optJSONObject("acLastSent")):null;}
-        catch(Exception error){message("Invalid saved AC settings. Add the device again.");return;}
-        busy=true;refreshButtons();
-        worker.execute(()->{
-            try{
-                AcEngine.Waveform waveform=AcEngine.encode(profile,desired,previous);
-                infrared.transmitSignal(waveform.carrierHz,waveform.patternUs);
-                ui(()->{
-                    if(devices.contains(device))try{device.put("acLastSent",stateJson(desired));store.save(devices);}catch(Exception e){message("IR sent, but last-sent state could not be saved.");}
-                    if(generation==connectionGeneration)updateStatus("AC IR sent · response unverified",true);
-                });
-            }catch(Exception error){ui(()->{if(generation==connectionGeneration){updateStatus(error.getMessage(),connected);message(error.getMessage());}});}
-            finally{ui(()->{busy=false;refreshButtons();});}
-        });
+    private String commandLabel(JSONObject device,String command) {
+        JSONObject profile=infrared==null?null:infrared.find(device.optString("profile"));
+        JSONObject commands=profile==null?null:profile.optJSONObject("commands");
+        JSONObject signal=commands==null?null:commands.optJSONObject(command);
+        return signal==null?labelFor(command):signal.optString("label",command);
     }
     private void chooseMethod(String brand) {
         List<String> options=new ArrayList<>();
-        if(brand.equals("Samsung"))options.add("SmartThings · published Samsung API");
-        if(brand.equals("LG"))options.add("webOS · local Wi-Fi pairing");
-        options.add("Infrared · requires phone IR transmitter");
+        if(brand.equalsIgnoreCase("Samsung"))options.add("SmartThings · published Samsung API");
+        if(brand.equalsIgnoreCase("LG"))options.add("webOS · local Wi-Fi pairing");
+        if(infrared!=null&&!infrared.forBrand(brand,"tv").isEmpty())options.add("Mi Remote infrared · requires phone IR transmitter");
         new AlertDialog.Builder(this).setTitle(brand+" connection").setItems(options.toArray(new String[0]),(dialog,index)->{
             if(options.get(index).startsWith("SmartThings"))smartThingsSetup();
-            else if(options.get(index).startsWith("webOS"))lgSetup();else irSetup(brand);
+            else if(options.get(index).startsWith("webOS"))lgSetup();else irSetup(brand,"tv");
         }).setNegativeButton("Cancel",null).show();
     }
-    private void irSetup(String brand) {
+    private void irSetup(String brand,String category) {
         if(infrared==null){message("IR catalogue is unavailable.");return;}
-        List<JSONObject> profiles=infrared.forBrand(brand);
-        if(profiles.isEmpty()) {
-            new AlertDialog.Builder(this).setTitle(brand+" learned IR profile").setMessage("No verified compatible codes are bundled for this device. Import a learned JSON profile for your exact handset. A phone IR transmitter is required.")
-                .setPositiveButton("Import profile",(d,w)->importIr()).setNegativeButton("Cancel",null).show();return;
-        }
-        String[] labels=new String[profiles.size()+1];
-        for(int i=0;i<profiles.size();i++)labels[i]=profiles.get(i).optString("model")+" · hardware untested";
-        labels[profiles.size()]="Import another learned profile…";
-        new AlertDialog.Builder(this).setTitle(brand+" infrared profile").setItems(labels,(dialog,index)->{
-            if(index==profiles.size()){importIr();return;}
+        List<Choice> options=new ArrayList<>();
+        List<JSONObject> profiles=infrared.forBrand(brand,category);
+        for(int index=0;index<profiles.size();index++) {
             JSONObject profile=profiles.get(index);
-            boolean emitter=irHardware.hasEmitter;
-            String guidance=profile.optString("notice").trim();
-            if(!emitter||!guidance.isEmpty()) {
-                if(!emitter)guidance+=(guidance.isEmpty()?"":"\n\n")+irHardware.title+". You can save this remote; IR sending is disabled until a built-in emitter is detected. Tap Check IR above the page for phone hardware details.";
-                new AlertDialog.Builder(this).setTitle(emitter?"About this IR profile":irHardware.title).setMessage(guidance)
-                    .setPositiveButton(emitter?"Save remote":"Save anyway",(d,w)->saveIr(brand,profile)).setNegativeButton("Cancel",null).show();
-            }else saveIr(brand,profile);
-        }).setNegativeButton("Cancel",null).show();
+            final String remoteName="Remote "+(index+1);
+            String label=remoteName;
+            if(profile.has("commandCount"))label+=" · "+profile.optInt("commandCount")+" recorded buttons";
+            options.add(new Choice(label,()->{
+                if(!irHardware.hasEmitter) {
+                    new AlertDialog.Builder(this).setTitle(irHardware.title)
+                        .setMessage("You can save this Mi Remote keyset. IR sending stays disabled until a built-in emitter is detected. Tap Check IR above the page for phone hardware details. A matching appliance model is required.")
+                        .setPositiveButton("Save anyway",(d,w)->saveIr(brand,profile,remoteName)).setNegativeButton("Cancel",null).show();
+                }else saveIr(brand,profile,remoteName);
+            }));
+        }
+        if(options.isEmpty()){message("No decoded Mi Remote keysets are available for this brand and category.");return;}
+        choices(brand+" · Mi Remote keyset",options);
     }
-    private void saveIr(String brand,JSONObject profile) {
-        try {JSONObject device=baseDevice(brand,"ir",brand+" · "+profile.getString("model"));device.put("profile",profile.getString("id"));device.put("category",profile.optString("category","tv"));saveDevice(device);}
-        catch(Exception e){message(e.getMessage());}
+    private void saveIr(String brand,JSONObject profile,String remoteName) {
+        try {
+            JSONObject device=baseDevice(brand,"ir",brand+" · "+remoteName);
+            device.put("profile",profile.getString("id"));device.put("category",profile.optString("category","tv"));
+            JSONObject source=profile.optJSONObject("source");if(source!=null)device.put("sourceModelId",source.optString("modelId"));
+            saveDevice(device);
+        }catch(Exception e){message(e.getMessage());}
     }
     private JSONObject baseDevice(String brand,String mode,String name)throws Exception {
         return new JSONObject().put("id",UUID.randomUUID().toString()).put("brand",brand).put("mode",mode).put("name",name).put("category","tv");
@@ -603,7 +587,7 @@ public final class MainActivity extends Activity {
         worker.execute(()->{
             try{action.execute();ui(()->{if(generation==connectionGeneration)updateStatus("SmartThings command accepted",true);});}
             catch(Exception e){ui(()->{if(generation==connectionGeneration)message(e.getMessage());});}
-            finally{ui(()->{busy=false;refreshButtons();});}
+            finally{ui(()->{if(generation==connectionGeneration){busy=false;refreshButtons();}});}
         });
     }
     private void cloudInput() {
@@ -619,20 +603,8 @@ public final class MainActivity extends Activity {
                         (d,index)->{if(generation==connectionGeneration)runCloudAction(()->client.setInputSource(device,inputs.get(index)));}).setNegativeButton("Cancel",null).show();
                 });
             }catch(Exception e){ui(()->{if(generation==connectionGeneration)message(e.getMessage());});}
-            finally{ui(()->{busy=false;refreshButtons();});}
+            finally{ui(()->{if(generation==connectionGeneration){busy=false;refreshButtons();}});}
         });
-    }
-    private void importIr() {
-        Intent intent=new Intent(Intent.ACTION_OPEN_DOCUMENT);intent.setType("*/*");intent.addCategory(Intent.CATEGORY_OPENABLE);startActivityForResult(intent,80);
-    }
-    @Override protected void onActivityResult(int request,int result,Intent data) {
-        super.onActivityResult(request,result,data);
-        if(request==80&&result==RESULT_OK&&data!=null&&data.getData()!=null) {
-            if(infrared==null){message("IR catalogue unavailable.");return;}
-            try(InputStream stream=getContentResolver().openInputStream(data.getData())) {
-                int count=infrared.importProfiles(IrCatalog.read(stream));message("Imported "+count+" learned profile(s). Add a remote to select one.");
-            }catch(Exception e){message("Import failed: "+e.getMessage());}
-        }
     }
     private void message(String value) {Toast.makeText(this,value==null?"Connection failed":value,Toast.LENGTH_LONG).show();}
     private void ui(Runnable task) {if(!destroyed)runOnUiThread(()->{if(!destroyed)task.run();});}

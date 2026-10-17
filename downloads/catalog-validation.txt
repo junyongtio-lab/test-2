@@ -1,0 +1,4 @@
+INSTRUMENTATION_RESULT: catalogChecks=23
+INSTRUMENTATION_RESULT: stream=PASS 23 Android Mi catalogue/hardware checks
+
+INSTRUMENTATION_CODE: -1

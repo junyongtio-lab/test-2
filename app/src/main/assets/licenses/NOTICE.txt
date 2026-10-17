@@ -1,17 +1,32 @@
+Palm Remote application code is independently written and distributed under
+its repository MIT license. Third-party data and libraries retain their own
+licenses; the MIT license does not relicense the Mi Remote database.
+
 Palm Remote uses OkHttp 3.14.9 and Okio 1.17.2 by Square, Inc.
 Both libraries are distributed under the Apache License, Version 2.0.
 Their license texts are included in this directory.
-
 https://github.com/square/okhttp/tree/parent-3.14.9
 https://github.com/square/okio/tree/okio-parent-1.17.2
 
-The stateful AC engine includes IRremoteESP8266 v2.9.0, LGPL-2.1-or-later,
-pinned upstream commit 1e2f0f3ef0a93cbf2a8ddb2e95130f8f4c584b3f.
-Its license is included here. Corresponding source, the local LGPL bridge,
-and Android build/relink instructions are published with the app at:
-https://github.com/junyongtio-lab/test-2/tree/main/third_party/IRremoteESP8266
-https://github.com/junyongtio-lab/test-2/tree/main/app/src/main/cpp
+The bundled infrared JSON derives exclusively from the GitHub JSON database
+published by ysard/mi_remote_database, release v2.1, by ysard and contributors.
+The upstream repository carries AGPL-3.0-or-later notices. Its license is
+included here as mi_remote_database-LICENSE.txt. This dataset is not MIT.
+https://github.com/ysard/mi_remote_database
+https://github.com/ysard/mi_remote_database/releases/tag/v2.1
 
-Infrared numerical capture facts have source attribution and rights metadata
-in assets/ir/. Legacy capture source licenses are NOASSERTION, not CC0.
+Pinned archive SHA-256:
+44dcf13d815383c907884f7cdb294afcd085b7063c1de4780589e0626cb61895
+Pinned upstream format-reference revision:
+8a60b419506e8c407f2b756ec8ab4b4bc446678d
+
+Original archive, the standalone AGPL-3.0-or-later conversion tool, complete
+input/output hash manifest and rebuild instructions are published at:
+https://github.com/junyongtio-lab/test-2/tree/main/tools/mi_catalogue
+The conversion tool is not linked into or executed by the Android app.
+Per-profile source paths, hashes, coverage and exclusions are in assets/ir/mi/.
+See assets/ir/ATTRIBUTION.md for attribution and format boundaries.
+
+Earlier IR datasets, the user-supplied Astro profile and the native
+IRremoteESP8266 AC engine have been removed from version 1.2.0.
 No manufacturer endorsement or physical compatibility certification is implied.

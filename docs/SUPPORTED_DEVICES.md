@@ -1,44 +1,49 @@
-# Supported-device scope, version 1.1.2
+# Supported-device scope, version 1.2.0
 
-This is an Android APK for Android 6.0 or newer, with ARM64, ARMv7 and x86_64 native builds. It cannot run on iPhone. No physical appliance was attached; implemented protocols and source labels are not hardware certification.
+Palm Remote is an Android APK for Android 6.0 or newer. The app uses Java and Android's consumer IR service; it has no native AC library or processor-specific encoder. It cannot run on iPhone. No physical appliance was attached during cloud validation, so source labels and successful software tests do not certify appliance compatibility.
 
-## Televisions and decoders
+## Mi Remote infrared catalogue
 
-| Family | Route | Coverage and requirements |
+All bundled infrared timings now derive exclusively from the published JSON archive of [ysard/mi_remote_database](https://github.com/ysard/mi_remote_database), release **v2.1**. The earlier TV captures, user-supplied Astro file, learned-profile imports and generated full-state AC protocols have been removed.
+
+| Category in Palm Remote | Distinct brand labels | Keysets | Command associations |
+| --- | ---: | ---: | ---: |
+| Television | 1,021 | 2,810 | 123,883 |
+| Set-top box / decoder | 181 | 406 | 12,200 |
+| Air conditioner | 38 | 68 | 685 |
+| Fan | 133 | 422 | 4,181 |
+
+There are **3,706 keysets**, **140,949 source command associations** and **1,289 distinct brand labels across categories**. Brand labels overlap between categories and are not added together. Repeated waveforms under different source buttons remain separate associations. The TV source contains duplicate brand labels in different brand files; the picker combines their labels without discarding the associated keysets.
+
+Set-top box coverage combines source categories 2 (set-top box), 11 (cable/satellite) and 12 (internet box). Television, AC and fan use categories 1, 3 and 6 respectively. Other upstream categories, such as DVD and projectors, are outside this build.
+
+The exact accepted profiles, their source paths and hashes, skipped-signal reasons and unavailable brands are recorded in [index.json](../app/src/main/assets/ir/mi/index.json). The generator's [source manifest](../tools/mi_catalogue/source-manifest.json) also records all input and generated output hashes. Upstream README totals describe the source archive and are not the accepted Android catalogue totals.
+
+Choose **+ → category → brand → Mi Remote keyset**. Source identifiers such as `xm_1_4947` identify code sets; they are not promises of support for a retail model with that name. A brand match alone does not establish compatibility. Only the source's actual decoded buttons are shown.
+
+## Astro, NJOI and PRISM+
+
+No Astro, NJOI, PRISM+ or PrismPlus brand appears in the included source categories. Consequently, **there is no Astro Ultra Box / Ulti Box or PRISM+ profile in this release**. The previous untested Astro hexadecimal codes and alternate bit-order profile are removed. Another satellite receiver's name or code set does not establish Malaysian Astro compatibility.
+
+## Air conditioners and fans
+
+These remotes replay specific raw commands decoded from the Mi JSON. AC commands can set several properties together; a label such as temperature, mode or fan does not create an arbitrary-state encoder. The app cannot query appliance state or synchronize it with other remotes.
+
+Most upstream AC definitions are not raw timing arrays. They contain proprietary byte templates, unsupported formats or executable fragments. The generator does not execute those definitions or invent conversions. Only 68 AC keysets have supported decoded commands in this build; this is not coverage of all 280 source AC brand files or every model sold.
+
+## Retained network integrations
+
+| Family | Route | Requirements and limits |
 | --- | --- | --- |
-| Samsung | Official SmartThings API; IR | Existing manufacturer authorization for the API; only returned capabilities. IR profile BN59-01315B or matching learned profile. |
-| LG | Published webOS SSAP subset; IR | Private LAN, TV approval, legacy port 3000. IR handset AKB75375604. Secure-only and pre-webOS sets are not covered by this Wi-Fi transport. |
-| Panasonic | IR | Viera and TH-43HS550K / HS550K / GX650K source profiles. |
-| Hisense | IR | EN3Y39H, EN3AH39H, U7G and 55U6K (2023) source profiles. No VIDAA, Google TV or Roku network adapter. |
-| PRISM+ | IR | Manufacturer-labelled community capture, exact TV model unspecified; 14 commands include power, volume, mute and navigation. Voice/Bluetooth features are not IR commands. |
-| Daewoo | IR | Community generic (6 commands), R-40A15 (15) and R-43A08 (21) handsets. R-40A15 has no identified power command; it is not invented. |
-| Astro Ultra Box / Ulti Box | Bundled user-supplied NEC IR; learned IR import remains available | 29 supplied commands, exposed through default and alternate bit-order profiles. No smartphone JSON import is needed for these entries. Decoder compatibility is physically untested; no coverage of all Astro/NJOI models is claimed. |
+| Samsung TV | Official SmartThings API | Existing Samsung/SmartThings account, authorized token and internet. Only capabilities returned for the selected TV are enabled. No Palm account is required. |
+| LG TV | Published webOS SSAP subset | Same trusted private LAN, TV approval and legacy port 3000. Secure-only webOS and pre-webOS sets are outside this transport. |
 
-The 14 bundled TV/decoder profile entries contain 441 command entries. This includes two interpretations of the same 29 Astro codes, not two independently captured decoder remotes. Select the correct profile and test the specific model. The old eight profile IDs are preserved so saved devices remain valid after an upgrade.
+These network integrations do not contribute non-Mi signals to the infrared catalogue. No new Panasonic, Hisense, Daewoo or other brand-wide network API is claimed. See [integration sources](API_INTEGRATIONS.md).
 
-For Astro, choose **+ → Television / Astro decoder → Astro → Infrared → Ultra Box / Ulti Box** and save the default entry. The alternate entry changes bit order if the default does not work. Both provide navigation, volume, channel, numeric, Guide, Record and colour controls from the supplied file. Missing commands remain disabled.
+## Phone requirements and upgrades
 
-The original [astro_ultrabox.json](../app/src/main/assets/astro_ultrabox.json) is preserved in the APK. It identifies NEC at 38 kHz but omits the 32-bit code convention. The default interprets the hexadecimal values as classic raw NEC32 values transmitted most-significant-bit first; the alternate transmits each byte least-significant-bit first. Neither interpretation has been tested on a physical decoder. Power/Blue and Mute/Right are duplicate code pairs in the supplied data and therefore transmit identical signals. Corrected captures are needed to make each pair perform distinct actions.
+Every direct IR path needs a built-in Android consumer IR transmitter, a supported carrier and line of sight. The app retains **IR ready**, **No IR transmitter detected**, **IR check unavailable** and the **Check IR** diagnostic. Most smartphones lack a consumer IR emitter; iPhone's Face ID hardware does not provide Android remote-control transmission. External USB, Bluetooth and Wi-Fi IR hubs are not supported.
 
-## Air conditioners
+The update removes saved old IR remotes and imported profiles after the replacement index validates. Add new Mi Remote selections. Samsung/LG Wi-Fi devices and encrypted credentials are retained. No smartphone JSON upload is required or offered.
 
-The searchable picker combines 147 distinct brand labels from two different sources:
-
-- **Adjustable:** 141 documented remote/model profiles, 79 manufacturer/protocol labels and 65 stateful sending families. Full-state generation comes from the genuine IRremoteESP8266 v2.9.0 implementation, including protocol checksums and repeats. See [exact encoded profile list](../app/src/main/java/com/universalremote/app/ac/AcProfiles.java).
-- **Recorded:** 158 community handset profiles, 96 source brand labels and 1,656 exact signals. See [full brand/model CSV](../app/src/main/assets/ir/ac_captures/coverage.csv) and [brand summary](../app/src/main/assets/ir/ac_captures/summary.json). Some source files describe air coolers, ventilation devices or humidifiers; model identifiers are retained.
-
-The encoded and recorded lists overlap; their brand counts must not be added. A catalogue label is not evidence that every appliance sold under that brand uses the same protocol. For unsupported brands, import a learned profile with category `air_conditioner`; the importer accepts any AC manufacturer name. This is extensibility for learned signals, not automatic compatibility with every brand/model.
-
-Encoded profiles include documented families/models for Daikin, Panasonic, Mitsubishi Electric and Heavy Industries, Midea, Gree, Haier, LG, Samsung, Sharp, Toshiba, Hitachi, Fujitsu, Carrier, AUX, Daewoo and many others. Hisense and York recorded profiles remain available; the incomplete upstream stateful York dispatcher and unsupported common-API KELON168/Hisense mapping are deliberately excluded. No PRISM+ AC mapping is invented.
-
-Use **+ → Air conditioner**, search a brand, then select an **Adjustable** or **Recorded** entry. Adjustable controls send the requested power, temperature, mode, fan and vertical swing when Send is pressed. Unsupported settings can be clamped/ignored by that protocol. Recorded commands preserve source labels and may set several properties together; a captured Temp+ button is not assumed to calculate a new temperature.
-
-The app stores a last-sent request, not measured appliance state. Other remotes can desynchronize toggle protocols. Reset the last-sent state when needed and check the actual unit. No external USB, Bluetooth, Wi-Fi IR or RF hub is implemented.
-
-## Hardware and source facts
-
-All direct IR paths require an Android phone with a built-in consumer IR transmitter, a supported carrier and line of sight. Most Android phones and all iPhones lack this hardware. Buttons remain disabled when no emitter is detected.
-
-The community TV and AC numerical capture facts come from pinned source revision `d126fb1b6f1e114c52b4a8c19839ea65e3a9c24d`. Per-profile URLs, hashes and source rights notes are bundled. Legacy source licenses are **NOASSERTION**, not CC0; original legacy capture text is excluded. The Astro JSON was separately supplied by the repository owner; it is not a manufacturer-published profile. Encoders are separately licensed source code, with the LGPL native library and relink instructions included.
-
-Record exact appliance model, region, firmware, handset, phone/Android version, profile and commands before reporting physical compatibility. See [validation](VALIDATION.md), [API sources](API_INTEGRATIONS.md) and [limits](KNOWN_LIMITATIONS.md).
+When reporting physical compatibility, record the appliance model, region, firmware, original handset, phone/Android version, source keyset ID and tested commands. See [validation](VALIDATION.md) and [known limits](KNOWN_LIMITATIONS.md).

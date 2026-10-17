@@ -17,15 +17,15 @@ jobs:
           java-version: '21'
       - uses: android-actions/setup-android@v3
       - name: Install Android platform
-        run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0' 'ndk;27.0.12077973' 'cmake;3.22.1'
+        run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
       - uses: gradle/actions/setup-gradle@v4
       - name: Build, test and lint
         run: ./gradlew --no-daemon testDebugUnitTest lintDebug assembleDebug
-      - name: Verify native AC encoders and TV profile facts
+      - name: Verify Mi database catalogue
         run: |
-          bash native_ir/tests/ac/run.sh
-          python3 native_ir/tests/ac/profile_catalog.py --check
-          python3 -m unittest discover -s native_ir/tests -p 'test_tv_extra.py' -v
+          python3 -m pip install -r tools/mi_catalogue/requirements.txt
+          python3 tools/mi_catalogue/generate.py --check
+          python3 -m unittest discover -s tools/mi_catalogue -p 'test_*.py' -v
       - uses: actions/upload-artifact@v4
         with:
           name: PalmRemote-Android-APK

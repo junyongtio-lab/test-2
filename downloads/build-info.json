@@ -1,28 +1,153 @@
 {
   "applicationId": "com.universalremote.app",
-  "versionName": "1.1.2",
-  "versionCode": 4,
+  "versionName": "1.2.0",
+  "versionCode": 5,
   "minSdk": 23,
   "targetSdk": 35,
-  "abis": [
-    "arm64-v8a",
-    "armeabi-v7a",
-    "x86_64"
-  ],
   "buildType": "debug",
-  "signing": "Same Android development certificate as version 1.0.0; not Play release signing",
+  "signing": "Same development certificate as earlier Palm Remote versions; not Play release signing",
   "signingCertificateSha256": "75e8320e3978d0cc65f0fb98c0bb82354a05dd02e1c34d96823d883cab9e4e64",
-  "apkBytes": 5184892,
-  "sha256": "10246ebbafccc8f1d8eca4573813e0006c7fc5f5467b8a46ca17c2b01b01172d",
+  "apkBytes": 9787999,
+  "sha256": "9b83d724a738bd1cf8832dc73081fa05e48fd99edfc94a541557842a31165a6e",
   "buildDate": "2026-10-17",
-  "automatedTests": [
-    {
-      "name": "com.universalremote.app.AstroProfilesTest",
-      "tests": "6",
-      "failures": "0",
-      "errors": "0",
-      "skipped": "0"
+  "nativeLibrariesIncluded": false,
+  "irSource": {
+    "archiveBytes": 7892348,
+    "archiveName": "database_dump.tar.xz",
+    "archiveSha256": "44dcf13d815383c907884f7cdb294afcd085b7063c1de4780589e0626cb61895",
+    "archiveUrl": "https://github.com/ysard/mi_remote_database/releases/download/v2.1/database_dump.tar.xz",
+    "frequencyUnit": "Hz",
+    "hardwareTested": false,
+    "license": "AGPL-3.0-or-later (upstream repository)",
+    "limitations": [
+      "Only published GitHub release JSON is used; no Xiaomi API requests.",
+      "Original model identifiers are code-set IDs, not verified hardware model numbers.",
+      "AC executable/proprietary definitions are omitted; only decoded raw commands are included.",
+      "No Astro, NJOI, PRISM+ or PrismPlus brand is present in the selected release categories.",
+      "Source coverage does not guarantee compatibility with a particular appliance."
+    ],
+    "release": "v2.1",
+    "repository": "https://github.com/ysard/mi_remote_database",
+    "revision": "8a60b419506e8c407f2b756ec8ab4b4bc446678d",
+    "timingUnit": "microseconds"
+  },
+  "irCoverage": {
+    "brands": 1289,
+    "categories": {
+      "air_conditioner": {
+        "brands": 38,
+        "commands": 685,
+        "profiles": 68
+      },
+      "fan": {
+        "brands": 133,
+        "commands": 4181,
+        "profiles": 422
+      },
+      "set_top_box": {
+        "brands": 181,
+        "commands": 12200,
+        "profiles": 406
+      },
+      "tv": {
+        "brands": 1021,
+        "commands": 123883,
+        "profiles": 2810
+      }
     },
+    "commands": 140949,
+    "profiles": 3706,
+    "requestedBrandsAbsent": [
+      "Astro",
+      "NJOI",
+      "PRISM+",
+      "PrismPlus"
+    ],
+    "skippedCommands": {
+      "carrier_out_of_range": 609,
+      "unsupported_ciphertext_length": 6955,
+      "unsupported_executable_ac_definition": 2256,
+      "unsupported_non_gzip_definition": 68,
+      "unsupported_nonbase64_definition": 23815,
+      "unsupported_payload_type": 1718
+    },
+    "skippedModels": {
+      "empty_model_data": 15,
+      "no_supported_raw_commands": 1783
+    },
+    "sourceDevices": {
+      "1": {
+        "brands": 1023,
+        "category": "tv",
+        "commands": 123883,
+        "directory": "1_TV",
+        "profiles": 2810,
+        "skippedCommands": 609,
+        "sourceBrands": 1060,
+        "sourceModels": 2848
+      },
+      "11": {
+        "brands": 2,
+        "category": "set_top_box",
+        "commands": 564,
+        "directory": "11_Cable _ Satellite box",
+        "profiles": 13,
+        "skippedCommands": 0,
+        "sourceBrands": 2,
+        "sourceModels": 13
+      },
+      "12": {
+        "brands": 136,
+        "category": "set_top_box",
+        "commands": 6684,
+        "directory": "12_Box",
+        "profiles": 221,
+        "skippedCommands": 0,
+        "sourceBrands": 136,
+        "sourceModels": 221
+      },
+      "2": {
+        "brands": 43,
+        "category": "set_top_box",
+        "commands": 4952,
+        "directory": "2_Set-top box",
+        "profiles": 172,
+        "skippedCommands": 0,
+        "sourceBrands": 43,
+        "sourceModels": 172
+      },
+      "3": {
+        "brands": 38,
+        "category": "air_conditioner",
+        "commands": 685,
+        "directory": "3_AC",
+        "profiles": 68,
+        "skippedCommands": 34812,
+        "sourceBrands": 280,
+        "sourceModels": 1828
+      },
+      "6": {
+        "brands": 133,
+        "category": "fan",
+        "commands": 4181,
+        "directory": "6_Fan",
+        "profiles": 422,
+        "skippedCommands": 0,
+        "sourceBrands": 133,
+        "sourceModels": 422
+      }
+    }
+  },
+  "offlineSourceTests": 10,
+  "offlineRegenerationVerified": true,
+  "sourceOnlyMiJson": true,
+  "oldIrCataloguesRemoved": true,
+  "oldImportedIrProfilesClearedOnUpgrade": true,
+  "networkCredentialsPreserved": true,
+  "physicalHardwareTested": false,
+  "apk16kZipAlignment": true,
+  "irHardwareProbeTests": 11,
+  "automatedTests": [
     {
       "name": "com.universalremote.app.IrHardwareTest",
       "tests": "11",
@@ -31,8 +156,15 @@
       "skipped": "0"
     },
     {
-      "name": "com.universalremote.app.IrSafetyTest",
-      "tests": "7",
+      "name": "com.universalremote.app.MiCatalogTest",
+      "tests": "9",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.universalremote.app.MiMigrationTest",
+      "tests": "4",
       "failures": "0",
       "errors": "0",
       "skipped": "0"
@@ -59,34 +191,8 @@
       "skipped": "0"
     }
   ],
-  "tvProfiles": 14,
-  "tvCommands": 441,
-  "statefulAcProfiles": 141,
-  "statefulAcFamilies": 65,
-  "statefulAcBrandLabels": 79,
-  "recordedAcProfiles": 158,
-  "recordedAcBrandLabels": 96,
-  "recordedAcCommands": 1656,
-  "searchableAcBrandLabels": 147,
-  "physicalHardwareTested": false,
-  "elfPageAlignmentBytes": 16384,
-  "apk16kZipAlignment": true,
-  "astroSuppliedCommands": 29,
-  "astroBitOrderInterpretations": 2,
-  "astroSourceSha256": "1daa99e6a4be4407ef1830c733b0522830e635683f902334b1022f582b15d747",
-  "previousValidation": {
-    "versionName": "1.1.0",
-    "standaloneIrChecks": 28,
-    "nativeAcHostChecks": 17360,
-    "note": "Native AC libraries and shared IR encoder are unchanged. All three native libraries are byte-identical to v1.1.1 (and v1.1.0). Separate host sweeps and source-regeneration tests were not repeated for this hardware-status update.",
-    "extraTvTests": 8,
-    "extraTvTestsVersion": "1.1.1"
-  },
+  "androidCatalogueChecks": 23,
+  "uiChecksPassed": 12,
   "emulatorApi": 29,
-  "emulatorAbi": "x86_64",
-  "irHardwareProbeTests": 11,
-  "irHardwareStatus": "Persistent on Remote, Devices and Help, with Check IR diagnostics and foreground refresh",
-  "nativeAcDeviceChecks": 423,
-  "androidCatalogueChecks": 11,
-  "uiChecksPassed": 11
+  "emulatorAbi": "x86_64"
 }

@@ -33,6 +33,20 @@ final class DeviceStore {
         for (JSONObject device : devices) array.put(device);
         prefs.edit().putString("profiles", array.toString()).apply();
     }
+    /** Run only after the replacement Mi index has loaded successfully. */
+    int removeUnavailableIrDevices(IrCatalog catalogue) {
+        try {
+            // Parse the whole value before writing: malformed data must not lose pairings.
+            JSONArray saved = new JSONArray(prefs.getString("profiles", "[]"));
+            MiCatalogueMigration.Result result = MiCatalogueMigration.removeUnavailable(saved,
+                id -> catalogue.find(id) != null);
+            if(result.removedCount == 0) return 0;
+            SharedPreferences.Editor update = prefs.edit().putString("profiles", result.retained.toString());
+            for(String id : result.removedIds) update.remove("credential." + id);
+            update.apply();
+            return result.removedCount;
+        } catch(Exception ignored) { return 0; /* Preserve the stored value on a parse failure. */ }
+    }
     private SecretKey key() throws Exception {
         KeyStore store = KeyStore.getInstance("AndroidKeyStore");
         store.load(null);

@@ -1,56 +1,19 @@
-# Infrared handset command facts
+# Mi Remote infrared JSON attribution
 
-The catalogue records factual manufacturer/model labels, handset functions,
-numeric protocol identifiers and parameters, and measured infrared durations
-from [Lucaslhm/Flipper-IRDB](https://github.com/Lucaslhm/Flipper-IRDB), pinned to
-commit `d126fb1b6f1e114c52b4a8c19839ea65e3a9c24d`. Each profile records its
-precise source path, URL, commit and original-source SHA-256 hash. Original
-capture files and their comments are not bundled.
+All infrared data bundled in Palm Remote version 1.2.0 comes from the published GitHub JSON archive of [ysard/mi_remote_database](https://github.com/ysard/mi_remote_database), maintained by ysard and contributors. No earlier Flipper-IRDB captures, owner-supplied Astro JSON, learned imports or IRremoteESP8266 stateful encoders remain in this app version.
 
-The upstream README explicitly says: "Commits prior to 2319685 are not covered."
-The eight original TV captures predate that 2025-08-07 licensing cutoff.
-Consequently their source metadata uses `NOASSERTION`: this application does
-not represent those captures as licensed under CC0 and does not assert a source
-licence grant. The catalogue contains extracted numeric control facts and
-function labels, rather than reproductions of the source file text. Application
-code has its own repository licence.
+- GitHub release: [v2.1](https://github.com/ysard/mi_remote_database/releases/tag/v2.1)
+- Source archive: [database_dump.tar.xz](https://github.com/ysard/mi_remote_database/releases/download/v2.1/database_dump.tar.xz), 7,892,348 bytes
+- Archive SHA-256: `44dcf13d815383c907884f7cdb294afcd085b7063c1de4780589e0626cb61895`
+- Upstream format-reference commit: `8a60b419506e8c407f2b756ec8ab4b4bc446678d`
+- Upstream license notices: **AGPL-3.0-or-later**, retained at `licenses/mi_remote_database-LICENSE.txt` in the APK
 
-These are community supplied handset parameters, not a manufacturer API or an
-endorsement. No physical television testing was performed during this build.
-Compatibility depends on handset/model families. An Android device with a
-working infrared emitter is required to transmit them.
+The original archive and the independent offline AGPL-3.0-or-later generator are published in this repository under `tools/mi_catalogue/`. The source data is not relicensed under the application code's MIT license. No additional rights over Xiaomi or manufacturer material are asserted. The upstream project is a community database and is not represented as a manufacturer-published API, certification or endorsement.
 
-The original eight handset/model families remain:
+Included source device IDs are 1 (TV), 2 (set-top box), 3 (AC), 6 (fan), 11 (cable/satellite) and 12 (internet box). Source brand-to-keyset references and original command keys are retained. Readable display labels are derived from those keys. Model identifiers describe code sets and are not independently verified appliance model numbers. Accepted encrypted/compressed raw arrays are decoded offline; carrier hertz and microsecond timing integers are preserved. The TVKill carrier-cycle export is not used.
 
-* Samsung BN59-01315B
-* LG AKB75375604
-* Panasonic Viera (source contributor: emptythevoid)
-* Panasonic TH-43HS550K / HS550K / GX650K
-* Hisense EN3Y39H
-* Hisense EN3AH39H
-* Hisense U7G
-* Hisense 55U6K (2023)
+Proprietary AC templates, executable fragments, unsupported representations, invalid carriers and empty responses are excluded rather than guessed or executed. Exact accepted coverage and exclusions appear in `mi/index.json`. Each profile records original brand/model JSON paths and SHA-256 hashes. `tools/mi_catalogue/source-manifest.json` records all input/output hashes and supports deterministic offline verification.
 
-The additional PRISM+ and Daewoo catalogue has its own `tv_extra/SOURCE_NOTICE.md`.
-Air conditioner facts are documented alongside the corresponding AC catalogue
-and protocol engine. Numeric profiles do not imply support for every model.
+The included categories have no Astro, NJOI, PRISM+ or PrismPlus brand. No substitute profile is fabricated. All bundled profiles have `hardwareTested: false`; no physical appliance testing was performed in the cloud. Android hardware detection and successful transmission do not establish compatibility with a particular appliance.
 
-No Malaysian Astro/NJOI handset recording has been independently established
-for this release. The unrelated Astro ASR340 satellite receiver recordings
-are not included as Malaysian Astro codes. Users can import genuine learned
-commands for their own decoder. An imported brand label does not establish
-decoder compatibility.
-
-Parsed NEC, NECext, Samsung32 and Kaseikyo parameters are expanded to alternating
-mark/space durations in microseconds by this app's `IrEncoder`. Raw parameters
-retain their source carrier and timings. Protocol references:
-
-* [Flipper infrared format](https://developer.flipper.net/flipperzero/doxygen/infrared_file_format.html)
-* [Arduino-IRremote protocol descriptions](https://github.com/Arduino-IRremote/Arduino-IRremote)
-* [Flipper Kaseikyo format](https://github.com/flipperdevices/flipperzero-firmware/tree/dev/lib/infrared/encoder_decoder/kaseikyo)
-
-`python3 native_ir/tools/build_catalog.py` regenerates `profiles.json` offline
-from `native_ir/data/base_tv_facts.json`, using the Java encoder and a JDK on
-`PATH`. `--verify-upstream` optionally checks the pinned source hashes and
-the complete numeric extraction over HTTPS, in memory, without saving original
-capture text. Regeneration preserves every existing command ID and waveform.
+The Android app makes no Xiaomi API requests. It independently reads the converted JSON and transmits only supported raw commands through Android ConsumerIrManager. It does not include upstream Python or the standalone generator in its runtime.
