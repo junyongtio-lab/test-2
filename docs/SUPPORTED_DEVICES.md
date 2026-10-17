@@ -1,4 +1,4 @@
-# Supported-device scope, version 1.1.1
+# Supported-device scope, version 1.1.2
 
 This is an Android APK for Android 6.0 or newer, with ARM64, ARMv7 and x86_64 native builds. It cannot run on iPhone. No physical appliance was attached; implemented protocols and source labels are not hardware certification.
 

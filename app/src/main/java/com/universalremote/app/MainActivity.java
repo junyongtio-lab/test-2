@@ -27,6 +27,8 @@ public final class MainActivity extends Activity {
     private static final int BG=0xff0a111e, CARD=0xff141f30, EDGE=0xff263449,
         TEXT=0xfff2f5fa, MUTED=0xff9aabc0, MINT=0xff72e5c3;
     private final ExecutorService worker = Executors.newSingleThreadExecutor();
+    private final ExecutorService hardwareWorker = Executors.newSingleThreadExecutor();
+    private IrHardware.Result irHardware = IrHardware.checking();
     private DeviceStore store;
     private IrCatalog infrared;
     private final List<JSONObject> devices = new ArrayList<>();
@@ -36,8 +38,10 @@ public final class MainActivity extends Activity {
     private SmartThingsClient.Device cloudDevice;
     private LinearLayout root, content, nav;
     private TextView statusText;
+    private TextView irHardwareTitle, irHardwareDetail;
+    private Button irHardwareButton;
     private String currentPage="Remote", status="Choose a device to get started", notice="";
-    private boolean connected, busy, destroyed;
+    private boolean connected, busy, destroyed, hardwareChecking, irCatalogFailed;
     private long connectionGeneration;
     private final Map<View,String> commandButtons = new HashMap<>();
 
@@ -53,9 +57,53 @@ public final class MainActivity extends Activity {
                 IrCatalog loaded=new IrCatalog(this);
                 ui(()->{infrared=loaded;render();if(selected!=null)connect();});
             } catch(Exception error) {
-                ui(()->{notice="IR profiles could not load: "+error.getMessage();render();if(selected!=null)connect();});
+                ui(()->{irCatalogFailed=true;notice="IR profiles could not load: "+error.getMessage();render();if(selected!=null)connect();});
             }
         });
+    }
+    @Override protected void onResume() {
+        super.onResume();
+        checkIrHardware(false);
+    }
+    private void checkIrHardware(boolean showDetails) {
+        if(hardwareChecking||destroyed)return;
+        hardwareChecking=true;irHardware=IrHardware.checking();updateIrHardwareViews();updateIrRemoteAvailability();
+        // A separate worker keeps phone detection independent of catalogue loading and TV pairing.
+        hardwareWorker.execute(()->{
+            IrHardware.Result result=IrHardware.inspect(getApplicationContext());
+            ui(()->{
+                hardwareChecking=false;irHardware=result;updateIrHardwareViews();updateIrRemoteAvailability();
+                if(showDetails)showIrHardwareDetails();
+            });
+        });
+    }
+    private void updateIrHardwareViews() {
+        if(irHardwareTitle==null)return;
+        irHardwareTitle.setText(irHardware.title);
+        irHardwareTitle.setTextColor(irHardware.hasEmitter?MINT:TEXT);
+        irHardwareDetail.setText(irHardware.detail);
+        irHardwareButton.setEnabled(!hardwareChecking);
+        irHardwareButton.setText(hardwareChecking?"Checking…":"Check IR");
+    }
+    private void showIrHardwareDetails() {
+        String version="";
+        try{version=getPackageManager().getPackageInfo(getPackageName(),0).versionName;}catch(Exception ignored){/* Optional display metadata. */}
+        String details="Palm Remote "+version+"\nPhone: "+android.os.Build.MANUFACTURER+" "+android.os.Build.MODEL
+            +"\nAndroid: "+android.os.Build.VERSION.RELEASE+"\n\n"+irHardware.diagnostics
+            +"\n\nThis checks the phone's built-in IR hardware. It does not test whether your TV, decoder or air conditioner responds. USB accessories and external IR hubs are not supported by this APK.";
+        new AlertDialog.Builder(this).setTitle(irHardware.title).setMessage(details)
+            .setPositiveButton("Done",null).setNeutralButton("Check again",(dialog,which)->checkIrHardware(true)).show();
+    }
+    private boolean selectedUsesIr() {
+        return selected!=null&&(selected.optString("mode").equals("ir")||selected.optString("mode").equals("ac"));
+    }
+    private void updateIrRemoteAvailability() {
+        if(!selectedUsesIr())return;
+        if(infrared==null) {
+            updateStatus(irCatalogFailed?"IR profiles could not load. Restart the app to retry.":"IR profiles are loading…",false);
+        } else if(selected.optString("mode").equals("ac")&&!AcEngine.isAvailable()) {
+            updateStatus("AC encoder is unavailable on this Android architecture.",false);
+        } else updateStatus(irHardware.title+(irHardware.hasEmitter?" · device response unverified":""),irHardware.hasEmitter);
     }
     private int dp(float value) { return (int)(value*getResources().getDisplayMetrics().density+.5f); }
     private GradientDrawable shape(int color, int radius) {
@@ -82,7 +130,7 @@ public final class MainActivity extends Activity {
     }
     private void full(LinearLayout into,View view,int height) { into.addView(view,new LinearLayout.LayoutParams(-1,dp(height))); }
     private void render() {
-        commandButtons.clear();
+        commandButtons.clear();statusText=null;
         root=column(); root.setBackgroundColor(BG); root.setPadding(dp(20),dp(8),dp(20),0);
         root.setOnApplyWindowInsetsListener((v,insets)->{
             if (android.os.Build.VERSION.SDK_INT>=30) {
@@ -98,6 +146,17 @@ public final class MainActivity extends Activity {
         header.addView(brand,new LinearLayout.LayoutParams(0,-2,1));
         Button plus=action("+",this::addBrand,false); plus.setContentDescription("Add a remote control");
         header.addView(plus,new LinearLayout.LayoutParams(dp(48),dp(48))); root.addView(header); gap(root,16);
+        LinearLayout hardware=row();hardware.setPadding(dp(12),dp(10),dp(12),dp(10));hardware.setBackground(shape(CARD,16));
+        LinearLayout hardwareLabels=column();
+        irHardwareTitle=text(irHardware.title,16,TEXT,true);irHardwareTitle.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
+        hardwareLabels.addView(irHardwareTitle);gap(hardwareLabels,3);
+        irHardwareDetail=text(irHardware.detail,12,MUTED,false);hardwareLabels.addView(irHardwareDetail);
+        hardware.addView(hardwareLabels,new LinearLayout.LayoutParams(0,-2,1));
+        irHardwareButton=action("Check IR",()->checkIrHardware(true),false);
+        irHardwareButton.setContentDescription("Check infrared transmitter");
+        LinearLayout.LayoutParams checkParams=new LinearLayout.LayoutParams(dp(105),dp(52));checkParams.setMargins(dp(8),0,0,0);
+        hardware.addView(irHardwareButton,checkParams);root.addView(hardware,new LinearLayout.LayoutParams(-1,-2));gap(root,12);
+        updateIrHardwareViews();
         ScrollView scroll=new ScrollView(this); scroll.setFillViewport(false); scroll.setClipToPadding(false);
         content=column(); content.setPadding(0,0,0,dp(20)); scroll.addView(content);
         root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
@@ -228,8 +287,7 @@ public final class MainActivity extends Activity {
         if(selected==null)return;
         JSONObject device=selected;
         if(device.optString("mode").equals("ir")||device.optString("mode").equals("ac")) {
-            if(device.optString("mode").equals("ac")&&!AcEngine.isAvailable()){updateStatus("AC encoder is unavailable on this Android architecture.",false);return;}
-            updateStatus(infrared!=null&&infrared.hasEmitter()?"IR ready · hardware response unverified":"No IR transmitter detected on this phone",infrared!=null&&infrared.hasEmitter());return;
+            updateIrRemoteAvailability();return;
         }
         updateStatus("Connecting…",false);
         worker.execute(()->{
@@ -273,7 +331,7 @@ public final class MainActivity extends Activity {
         card("Air conditioners", "Choose an encoded protocol family for adjustable power, temperature, mode, fan and swing, or a recorded handset profile for captured commands. Settings are requested states, not readings from the unit. A brand match alone does not guarantee model compatibility; unknown brands can import a learned IR profile.");
         card("AC state and synchronization", "Only the last successfully transmitted requested state is stored. The app cannot read the AC state. If someone uses the original remote, reset the last-sent state in this app. Some protocols use toggles or normalize temperature, mode, fan or swing options; test the exact model.");
         card("Astro Ultra Box / Ulti Box", "The supplied decoder profiles are built in; no phone JSON import is needed. Start with the default profile and try the alternate if there is no response. These codes have not been tested on a physical decoder. The supplied Power/Blue and Mute/Right pairs transmit identical signals. An Android phone with an IR transmitter is required.");
-        card("Infrared hardware", infrared!=null&&infrared.hasEmitter()?"An infrared transmitter was detected. Aim it at the device and use the exact or compatible handset profile.":"No infrared transmitter detected. IR buttons will stay disabled. Most Android phones and all iPhones lack a built-in consumer IR transmitter. This app does not support USB or external IR hubs.");
+        card("Check this phone's infrared", "The hardware indicator above stays visible on every tab, even before adding a device. Tap Check IR to see this phone's model, app version and supported carrier frequencies. IR ready confirms Android detected a built-in emitter; it does not confirm the device responded. No IR transmitter detected means Android exposes no built-in emitter to this app. If a hardware query fails, IR check unavailable is shown instead.");
         card("Your data stays yours", "Device names and imported profiles stay in private app storage. Pairing keys and SmartThings tokens use Android Keystore encryption. Samsung commands go to api.smartthings.com; LG commands go directly to your TV. Android backup is disabled. Remove devices or clear app data to delete saved credentials.");
         card("Test status", "Automated build and protocol tests do not establish physical device compatibility. No TV, decoder or physical phone was attached during development. This APK is Android-only; iOS requires separate development and signing.");
         full(content,action("Import learned IR profile",this::importIr,false),54);
@@ -440,11 +498,11 @@ public final class MainActivity extends Activity {
         new AlertDialog.Builder(this).setTitle(brand+" infrared profile").setItems(labels,(dialog,index)->{
             if(index==profiles.size()){importIr();return;}
             JSONObject profile=profiles.get(index);
-            boolean emitter=infrared.hasEmitter();
+            boolean emitter=irHardware.hasEmitter;
             String guidance=profile.optString("notice").trim();
             if(!emitter||!guidance.isEmpty()) {
-                if(!emitter)guidance+=(guidance.isEmpty()?"":"\n\n")+"You can save this remote, but this phone cannot send infrared commands. Wi-Fi alternatives are available only for supported Samsung and LG models.";
-                new AlertDialog.Builder(this).setTitle(emitter?"About this IR profile":"No IR transmitter detected").setMessage(guidance)
+                if(!emitter)guidance+=(guidance.isEmpty()?"":"\n\n")+irHardware.title+". You can save this remote; IR sending is disabled until a built-in emitter is detected. Tap Check IR above the page for phone hardware details.";
+                new AlertDialog.Builder(this).setTitle(emitter?"About this IR profile":irHardware.title).setMessage(guidance)
                     .setPositiveButton(emitter?"Save remote":"Save anyway",(d,w)->saveIr(brand,profile)).setNegativeButton("Cancel",null).show();
             }else saveIr(brand,profile);
         }).setNegativeButton("Cancel",null).show();
@@ -578,5 +636,5 @@ public final class MainActivity extends Activity {
     }
     private void message(String value) {Toast.makeText(this,value==null?"Connection failed":value,Toast.LENGTH_LONG).show();}
     private void ui(Runnable task) {if(!destroyed)runOnUiThread(()->{if(!destroyed)task.run();});}
-    @Override protected void onDestroy(){destroyed=true;connectionGeneration++;if(network!=null)network.dispose();worker.shutdownNow();super.onDestroy();}
+    @Override protected void onDestroy(){destroyed=true;connectionGeneration++;if(network!=null)network.dispose();worker.shutdownNow();hardwareWorker.shutdownNow();super.onDestroy();}
 }

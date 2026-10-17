@@ -1,7 +1,7 @@
 {
   "applicationId": "com.universalremote.app",
-  "versionName": "1.1.1",
-  "versionCode": 3,
+  "versionName": "1.1.2",
+  "versionCode": 4,
   "minSdk": 23,
   "targetSdk": 35,
   "abis": [
@@ -13,12 +13,19 @@
   "signing": "Same Android development certificate as version 1.0.0; not Play release signing",
   "signingCertificateSha256": "75e8320e3978d0cc65f0fb98c0bb82354a05dd02e1c34d96823d883cab9e4e64",
   "apkBytes": 5184892,
-  "sha256": "57ee9270d7eda6eb0ed308ad59ce3548186f7534b21d6f2e5ea96f12a38674d8",
+  "sha256": "10246ebbafccc8f1d8eca4573813e0006c7fc5f5467b8a46ca17c2b01b01172d",
   "buildDate": "2026-10-17",
   "automatedTests": [
     {
       "name": "com.universalremote.app.AstroProfilesTest",
       "tests": "6",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.universalremote.app.IrHardwareTest",
+      "tests": "11",
       "failures": "0",
       "errors": "0",
       "skipped": "0"
@@ -52,7 +59,6 @@
       "skipped": "0"
     }
   ],
-  "extraTvTests": 8,
   "tvProfiles": 14,
   "tvCommands": 441,
   "statefulAcProfiles": 141,
@@ -72,11 +78,15 @@
     "versionName": "1.1.0",
     "standaloneIrChecks": 28,
     "nativeAcHostChecks": 17360,
-    "note": "Native AC libraries and shared IR encoder unchanged; all three APK native libraries are byte-identical to v1.1.0. Host sweep not repeated for this JSON/UI update."
+    "note": "Native AC libraries and shared IR encoder are unchanged. All three native libraries are byte-identical to v1.1.1 (and v1.1.0). Separate host sweeps and source-regeneration tests were not repeated for this hardware-status update.",
+    "extraTvTests": 8,
+    "extraTvTestsVersion": "1.1.1"
   },
-  "nativeAcDeviceChecks": 423,
-  "androidCatalogueChecks": 11,
   "emulatorApi": 29,
   "emulatorAbi": "x86_64",
-  "uiChecksPassed": 9
+  "irHardwareProbeTests": 11,
+  "irHardwareStatus": "Persistent on Remote, Devices and Help, with Check IR diagnostics and foreground refresh",
+  "nativeAcDeviceChecks": 423,
+  "androidCatalogueChecks": 11,
+  "uiChecksPassed": 11
 }

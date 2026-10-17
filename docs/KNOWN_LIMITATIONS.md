@@ -1,5 +1,7 @@
 # Known limitations
 
+- The persistent phone hardware indicator checks Android's consumer IR service independently of the catalogue. **IR ready** confirms emitter detection, not correct remote codes or appliance response. Carrier support can be unknown or exclude 38 kHz; diagnostic details report this separately. **IR check unavailable** means the query failed, rather than confirming hardware is absent. The check does not support external USB adapters or IR hubs.
+
 - Android APK only: Android 6.0+, ARM64/ARMv7/x86_64. No iPhone app or external IR hub.
 - Most phones have no IR emitter. The app detects this; installing software cannot add hardware.
 - Catalogue coverage is broad, not every brand/model ever sold. Exact appliance/remote matching matters; physical TVs, decoders and ACs were not available for testing.

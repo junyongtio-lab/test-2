@@ -117,4 +117,4 @@ adb install -r app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
 adb shell am instrument -w -r com.universalremote.app.test/com.universalremote.app.ac.AcEngineInstrumentation
 ```
 
-The prepared cloud setup helper now also installs the pinned NDK and CMake. Version 1.1.1 retains the earlier versions' package, profile IDs and debug signing key for in-place upgrades. Its Astro JSON is an app asset and requires no separate installation or phone import. Keep private signing keys outside Git.
+The prepared cloud setup helper now also installs the pinned NDK and CMake. Version 1.1.2 retains the earlier versions' package, profile IDs and debug signing key for in-place upgrades. Its Astro JSON is an app asset and requires no separate installation or phone import. The Check IR dialog shows the installed app version and phone hardware results. Keep private signing keys outside Git.

@@ -1,6 +1,6 @@
 # Palm Remote for Android
 
-Version **1.1.1** bundles the supplied **Astro Ultra Box / Ulti Box JSON profile**, so a smartphone file import is no longer needed for that profile. PRISM+, Daewoo, Samsung, LG, Panasonic and Hisense TV controls and the searchable air-conditioner infrared catalogue remain available. No app registration, paid account, subscriptions, advertisements or analytics.
+Version **1.1.2** adds an always-visible **IR hardware status** and a **Check IR** diagnostic button. The supplied **Astro Ultra Box / Ulti Box JSON profile** remains built in, with no smartphone import needed. PRISM+, Daewoo, Samsung, LG, Panasonic and Hisense TV controls and the searchable air-conditioner infrared catalogue remain available. No app registration, paid account, subscriptions, advertisements or analytics.
 
 ## Download and install
 
@@ -21,6 +21,16 @@ Download [PalmRemote.apk](downloads/PalmRemote.apk) on an Android phone (Android
 | Other AC brands/models | Learned IR import for any AC manufacturer | Add a legitimately learned waveform profile with category `air_conditioner`. |
 
 The AC picker combines **147 distinct searchable brand labels** from encoded and recorded profiles. This covers the available documented catalogue, **not every brand/model ever sold**. All physical TV/AC/decoder compatibility is untested in this cloud environment. Brand names identify compatibility and do not imply endorsement.
+
+## Check the phone's IR hardware
+
+The indicator below the app heading stays visible on **Remote, Devices and Help**, including before adding any device. It refreshes when the app returns to the foreground.
+
+- **IR ready**: Android detected a built-in emitter. Carrier support is shown separately; this does not verify the selected remote codes or appliance response.
+- **No IR transmitter detected**: Android exposes no built-in emitter to this app. IR sending stays disabled.
+- **IR check unavailable**: Android could not complete the query. Tap **Check IR** to retry; a query error is not treated as proof that hardware is absent.
+
+Tap **Check IR** for the phone model, Android/app versions, reported carrier-frequency ranges and whether 38 kHz is supported. The check works independently of remote-profile loading and sends no infrared signal. It does not add hardware or support external IR accessories.
 
 ## Use the app
 
