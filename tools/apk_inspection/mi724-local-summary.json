@@ -1,0 +1,350 @@
+{
+  "schemaVersion": 1,
+  "staticOnly": true,
+  "emitsVendorData": false,
+  "input": {
+    "package": "com.duokan.phone.remotecontroller",
+    "versionName": "7.2.4M",
+    "versionCode": 6500,
+    "bytes": 34320753,
+    "sha256": "4c20655f2b636d86152202994da2a1b88f4ebf5bddf58b7ef6c2bf8e42fa5c73",
+    "versionEvidence": "Independently inspected Android manifest; this helper verifies its exact APK hash."
+  },
+  "archiveResource": {
+    "apkPath": "res/Jy4",
+    "recoveredResourceName": "raw/irlocaldata",
+    "format": "RAR4",
+    "bytes": 3438991,
+    "sha256": "b9d940a132ab958065d5d244e0132ef4c2d4c8976383df2651cb247da5c15947"
+  },
+  "database": {
+    "archiveEntry": "irlocaldata.db",
+    "format": "SQLite3",
+    "bytes": 5878784,
+    "sha256": "727a271f25889d97fc94b021b240f62d1ce559ce8a98cf14b7ac0d3efb657bfa",
+    "applicationTableCount": 19,
+    "internalTableCount": 1,
+    "tables": {
+      "devicebrands": {
+        "rows": 176,
+        "columns": [
+          "ID",
+          "BRAND_ID",
+          "DEVICE_ID",
+          "CONTENT"
+        ],
+        "encryptedJsonColumn": "CONTENT",
+        "decodedJsonRecords": 176,
+        "identityTermMatches": 0
+      },
+      "mi_ir_tree": {
+        "rows": 430,
+        "columns": [
+          "ID",
+          "BRAND_ID",
+          "DEVICE_ID",
+          "SP_ID",
+          "ENTRYS",
+          "NODES",
+          "ROOT_INDEX",
+          "SECRET_KEY",
+          "VERSION",
+          "STATUS",
+          "COUNTRY"
+        ],
+        "encryptedJsonColumn": "NODES",
+        "decodedJsonRecords": 430,
+        "identityTermMatches": 0
+      },
+      "mi_remote_ircode": {
+        "rows": 1923,
+        "columns": [
+          "ID",
+          "BRAND_ID",
+          "DEVICE_ID",
+          "FREQUENCY",
+          "SP_ID",
+          "IR_ZIP_KEY",
+          "INDEXED",
+          "VERSION"
+        ],
+        "encryptedJsonColumn": null,
+        "decodedJsonRecords": 0,
+        "identityTermMatches": 0
+      },
+      "kk_remote_ircode": {
+        "rows": 1053,
+        "columns": [
+          "ID",
+          "FREQUENCY",
+          "SP_ID",
+          "DEVICE_ID",
+          "BRAND_ID",
+          "IR_ZIP_KEY",
+          "INDEXED",
+          "EXT_FLAG",
+          "VERSION"
+        ],
+        "encryptedJsonColumn": null,
+        "decodedJsonRecords": 0,
+        "identityTermMatches": 0
+      },
+      "kk_remote_ircode_src": {
+        "rows": 1747,
+        "columns": [
+          "ID",
+          "IR_ZIP_KEY"
+        ],
+        "encryptedJsonColumn": "IR_ZIP_KEY",
+        "decodedJsonRecords": 1747,
+        "identityTermMatches": 0
+      },
+      "device": {
+        "rows": 14,
+        "columns": [
+          "ID",
+          "CONTENT"
+        ],
+        "encryptedJsonColumn": "CONTENT",
+        "decodedJsonRecords": 14,
+        "identityTermMatches": 0
+      },
+      "brand": {
+        "rows": 125,
+        "columns": [
+          "ID",
+          "CONTENT"
+        ],
+        "encryptedJsonColumn": "CONTENT",
+        "decodedJsonRecords": 125,
+        "identityTermMatches": 0
+      },
+      "sp": {
+        "rows": 340,
+        "columns": [
+          "ID",
+          "CITY_ID",
+          "SP_ID",
+          "TYPE",
+          "NAME"
+        ],
+        "encryptedJsonColumn": null,
+        "decodedJsonRecords": 0,
+        "identityTermMatches": 0
+      },
+      "xm_sp": {
+        "rows": 43,
+        "columns": [
+          "ID",
+          "CITY_ID",
+          "SP_ID",
+          "TYPE",
+          "NAME"
+        ],
+        "encryptedJsonColumn": null,
+        "decodedJsonRecords": 0,
+        "identityTermMatches": 0
+      },
+      "city": {
+        "rows": 294,
+        "columns": [
+          "ID",
+          "NAME",
+          "PROVINCE_ID",
+          "PROVINCE_NAME"
+        ],
+        "encryptedJsonColumn": null,
+        "decodedJsonRecords": 0,
+        "identityTermMatches": 0
+      },
+      "xm_city": {
+        "rows": 1,
+        "columns": [
+          "ID",
+          "NAME",
+          "PROVINCE_ID",
+          "PROVINCE_NAME"
+        ],
+        "encryptedJsonColumn": null,
+        "decodedJsonRecords": 0,
+        "identityTermMatches": 0
+      },
+      "lineup": {
+        "rows": 856,
+        "columns": [
+          "ID",
+          "AREA",
+          "NAME",
+          "SP_ID",
+          "S_TPBRAND",
+          "STATUS"
+        ],
+        "encryptedJsonColumn": null,
+        "decodedJsonRecords": 0,
+        "identityTermMatches": 0
+      },
+      "xm_lineup": {
+        "rows": 47,
+        "columns": [
+          "ID",
+          "AREA",
+          "NAME",
+          "SP_ID",
+          "S_TPBRAND",
+          "STATUS"
+        ],
+        "encryptedJsonColumn": null,
+        "decodedJsonRecords": 0,
+        "identityTermMatches": 0
+      },
+      "kk_match": {
+        "rows": 1056,
+        "columns": [
+          "ID",
+          "FREQUENCY",
+          "SP_ID",
+          "DEVICE_ID",
+          "BRAND_ID",
+          "KEY",
+          "EXT_FLAG",
+          "LOCALES"
+        ],
+        "encryptedJsonColumn": "KEY",
+        "decodedJsonRecords": 1056,
+        "identityTermMatches": 0
+      },
+      "xm_match": {
+        "rows": 34,
+        "columns": [
+          "ID",
+          "FREQUENCY",
+          "SP_ID",
+          "DEVICE_ID",
+          "BRAND_ID",
+          "KEY",
+          "EXT_FLAG",
+          "LOCALES"
+        ],
+        "encryptedJsonColumn": "KEY",
+        "decodedJsonRecords": 34,
+        "identityTermMatches": 0
+      },
+      "xm_remote_ircode": {
+        "rows": 34,
+        "columns": [
+          "ID",
+          "FREQUENCY",
+          "SP_ID",
+          "DEVICE_ID",
+          "BRAND_ID",
+          "IR_ZIP_KEY",
+          "INDEXED",
+          "EXT_FLAG",
+          "VERSION"
+        ],
+        "encryptedJsonColumn": "IR_ZIP_KEY",
+        "decodedJsonRecords": 34,
+        "identityTermMatches": 0
+      },
+      "mi_ir_merge": {
+        "rows": 477,
+        "columns": [
+          "ID",
+          "VENDOR",
+          "MI_ID",
+          "BRAND_ID",
+          "DEVICE_ID",
+          "SP_ID",
+          "LOCALES"
+        ],
+        "encryptedJsonColumn": null,
+        "decodedJsonRecords": 0,
+        "identityTermMatches": 0
+      },
+      "country": {
+        "rows": 4,
+        "columns": [
+          "ID",
+          "COUNTRY",
+          "LANGUAGE",
+          "LOCALE_DEVICE"
+        ],
+        "encryptedJsonColumn": null,
+        "decodedJsonRecords": 0,
+        "identityTermMatches": 0
+      },
+      "version": {
+        "rows": 1,
+        "columns": [
+          "VERSION"
+        ],
+        "encryptedJsonColumn": null,
+        "decodedJsonRecords": 0,
+        "identityTermMatches": 0
+      },
+      "sqlite_sequence": {
+        "rows": 6,
+        "columns": [
+          "name",
+          "seq"
+        ],
+        "encryptedJsonColumn": null,
+        "decodedJsonRecords": 0,
+        "identityTermMatches": 0
+      }
+    },
+    "decodedJsonRecords": 3616,
+    "decodeErrors": 0,
+    "identitySearch": {
+      "terms": [
+        "Astro",
+        "NJOI",
+        "Ultra Box",
+        "Ulti Box"
+      ],
+      "matchingOccurrences": 0,
+      "scope": "All plain rows and decoded outer JSON columns; nested pulse blobs remain encoded.",
+      "meaning": "No attributable named Astro profile was recovered; this does not exclude unnamed compatible waveforms or online profiles."
+    },
+    "brandAssociationCoverage": {
+      "devicebrands": {
+        "distinctNonemptyBrandIds": 126,
+        "idsWithoutBundledBrandName": 1
+      },
+      "mi_ir_tree": {
+        "distinctNonemptyBrandIds": 27,
+        "idsWithoutBundledBrandName": 1
+      },
+      "mi_remote_ircode": {
+        "distinctNonemptyBrandIds": 43,
+        "idsWithoutBundledBrandName": 16
+      },
+      "kk_remote_ircode": {
+        "distinctNonemptyBrandIds": 113,
+        "idsWithoutBundledBrandName": 0
+      },
+      "kk_match": {
+        "distinctNonemptyBrandIds": 116,
+        "idsWithoutBundledBrandName": 0
+      },
+      "xm_match": {
+        "distinctNonemptyBrandIds": 2,
+        "idsWithoutBundledBrandName": 0
+      },
+      "xm_remote_ircode": {
+        "distinctNonemptyBrandIds": 2,
+        "idsWithoutBundledBrandName": 0
+      },
+      "mi_ir_merge": {
+        "distinctNonemptyBrandIds": 267,
+        "idsWithoutBundledBrandName": 237
+      }
+    }
+  },
+  "limitations": [
+    "No APK, DEX, native library, embedded script, or SQL script was executed.",
+    "Native DAT formats and server-side data are outside this helper's scope.",
+    "No compatibility with physical appliances was tested.",
+    "Vendor data ownership and redistribution permission are not established; no extracted records are included in the app or report."
+  ]
+}

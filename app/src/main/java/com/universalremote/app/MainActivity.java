@@ -19,8 +19,8 @@ import java.util.concurrent.*;
 
 /** Account-free, local-first controller. A command is successful only after the transport accepts it. */
 public final class MainActivity extends Activity {
-    private static final int BG=0xff0a111e, CARD=0xff141f30, EDGE=0xff263449,
-        TEXT=0xfff2f5fa, MUTED=0xff9aabc0, MINT=0xff72e5c3;
+    private static final int BG=0xff10141f, CARD=0xff1a2130, EDGE=0xff2c3548,
+        TEXT=0xfff5f7fc, MUTED=0xffa8b3c8, MINT=0xff91e5d0, LILAC=0xffbcb3ff;
     private final ExecutorService worker = Executors.newSingleThreadExecutor();
     private final ExecutorService hardwareWorker = Executors.newSingleThreadExecutor();
     private IrHardware.Result irHardware = IrHardware.checking();
@@ -35,7 +35,7 @@ public final class MainActivity extends Activity {
     private TextView statusText;
     private TextView irHardwareTitle, irHardwareDetail;
     private Button irHardwareButton;
-    private String currentPage="Remote", status="Choose a device to get started", notice="", irProfileError="";
+    private String currentPage="Home", status="Choose a device to get started", notice="", irProfileError="";
     private boolean connected, busy, destroyed, hardwareChecking, irCatalogFailed;
     private long connectionGeneration;
     private final Map<View,String> commandButtons = new HashMap<>();
@@ -137,6 +137,11 @@ public final class MainActivity extends Activity {
         b.setOnClickListener(v->{v.performHapticFeedback(android.view.HapticFeedbackConstants.KEYBOARD_TAP); onClick.run();});
         return b;
     }
+    private ImageView glyph(String kind,int color,int size) {
+        ImageView icon=new ImageView(this);icon.setImageDrawable(new PalmGlyph(kind,color));
+        icon.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+        icon.setLayoutParams(new LinearLayout.LayoutParams(dp(size),dp(size)));return icon;
+    }
     private void weighted(LinearLayout into,View view,int height) {
         LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(0,dp(height),1); p.setMargins(dp(4),dp(4),dp(4),dp(4)); into.addView(view,p);
     }
@@ -153,8 +158,8 @@ public final class MainActivity extends Activity {
         });
         setContentView(root);
         LinearLayout header=row();
-        LinearLayout brand=column(); brand.addView(text("PALM / REMOTE",12,MINT,true)); gap(brand,4);
-        brand.addView(text(currentPage.equals("Remote")?"Your home, in hand.":currentPage,25,TEXT,true));
+        LinearLayout brand=column(); brand.addView(text("P A L M   R E M O T E",11,MINT,true)); gap(brand,4);
+        brand.addView(text(currentPage.equals("Home")?"A little more control.":currentPage.equals("Remote")?"Your remote":currentPage,25,TEXT,true));
         header.addView(brand,new LinearLayout.LayoutParams(0,-2,1));
         Button plus=action("+",this::addBrand,false); plus.setContentDescription("Add a remote control");
         header.addView(plus,new LinearLayout.LayoutParams(dp(48),dp(48))); root.addView(header); gap(root,16);
@@ -172,11 +177,18 @@ public final class MainActivity extends Activity {
         ScrollView scroll=new ScrollView(this); scroll.setFillViewport(false); scroll.setClipToPadding(false);
         content=column(); content.setPadding(0,0,0,dp(20)); scroll.addView(content);
         root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
-        if (currentPage.equals("Remote")) remotePage();
+        if (currentPage.equals("Home")) homePage();
+        else if (currentPage.equals("Remote")) remotePage();
         else if (currentPage.equals("Devices")) devicesPage(); else helpPage();
         nav=row(); nav.setPadding(0,dp(8),0,dp(8));
-        for (String page:new String[]{"Remote","Devices","Help"}) {
-            Button b=action(page,()->{currentPage=page;render();},currentPage.equals(page)); weighted(nav,b,48);
+        for (String page:new String[]{"Home","Remote","Devices","Help"}) {
+            boolean active=currentPage.equals(page);
+            LinearLayout tab=column();tab.setGravity(Gravity.CENTER);tab.setPadding(0,dp(7),0,dp(7));
+            tab.setBackground(shape(active?CARD:BG,16));
+            tab.addView(glyph(page.toLowerCase(Locale.ROOT),active?MINT:MUTED,22));gap(tab,4);
+            tab.addView(text(page,11,active?MINT:MUTED,active));
+            tab.setContentDescription(page+" tab"+(active?", selected":""));tab.setFocusable(true);
+            tab.setOnClickListener(v->{currentPage=page;render();});weighted(nav,tab,62);
         }
         root.addView(nav);
         root.requestApplyInsets();
@@ -187,11 +199,58 @@ public final class MainActivity extends Activity {
         if (!body.isEmpty()) { gap(card,8); card.addView(text(body,14,MUTED,false)); }
         content.addView(card,new LinearLayout.LayoutParams(-1,-2));gap(content,14);return card;
     }
+    private void section(String title,String detail) {
+        gap(content,8);content.addView(text(title,19,TEXT,true));
+        if(!detail.isEmpty()){gap(content,4);content.addView(text(detail,13,MUTED,false));}gap(content,12);
+    }
+    private void homePage() {
+        LinearLayout welcome=card("One home. Your remotes.","No Palm account. No subscription. Choose an appliance to begin.");
+        LinearLayout overview=row();
+        TextView count=text(devices.size()+ (devices.size()==1?" saved remote":" saved remotes"),13,MINT,true);
+        overview.addView(count,new LinearLayout.LayoutParams(0,-2,1));
+        TextView local=text("ON THIS PHONE",10,MUTED,true);overview.addView(local);gap(welcome,14);welcome.addView(overview);
+        section("Add a remote","Choose a category, then find and test a matching keyset.");
+        LinearLayout first=row();categoryTile(first,"tv","Television","IR or supported Wi-Fi",MINT);
+        categoryTile(first,"set_top_box","Decoder","Recorded IR controls",LILAC);content.addView(first);
+        LinearLayout second=row();categoryTile(second,"air_conditioner","Air conditioner","Recorded IR settings",0xffffcc97);
+        categoryTile(second,"fan","Fan","Speed, swing & more",0xff9ccfff);content.addView(second);gap(content,14);
+        if(!devices.isEmpty()) {
+            section("Ready when you are","Tap a saved device to open its remote.");
+            for(JSONObject device:devices)savedDeviceCard(device,false);
+        }
+        LinearLayout astro=card("Set up your Astro decoder","Five Astro remotes from Mi Remote’s regional catalogue are included. Test them with your decoder to find a match. Ultra Box, Ulti Box and NJOI model compatibility still needs confirmation on your device.");
+        gap(astro,12);full(astro,action("Set up Astro",()->irSetup("Astro","set_top_box"),true),48);
+        if(!notice.isEmpty())card("Notice",notice);
+    }
+    private void categoryTile(LinearLayout parent,String category,String title,String subtitle,int accent) {
+        LinearLayout tile=column();tile.setPadding(dp(16),dp(18),dp(12),dp(15));tile.setBackground(shape(CARD,23));
+        tile.addView(glyph(category,accent,34));gap(tile,14);tile.addView(text(title,15,TEXT,true));gap(tile,3);
+        tile.addView(text(subtitle,11,MUTED,false));tile.setGravity(Gravity.TOP);
+        tile.setContentDescription("Add "+title+" remote");tile.setFocusable(true);
+        tile.setOnClickListener(v->startCategory(category));
+        weighted(parent,tile,164);
+    }
+    private void savedDeviceCard(JSONObject device,boolean editable) {
+        LinearLayout c=card("","");LinearLayout line=row();
+        String category=device.optString("category","tv");line.addView(glyph(category,MINT,30));
+        LinearLayout labels=column();labels.setPadding(dp(12),0,0,0);
+        labels.addView(text(device.optString("name"),16,TEXT,true));gap(labels,3);
+        labels.addView(text(device.optString("brand")+" · "+connectionLabel(device),12,MUTED,false));
+        line.addView(labels,new LinearLayout.LayoutParams(0,-2,1));line.addView(text("›",28,MINT,false));c.addView(line);
+        c.setContentDescription("Open "+device.optString("name"));c.setFocusable(true);c.setOnClickListener(v->select(device));
+        if(editable) {
+            gap(c,12);LinearLayout actions=row();weighted(actions,action("Open",()->select(device),true),48);
+            weighted(actions,action("Remove",()->new AlertDialog.Builder(this).setTitle("Remove remote?").setMessage(device.optString("name"))
+                .setNegativeButton("Cancel",null).setPositiveButton("Remove",(dialog,which)->{
+                    devices.remove(device);store.delete(device.optString("id"));store.save(devices);
+                    if(selected==device){selected=devices.isEmpty()?null:devices.get(0);connect();}render();}).show(),false),48);c.addView(actions);
+        }
+    }
     private void remotePage() {
         if (selected==null) {
             LinearLayout c=card("TVs, decoders, ACs & fans.","Choose a matching remote from the Mi Remote IR catalogue. No Palm account, subscriptions or ads.");
             gap(c,16); full(c,action("Add your first remote",this::addBrand,true),54);
-            card("The right connection", "Infrared requires a compatible Android phone and a matching Mi Remote keyset. Samsung SmartThings and supported LG webOS Wi-Fi pairing are also available. Astro, NJOI and PRISM+ were not found in this database snapshot.");
+            card("The right connection", "Infrared requires a compatible Android phone and a matching Mi Remote keyset. Five Astro decoder remotes are bundled for testing. Samsung SmartThings and supported LG webOS Wi-Fi pairing are also available. PRISM+ is absent from this snapshot.");
             card("Built for your Android phone", "An APK cannot run on iPhone. Most Android phones also have no IR transmitter; check your phone before choosing infrared.");
             if (!notice.isEmpty()) card("Notice",notice);
             return;
@@ -202,7 +261,7 @@ public final class MainActivity extends Activity {
         statusText=text(status,13,connected?MINT:MUTED,false);gap(device,8);device.addView(statusText);
         statusText.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
         gap(device,10);full(device,action("Switch device  ▾",this::pickDevice,false),44);
-        LinearLayout top=row(); command(top,"⏻  Power","power",true);command(top,"Input","input",false); content.addView(top);
+        LinearLayout top=row(); command(top,"Power","power",true);command(top,"Input","input",false); content.addView(top);
         gap(content,12);
         LinearLayout pad=column(); pad.setPadding(dp(8),dp(8),dp(8),dp(8));pad.setBackground(shape(CARD,28));
         LinearLayout p1=row(); spacer(p1);command(p1,"▲","up",false);spacer(p1);pad.addView(p1);
@@ -336,20 +395,13 @@ public final class MainActivity extends Activity {
     }
     private void devicesPage() {
         card("Your devices",devices.isEmpty()?"Add a TV, decoder, air conditioner or fan. Your device list stays on this phone.":"Saved on this phone. Tap a device to open its remote.");
-        for(JSONObject device:devices) {
-            LinearLayout c=card(device.optString("name"),device.optString("brand")+" · "+connectionLabel(device));
-            LinearLayout actions=row();weighted(actions,action("Open",()->select(device),true),48);
-            weighted(actions,action("Remove",()->new AlertDialog.Builder(this).setTitle("Remove remote?").setMessage(device.optString("name"))
-                .setNegativeButton("Cancel",null).setPositiveButton("Remove",(dialog,which)->{
-                    devices.remove(device);store.delete(device.optString("id"));store.save(devices);
-                    if(selected==device){selected=devices.isEmpty()?null:devices.get(0);connect();}render();}).show(),false),48);c.addView(actions);
-        }
+        for(JSONObject device:devices)savedDeviceCard(device,true);
         full(content,action("+ Add a remote",this::addBrand,true),54);gap(content,12);
     }
     private void helpPage() {
-        card("Mi Remote infrared catalogue", "All bundled IR signals come from the JSON database published by github.com/ysard/mi_remote_database. Previous bundled IR datasets, user-imported profiles and generated AC protocols are removed. There is no profile-import step. No Palm account, subscriptions, advertisements or analytics.");
+        card("Mi Remote infrared catalogue", "Bundled IR signals come from github.com/ysard/mi_remote_database and five Astro keysets retrieved from Mi Remote’s regional catalogue. They are built into this app and work offline. There is no profile-import step. No Palm account, subscriptions, advertisements or analytics.");
         if(infrared!=null)card("Available remote keysets",infrared.profileCount()+" keysets across televisions, set-top boxes, air conditioners and fans. Search by the database brand, then try a recorded remote on your appliance. Source keyset IDs are not retail model numbers; a brand match alone does not establish compatibility.");
-        card("Astro, NJOI and PRISM+", "These names were not found in the bundled Mi Remote snapshot. The previous unverified Astro codes have been removed. This build does not provide an Astro Ultra Box / Ulti Box profile. A decoder profile from another brand must not be assumed compatible.");
+        card("Astro decoder setup", "Use Set up Astro on Home, then Find a working remote. Five actual Astro keysets are available. Test several buttons and confirm the decoder responds before saving. The source does not identify Ultra Box, Ulti Box or NJOI models, so those matches require testing. The earlier unverified Astro codes remain removed. PRISM+ is absent from the catalogue.");
         card("Recorded buttons", "Every remote shows the actual decoded command labels from its source JSON. Only those captured signals are available. The app does not invent missing buttons or generate arbitrary temperatures, modes or fan speeds. Some source files cannot be decoded and are excluded.");
         card("Air conditioners and fans", "A recorded AC command may change several settings at once. Labels describe the source capture, not readings from the appliance. Choose the matching keyset and test each command. The app cannot read or synchronize appliance state.");
         card("Samsung", "Use the published SmartThings API with an existing Samsung account and a token permitted to read devices and execute commands. Only capabilities exposed by your TV are enabled. Power-on depends on TV network settings.");
@@ -362,13 +414,15 @@ public final class MainActivity extends Activity {
         String[] labels={"Television","Set-top box / decoder","Air conditioner","Fan"};
         String[] categories={"tv","set_top_box","air_conditioner","fan"};
         new AlertDialog.Builder(this).setTitle("Add a device").setItems(labels,(dialog,index)->{
-            String category=categories[index];
-            if(category.equals("set_top_box")) {
-                new AlertDialog.Builder(this).setTitle("Mi Remote decoder catalogue")
-                    .setMessage("Astro and NJOI were not found in this database snapshot. Browse the listed brands for a matching remote; no Astro profile is bundled.")
-                    .setPositiveButton("Browse brands",(d,w)->categoryBrands(category)).setNegativeButton("Cancel",null).show();
-            }else categoryBrands(category);
+            startCategory(categories[index]);
         }).setNegativeButton("Cancel",null).show();
+    }
+    private void startCategory(String category) {
+        if(category.equals("set_top_box")) {
+            new AlertDialog.Builder(this).setTitle("Mi Remote decoder catalogue")
+                .setMessage("Five Astro keysets are bundled for testing, with no JSON import needed. Choose Astro, then Find a working remote. Ultra Box, Ulti Box and NJOI model matches require confirmation on your decoder.")
+                .setPositiveButton("Browse brands",(d,w)->categoryBrands(category)).setNegativeButton("Cancel",null).show();
+        }else categoryBrands(category);
     }
     private String categoryLabel(String category) {
         switch(category){case "set_top_box":return "Decoder";case "air_conditioner":return "Air-conditioner";case "fan":return "Fan";default:return "TV";}
@@ -424,32 +478,96 @@ public final class MainActivity extends Activity {
             card("Remote unavailable",infrared==null?"The Mi Remote catalogue is loading…":"Add this remote again from the Mi Remote catalogue.");
         }else {
             String category=profile.optString("category","tv");
-            String guidance="Signals and button labels come from the Mi Remote JSON keyset. Aim the phone's IR emitter at the appliance. Sending cannot confirm a response; exact model compatibility is untested.";
-            if(category.equals("air_conditioner"))guidance+=" Each recorded AC command may change several settings at once. Arbitrary temperature or mode generation is unavailable.";
-            card("Recorded "+categoryLabel(category).toLowerCase(Locale.ROOT)+" commands",guidance);
-            content.addView(text("Source keyset: "+profile.optString("model",profile.optString("id")),12,MUTED,false));gap(content,10);
             JSONObject commands=profile.optJSONObject("commands");
             if(commands==null)card("Signals",irProfileError.isEmpty()?"Loading this keyset’s recorded signals…":irProfileError);
             else {
                 List<String> keys=new ArrayList<>();Iterator<String> names=commands.keys();while(names.hasNext())keys.add(names.next());
-                // Stable source-key ordering retains every actual command, including uncommon controls.
-                Collections.sort(keys);
-                LinearLayout line=null;
-                for(int index=0;index<keys.size();index++) {
-                    if(index%2==0){line=row();content.addView(line,new LinearLayout.LayoutParams(-1,-2));}
-                    String code=keys.get(index);JSONObject signal=commands.optJSONObject(code);
-                    String label=signal==null?code:signal.optString("label",signal.optString("sourceKey",code));
-                    Button button=key(label,code,false);button.setMinHeight(dp(64));button.setMinimumHeight(dp(64));
-                    button.setPadding(dp(8),dp(10),dp(8),dp(10));
-                    LinearLayout.LayoutParams params=new LinearLayout.LayoutParams(0,-2,1);params.setMargins(dp(4),dp(4),dp(4),dp(4));line.addView(button,params);
+                Collections.sort(keys);RecordedControls controls=new RecordedControls(keys);
+                String guidance="Aim the phone at your appliance. IR sent means the phone transmitted; confirm the appliance responds.";
+                if(category.equals("air_conditioner"))guidance+=" Each captured setting may change several AC settings at once.";
+                content.addView(text(guidance,12,MUTED,false));gap(content,12);
+                recordedRow(controls,new String[]{"power","input"},new String[]{"Power","Input"},"power");
+                boolean navigation=false;for(String role:new String[]{"up","down","left","right","ok"})if(controls.key(role)!=null)navigation=true;
+                if(navigation) {
+                    gap(content,10);LinearLayout pad=column();pad.setPadding(dp(12),dp(12),dp(12),dp(12));pad.setBackground(shape(CARD,32));
+                    recordedPadRow(pad,controls,new String[]{null,"up",null},new String[]{"","▲",""});
+                    recordedPadRow(pad,controls,new String[]{"left","ok","right"},new String[]{"◀","OK","▶"});
+                    recordedPadRow(pad,controls,new String[]{null,"down",null},new String[]{"","▼",""});
+                    content.addView(pad);gap(content,8);
                 }
-                if(keys.size()%2==1)line.addView(new View(this),new LinearLayout.LayoutParams(0,1,1));
+                recordedRow(controls,new String[]{"back","home","menu"},new String[]{"Back","Home","Menu"},"");
+                if(controls.key("volume_up")!=null||controls.key("volume_down")!=null||controls.key("channel_up")!=null||controls.key("channel_down")!=null) {
+                    gap(content,10);LinearLayout adjustments=row();
+                    recordedRocker(adjustments,controls,"VOLUME","volume_up","volume_down");
+                    recordedRocker(adjustments,controls,"CHANNEL","channel_up","channel_down");
+                    content.addView(adjustments);
+                }
+                if(controls.key("temperature_up")!=null||controls.key("temperature_down")!=null) {
+                    gap(content,10);content.addView(text("RECORDED TEMPERATURE CONTROLS",11,MUTED,true));gap(content,6);
+                    recordedRow(controls,new String[]{"temperature_down","temperature_up"},new String[]{"Temperature −","Temperature +"},"");
+                }
+                recordedRow(controls,new String[]{"mute","guide","info"},new String[]{"Mute","Guide","Info"},"");
+                recordedRow(controls,new String[]{"mode","fan_speed","timer"},new String[]{"Mode","Fan speed","Timer"},"");
+                gap(content,12);
+                if(!controls.digits().isEmpty()) {
+                    full(content,action("123  Number pad",()->showRecordedCommands("Number pad",controls.digits(),commands),false),54);gap(content,8);
+                }
+                if(!controls.remaining.isEmpty()) {
+                    full(content,action("More commands  ·  "+controls.remaining.size(),()->showRecordedCommands("More recorded commands",controls.remaining,commands),false),54);gap(content,8);
+                }
+                full(content,action("All recorded buttons  ·  "+keys.size(),()->showRecordedCommands("All recorded buttons",keys,commands),false),48);
+                gap(content,14);content.addView(text("Source keyset: "+profile.optString("model",profile.optString("id")),11,MUTED,false));
                 if(keys.isEmpty())card("No decoded buttons","This keyset has no available commands. Choose another matching keyset.");
             }
         }
         gap(content,14);full(content,action("Reload remote",this::connect,false),48);
         if(!notice.isEmpty()){gap(content,10);content.addView(text(notice,13,MUTED,false));}
         refreshButtons();
+    }
+    private Button recordedKey(String label,String sourceKey,boolean primary) {
+        Button button=key(label,sourceKey,primary);
+        button.setContentDescription(label+", recorded source key "+sourceKey);return button;
+    }
+    private void recordedRow(RecordedControls controls,String[] roles,String[] labels,String primary) {
+        LinearLayout line=row();int count=0;
+        for(int i=0;i<roles.length;i++) {
+            String code=controls.key(roles[i]);if(code==null)continue;
+            weighted(line,recordedKey(labels[i],code,roles[i].equals(primary)),58);count++;
+        }
+        if(count>0)content.addView(line);
+    }
+    private void recordedPadRow(LinearLayout pad,RecordedControls controls,String[] roles,String[] labels) {
+        LinearLayout line=row();
+        for(int i=0;i<roles.length;i++) {
+            String code=roles[i]==null?null:controls.key(roles[i]);
+            if(code==null)spacer(line);else weighted(line,recordedKey(labels[i],code,"ok".equals(roles[i])),64);
+        }
+        pad.addView(line);
+    }
+    private void recordedRocker(LinearLayout parent,RecordedControls controls,String heading,String plus,String minus) {
+        if(controls.key(plus)==null&&controls.key(minus)==null)return;
+        LinearLayout rocker=column();rocker.setGravity(Gravity.CENTER);rocker.setPadding(dp(8),dp(12),dp(8),dp(8));rocker.setBackground(shape(CARD,24));
+        TextView title=text(heading,11,MUTED,true);title.setGravity(Gravity.CENTER);rocker.addView(title);gap(rocker,8);
+        if(controls.key(plus)!=null){Button button=recordedKey("+",controls.key(plus),false);button.setContentDescription(heading.equals("VOLUME")?"Volume up":"Channel up");full(rocker,button,54);}
+        gap(rocker,4);if(controls.key(minus)!=null){Button button=recordedKey("−",controls.key(minus),false);button.setContentDescription(heading.equals("VOLUME")?"Volume down":"Channel down");full(rocker,button,54);}
+        weighted(parent,rocker,158);
+    }
+    private void showRecordedCommands(String title,List<String> codes,JSONObject commands) {
+        LinearLayout body=column();body.setPadding(dp(16),0,dp(16),dp(12));
+        TextView note=text("Only recorded source signals are shown. A transmission does not confirm an appliance response.",12,MUTED,false);body.addView(note);gap(body,10);
+        ScrollView scroll=new ScrollView(this);LinearLayout grid=column();scroll.addView(grid);body.addView(scroll,new LinearLayout.LayoutParams(-1,dp(350)));
+        List<View> transientButtons=new ArrayList<>();LinearLayout line=null;
+        for(int i=0;i<codes.size();i++) {
+            if(i%2==0){line=row();grid.addView(line);}
+            String code=codes.get(i);JSONObject signal=commands.optJSONObject(code);
+            String label=signal==null?code:signal.optString("label",code);
+            Button button=recordedKey(label,code,false);button.setSingleLine(false);button.setPadding(dp(8),dp(10),dp(8),dp(10));
+            LinearLayout.LayoutParams params=new LinearLayout.LayoutParams(0,-2,1);params.setMargins(dp(3),dp(3),dp(3),dp(3));
+            line.addView(button,params);transientButtons.add(button);
+        }
+        if(codes.size()%2==1)line.addView(new View(this),new LinearLayout.LayoutParams(0,1,1));
+        AlertDialog dialog=new AlertDialog.Builder(this).setTitle(title).setView(body).setPositiveButton("Done",null).create();
+        dialog.setOnDismissListener(d->{for(View button:transientButtons)commandButtons.remove(button);});dialog.show();refreshButtons();
     }
     private String commandLabel(JSONObject device,String command) {
         JSONObject profile=infrared==null?null:infrared.find(device.optString("profile"));
@@ -471,11 +589,13 @@ public final class MainActivity extends Activity {
         if(infrared==null){message("IR catalogue is unavailable.");return;}
         List<Choice> options=new ArrayList<>();
         List<JSONObject> profiles=infrared.forBrand(brand,category);
+        if(!profiles.isEmpty())options.add(new Choice("Find a working remote · Guided testing",()->matchIrProfiles(brand,profiles)));
         for(int index=0;index<profiles.size();index++) {
             JSONObject profile=profiles.get(index);
             final String remoteName="Remote "+(index+1);
             String label=remoteName;
             if(profile.has("commandCount"))label+=" · "+profile.optInt("commandCount")+" recorded buttons";
+            if(brand.equalsIgnoreCase("Astro"))label+=" · "+profile.optString("model");
             options.add(new Choice(label,()->{
                 if(!irHardware.hasEmitter) {
                     new AlertDialog.Builder(this).setTitle(irHardware.title)
@@ -486,6 +606,95 @@ public final class MainActivity extends Activity {
         }
         if(options.isEmpty()){message("No decoded Mi Remote keysets are available for this brand and category.");return;}
         choices(brand+" · Mi Remote keyset",options);
+    }
+    private void matchIrProfiles(String brand,List<JSONObject> profiles) {
+        final IrCatalog catalogue=infrared;
+        if(catalogue==null||profiles.isEmpty())return;
+        LinearLayout body=column();body.setPadding(dp(20),dp(8),dp(20),dp(12));
+        TextView position=text("",17,TEXT,true);body.addView(position);gap(body,8);
+        TextView explanation=text("Test one recorded button while aiming at the appliance. A keyset is a source capture, not a verified model match. Save only the remote you choose.",13,MUTED,false);
+        body.addView(explanation);gap(body,12);
+        Spinner command=new Spinner(this);body.addView(command,new LinearLayout.LayoutParams(-1,dp(52)));
+        TextView result=text("Loading signals…",13,MUTED,false);result.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
+        gap(body,8);body.addView(result);gap(body,12);
+        Button test=action("Send test signal",()->{},true);full(body,test,54);gap(body,12);
+        LinearLayout paging=row();Button previous=action("Previous",()->{},false),next=action("Next remote",()->{},false);
+        weighted(paging,previous,48);weighted(paging,next,48);body.addView(paging);
+        AlertDialog dialog=new AlertDialog.Builder(this).setTitle(brand+" · Find your remote").setView(body)
+            .setNegativeButton("Close",null).setPositiveButton("Use this remote",null).create();
+        final int[] current={0};final boolean[] sending={false},signalSent={false};
+        final List<String> codes=new ArrayList<>();
+        final java.util.concurrent.atomic.AtomicInteger request=new java.util.concurrent.atomic.AtomicInteger();
+        final java.util.concurrent.atomic.AtomicBoolean active=new java.util.concurrent.atomic.AtomicBoolean(true);
+        Runnable[] load=new Runnable[1];
+        load[0]=()->{
+            int token=request.incrementAndGet();JSONObject metadata=profiles.get(current[0]);signalSent[0]=false;
+            position.setText("Remote "+(current[0]+1)+" of "+profiles.size()+
+                (brand.equalsIgnoreCase("Astro")?" · "+metadata.optString("model"):""));
+            result.setText("Loading recorded signals…");test.setEnabled(false);command.setEnabled(false);
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
+            previous.setEnabled(current[0]>0);next.setEnabled(current[0]<profiles.size()-1);codes.clear();
+            worker.execute(()->{
+                try {
+                    if(!active.get()||token!=request.get())return;
+                    JSONObject loaded=catalogue.loadProfile(metadata.optString("id"));
+                    JSONObject signals=loaded.getJSONObject("commands");
+                    List<String> found=new ArrayList<>();Iterator<String> keys=signals.keys();while(keys.hasNext())found.add(keys.next());Collections.sort(found);
+                    List<String> labels=new ArrayList<>();for(String code:found)labels.add(signals.getJSONObject(code).optString("label",code));
+                    RecordedControls controls=new RecordedControls(found);String preferred=controls.key("power");if(preferred==null)preferred=controls.key("mute");
+                    final int initial=preferred==null?0:found.indexOf(preferred);
+                    ui(()->{
+                        if(!active.get()||token!=request.get())return;
+                        codes.addAll(found);ArrayAdapter<String> adapter=new ArrayAdapter<>(this,android.R.layout.simple_spinner_item,labels);
+                        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);command.setAdapter(adapter);
+                        if(!codes.isEmpty())command.setSelection(initial);
+                        command.setEnabled(!codes.isEmpty());test.setEnabled(irHardware.hasEmitter&&!codes.isEmpty());
+                        result.setText(irHardware.hasEmitter?"Choose a recorded button. Tap Send test signal, then check the appliance yourself.":irHardware.title+". You can browse here. To save without testing, choose a remote from the keyset list.");
+                    });
+                }catch(Exception error){ui(()->{if(active.get()&&token==request.get())result.setText("Could not load this keyset: "+error.getMessage());});}
+            });
+        };
+        previous.setOnClickListener(v->{if(!sending[0]&&current[0]>0){current[0]--;load[0].run();}});
+        next.setOnClickListener(v->{if(!sending[0]&&current[0]<profiles.size()-1){current[0]++;load[0].run();}});
+        test.setOnClickListener(v->{
+            if(sending[0]||!irHardware.hasEmitter||codes.isEmpty())return;
+            int selection=command.getSelectedItemPosition();if(selection<0||selection>=codes.size())return;
+            String sourceKey=codes.get(selection);JSONObject metadata=profiles.get(current[0]);int token=request.get();
+            sending[0]=true;test.setEnabled(false);previous.setEnabled(false);next.setEnabled(false);command.setEnabled(false);
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);result.setText("Sending one recorded signal…");
+            worker.execute(()->{
+                String outcome;boolean accepted=false;
+                try {
+                    if(!active.get())return;
+                    catalogue.transmit(metadata.optString("id"),sourceKey);
+                    accepted=true;
+                    outcome="IR sent. Did the appliance respond? Try another button to check, or choose the next remote. Palm cannot detect the response.";
+                }catch(Exception error){outcome="Signal could not be sent: "+error.getMessage();}
+                final String text=outcome;final boolean transmitted=accepted;ui(()->{
+                    if(!active.get()||token!=request.get())return;
+                    sending[0]=false;signalSent[0]|=transmitted;result.setText(text);test.setEnabled(irHardware.hasEmitter);command.setEnabled(true);
+                    previous.setEnabled(current[0]>0);next.setEnabled(current[0]<profiles.size()-1);
+                    dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(signalSent[0]);
+                });
+            });
+        });
+        dialog.setOnDismissListener(d->{
+            active.set(false);request.incrementAndGet();
+            // Browsing keysets shares the bounded cache with the selected remote. Restore it
+            // after queued wizard reads finish; connect() retains the device-generation guard.
+            final JSONObject originalSelection=selected;
+            if(!destroyed)worker.execute(()->ui(()->{
+                if(catalogue==infrared&&selected==originalSelection&&selectedUsesIr()&&!catalogue.isLoaded(selected.optString("profile")))connect();
+            }));
+        });
+        dialog.setOnShowListener(d->{
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v->{
+                if(sending[0]||!signalSent[0])return;JSONObject chosen=profiles.get(current[0]);String name="Remote "+(current[0]+1);
+                new AlertDialog.Builder(this).setTitle("Did your appliance respond?")
+                    .setMessage("Save this keyset only if the appliance responded correctly to your test. Palm cannot detect that response. Other buttons may still need testing.")
+                    .setNegativeButton("Keep testing",null).setPositiveButton("Yes, save remote",(confirm,which)->{dialog.dismiss();saveIr(brand,chosen,name);}).show();
+            });load[0].run();
+        });dialog.show();
     }
     private void saveIr(String brand,JSONObject profile,String remoteName) {
         try {

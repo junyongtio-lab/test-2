@@ -10,7 +10,9 @@ public final class CatalogInstrumentation extends Instrumentation {
     @Override public void onStart() {
         Bundle result=new Bundle();
         try {
-            int checks=CatalogDeviceChecks.run(getTargetContext());
+            int checks=CatalogDeviceChecks.run(getTargetContext(), message -> {
+                Bundle progress=new Bundle();progress.putString("stream",message + "\n");sendStatus(0,progress);
+            });
             result.putInt("catalogChecks",checks);
             result.putString("stream","PASS "+checks+" Android Mi catalogue/hardware checks\n");
             finish(Activity.RESULT_OK,result);

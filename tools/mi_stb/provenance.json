@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "origin": "https://sg-urc.io.mi.com",
+  "purpose": "Independent interoperability research using anonymous public JSON responses identified in user-supplied Mi Remote 7.2.4M",
+  "sourceApkSha256": "4c20655f2b636d86152202994da2a1b88f4ebf5bddf58b7ef6c2bf8e42fa5c73",
+  "brand": {
+    "name": "Astro",
+    "id": 3833,
+    "deviceId": 2,
+    "country": "MY"
+  },
+  "retrieval": {
+    "method": "GET",
+    "userAgent": "PalmRemoteResearch/1.0 (independent interoperability research)",
+    "accountOrCredentialsUsed": false,
+    "tlsVerification": true,
+    "proxyPreserved": true
+  },
+  "physicalCompatibilityVerified": false,
+  "modelIdentityLimit": "Service identifiers are keysets, not verified retail-model names; no Ultra Box or Ulti Box model label was returned.",
+  "dataRights": "Source data is attributed to the Xiaomi/Kookong remote service and is not relicensed under Palm Remote code licenses. No additional rights, endorsement or manufacturer certification are asserted.",
+  "responses": [
+    {
+      "file": "source/brands_my.json",
+      "sha256": "ad3fcd077c80bcad07c8847d8a763c955da0c59ae79deb8e2e96178fdd8a7ba5",
+      "bytes": 215689,
+      "requestUrl": "https://sg-urc.io.mi.com/app/public/get_stb_brand?data=%7B%22country%22%3A%22MY%22%7D",
+      "retrievedAtUtc": "2026-10-19T13:14:30.381725+00:00",
+      "httpStatus": 200,
+      "contentType": "text/plain; charset=utf-8"
+    },
+    {
+      "file": "source/astro_matches_my.json",
+      "sha256": "e1e45e478d5310f45cb17d3d6cc6035d372b8af8f4e8fee39898f928350d268e",
+      "bytes": 1911,
+      "requestUrl": "https://sg-urc.io.mi.com/app/public/get_stb_match?data=%7B%22country%22%3A%22MY%22%2C%22brandid%22%3A3833%7D",
+      "retrievedAtUtc": "2026-10-19T13:14:55.001057+00:00",
+      "httpStatus": 200,
+      "contentType": "text/plain; charset=utf-8"
+    },
+    {
+      "file": "source/keyset_kk_2_3833_536.json",
+      "sha256": "079c3fc37ed7abb074f129b78f75f31e7fe836f6d5fd52f8dc58e6a3bad5c3b5",
+      "bytes": 6942,
+      "requestUrl": "https://sg-urc.io.mi.com/app/public/get_stb_keyset?data=%7B%22id%22%3A%22kk_2_3833_536%22%7D",
+      "retrievedAtUtc": "2026-10-19T13:15:10.409534+00:00",
+      "httpStatus": 200,
+      "contentType": "text/plain; charset=utf-8"
+    },
+    {
+      "file": "source/keyset_kk_2_3833_1819.json",
+      "sha256": "453c28d82c8731fe68c99ad86804652825d96a0b832b3e7f8d5a077b68c01daa",
+      "bytes": 4631,
+      "requestUrl": "https://sg-urc.io.mi.com/app/public/get_stb_keyset?data=%7B%22id%22%3A%22kk_2_3833_1819%22%7D",
+      "retrievedAtUtc": "2026-10-19T13:15:10.413555+00:00",
+      "httpStatus": 200,
+      "contentType": "text/plain; charset=utf-8"
+    },
+    {
+      "file": "source/keyset_kk_2_3833_350.json",
+      "sha256": "d47b2fb9b017f841b496b72bb21e84f0ac471b0386a6d5af6e4bd1dbc7252361",
+      "bytes": 7258,
+      "requestUrl": "https://sg-urc.io.mi.com/app/public/get_stb_keyset?data=%7B%22id%22%3A%22kk_2_3833_350%22%7D",
+      "retrievedAtUtc": "2026-10-19T13:15:10.416177+00:00",
+      "httpStatus": 200,
+      "contentType": "text/plain; charset=utf-8"
+    },
+    {
+      "file": "source/keyset_kk_2_3833_211.json",
+      "sha256": "dab3c068578abca2e0c33806e12ddb1e6d418908a3eec3e24e9dd071f5187a92",
+      "bytes": 3415,
+      "requestUrl": "https://sg-urc.io.mi.com/app/public/get_stb_keyset?data=%7B%22id%22%3A%22kk_2_3833_211%22%7D",
+      "retrievedAtUtc": "2026-10-19T13:15:10.462287+00:00",
+      "httpStatus": 200,
+      "contentType": "text/plain; charset=utf-8"
+    },
+    {
+      "file": "source/keyset_kk_2_3833_2160.json",
+      "sha256": "59716adc2a0d56abede4b8fe4bc7e1afbadce8df00ae1d8c805cad10f2c9ead6",
+      "bytes": 1872,
+      "requestUrl": "https://sg-urc.io.mi.com/app/public/get_stb_keyset?data=%7B%22id%22%3A%22kk_2_3833_2160%22%7D",
+      "retrievedAtUtc": "2026-10-19T13:15:10.393478+00:00",
+      "httpStatus": 200,
+      "contentType": "text/plain; charset=utf-8"
+    }
+  ]
+}

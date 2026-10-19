@@ -1,0 +1,2 @@
+# Optional static local-IR inspection only; not an Android app dependency.
+pycryptodome==3.23.0

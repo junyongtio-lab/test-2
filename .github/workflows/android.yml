@@ -26,6 +26,12 @@ jobs:
           python3 -m pip install -r tools/mi_catalogue/requirements.txt
           python3 tools/mi_catalogue/generate.py --check
           python3 -m unittest discover -s tools/mi_catalogue -p 'test_*.py' -v
+      - name: Verify static APK research tools
+        run: python3 -m unittest discover -s tools/apk_inspection -p 'test_*.py' -v
+      - name: Verify bundled Astro keysets
+        run: |
+          python3 tools/mi_stb/generate_stb.py --check
+          python3 -m unittest discover -s tools/mi_stb -p 'test_*.py' -v
       - uses: actions/upload-artifact@v4
         with:
           name: PalmRemote-Android-APK

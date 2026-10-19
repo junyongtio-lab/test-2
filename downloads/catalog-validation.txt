@@ -1,4 +1,34 @@
-INSTRUMENTATION_RESULT: catalogChecks=23
-INSTRUMENTATION_RESULT: stream=PASS 23 Android Mi catalogue/hardware checks
+INSTRUMENTATION_STATUS: stream=Loading packaged catalogue
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=Catalogue metadata loaded
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=Checking recorded tv signals
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=Checking recorded set_top_box signals
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=Checking recorded air_conditioner signals
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=Checking recorded fan signals
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=Checking bundled online Astro keysets
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=Checking Android IR service
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=Checking Keystore credential migration
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=Catalogue and credential migration complete
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_RESULT: catalogChecks=25
+INSTRUMENTATION_RESULT: stream=PASS 25 Android Mi catalogue/hardware checks
 
 INSTRUMENTATION_CODE: -1

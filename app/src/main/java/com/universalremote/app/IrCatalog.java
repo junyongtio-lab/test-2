@@ -18,32 +18,53 @@ import java.util.TreeSet;
 /** A small metadata index and an eight-profile cache of the bundled Mi JSON signals. */
 final class IrCatalog {
     static final String SOURCE_URL = "https://github.com/ysard/mi_remote_database";
+    static final String STB_SOURCE_URL = "https://sg-urc.io.mi.com";
     static final int PROFILE_LIMIT = 512 * 1024;
     private static final int INDEX_LIMIT = 16 * 1024 * 1024, CACHE_SIZE = 8;
     interface AssetReader { InputStream open(String asset) throws Exception; }
+    interface Emitter extends IrHardware.Probe { void transmit(int frequency,int[] pattern); }
     private final Map<String, JSONObject> profiles = new LinkedHashMap<>();
     private final LinkedHashMap<String, JSONObject> cache = new LinkedHashMap<>(CACHE_SIZE, .75f, true);
     private final ConsumerIrManager ir;
     private final AssetReader assets;
     private final JSONObject coverage;
+    private final RecordedSignalSender recordedSender = new RecordedSignalSender();
 
     IrCatalog(Context context) throws Exception {
-        this(readIndex(context), asset -> context.getAssets().open(asset),
+        this(readIndex(context, "ir/mi/index.json"), readIndex(context, "ir/mi_stb/index.json"),
+            asset -> context.getAssets().open(asset),
             (ConsumerIrManager) context.getSystemService(Context.CONSUMER_IR_SERVICE));
-        // Only remove the superseded import value after the replacement index validates.
+        // Only remove the superseded import value after both replacement indexes validate.
         context.getSharedPreferences("ir_imports", Context.MODE_PRIVATE).edit().remove("custom").apply();
     }
-    IrCatalog(JSONObject index, AssetReader assets) throws Exception { this(index, assets, null); }
-    private IrCatalog(JSONObject index, AssetReader assets, ConsumerIrManager ir) throws Exception {
+    IrCatalog(JSONObject index, AssetReader assets) throws Exception { this(index, null, assets, null); }
+    IrCatalog(JSONObject index, JSONObject supplement, AssetReader assets) throws Exception {
+        this(index, supplement, assets, null);
+    }
+    private IrCatalog(JSONObject index, JSONObject supplement, AssetReader assets, ConsumerIrManager ir) throws Exception {
+        addIndex(index, false);
+        this.coverage = new JSONObject(index.getJSONObject("coverage").toString());
+        if(supplement != null) {
+            addIndex(supplement, true);
+            mergeCoverage();
+        }
+        this.assets = assets;
+        this.ir = ir;
+    }
+    private void addIndex(JSONObject index, boolean supplemental) throws Exception {
         if(index.getDouble("schemaVersion") != 2) throw new IllegalArgumentException("Unsupported Mi catalogue version.");
-        checkSource(index.getJSONObject("source"));
+        if(supplemental) checkStbSource(index.getJSONObject("source"));
+        else checkSource(index.getJSONObject("source"));
         JSONArray array = index.getJSONArray("profiles");
-        if(array.length() == 0 || array.length() > 50000) throw new IllegalArgumentException("Invalid Mi catalogue size.");
+        if(array.length() == 0 || array.length() > (supplemental ? 64 : 50000))
+            throw new IllegalArgumentException("Invalid Mi catalogue size.");
+        Set<String> supplementalModels = new java.util.HashSet<>();
         for(int i = 0; i < array.length(); i++) {
             JSONObject profile = array.getJSONObject(i);
             String id = profile.getString("id");
             if(!id.matches("mi_[a-f0-9]{8,64}") || profiles.containsKey(id)) throw new IllegalArgumentException("Invalid or duplicate Mi profile ID.");
-            if(!profile.getString("asset").equals("ir/mi/profiles/" + id + ".json")) throw new IllegalArgumentException("Invalid Mi profile asset path.");
+            String directory = supplemental ? "ir/mi_stb/profiles/" : "ir/mi/profiles/";
+            if(!profile.getString("asset").equals(directory + id + ".json")) throw new IllegalArgumentException("Invalid Mi profile asset path.");
             if(!profile.getString("assetSha256").matches("[a-f0-9]{64}")) throw new IllegalArgumentException("Invalid Mi signal asset digest.");
             String category = profile.getString("category");
             if(!category.equals("tv") && !category.equals("set_top_box") && !category.equals("air_conditioner") && !category.equals("fan"))
@@ -59,16 +80,62 @@ final class IrCatalog {
             checkedText(source.getString("brandFile"), 240, "brand file");
             checkedText(source.getString("modelId"), 240, "source model");
             if(!source.getString("sourceSha256").matches("[a-f0-9]{64}")) throw new IllegalArgumentException("Invalid Mi source digest.");
+            if(supplemental) {
+                String model = source.getString("modelId");
+                if(!category.equals("set_top_box") || !profile.getString("brand").equals("Astro")
+                    || !Boolean.FALSE.equals(profile.get("hardwareTested"))
+                    || !(source.get("brandId") instanceof Number) || source.getDouble("brandId") != 3833 || !model.matches("kk_2_3833_[0-9]{1,12}")
+                    || !supplementalModels.add(model)
+                    || !profile.getString("model").equals(model)
+                    || !source.getString("url").equals(STB_SOURCE_URL + "/app/public/get_stb_keyset")
+                    || !source.getString("sourceFile").equals("tools/mi_stb/source/keyset_" + model + ".json")
+                    || !source.getString("brandFile").equals("tools/mi_stb/source/brands_my.json"))
+                    throw new IllegalArgumentException("Invalid Mi online Astro provenance.");
+            }
             profiles.put(id, profile);
         }
-        this.coverage = index.getJSONObject("coverage");
-        this.assets = assets;
-        this.ir = ir;
     }
-    private static JSONObject readIndex(Context context) throws Exception {
-        try(InputStream in = context.getAssets().open("ir/mi/index.json")) {
+    private void mergeCoverage() throws Exception {
+        Set<String> allBrands = new java.util.HashSet<>();
+        Map<String, Set<String>> categoryBrands = new LinkedHashMap<>();
+        JSONObject categories = new JSONObject();int commands = 0;
+        for(JSONObject profile : profiles.values()) {
+            String category = profile.getString("category"), brand = profile.getString("brand");
+            allBrands.add(brand);
+            Set<String> names = categoryBrands.get(category);
+            if(names == null) { names = new java.util.HashSet<>(); categoryBrands.put(category, names); }
+            names.add(brand);
+            JSONObject counts = categories.optJSONObject(category);
+            if(counts == null) { counts = new JSONObject(); categories.put(category, counts); }
+            counts.put("profiles", counts.optInt("profiles") + 1);
+            counts.put("commands", counts.optInt("commands") + profile.getInt("commandCount"));
+            counts.put("brands", names.size());
+            commands += profile.getInt("commandCount");
+        }
+        coverage.put("profiles", profiles.size()).put("commands", commands)
+            .put("brands", allBrands.size()).put("categories", categories);
+        JSONArray absent = coverage.optJSONArray("requestedBrandsAbsent");
+        if(absent != null) {
+            JSONArray remaining = new JSONArray();
+            for(int i = 0; i < absent.length(); i++) {
+                String requested = absent.getString(i);boolean found = false;
+                for(String brand : allBrands) if(brand.equalsIgnoreCase(requested)) { found = true; break; }
+                if(!found) remaining.put(requested);
+            }
+            coverage.put("requestedBrandsAbsent", remaining);
+        }
+    }
+    private static JSONObject readIndex(Context context, String path) throws Exception {
+        try(InputStream in = context.getAssets().open(path)) {
             return new JSONObject(readBounded(in, INDEX_LIMIT));
         }
+    }
+    private static void checkStbSource(JSONObject source) throws Exception {
+        if(!source.getString("repository").equals(STB_SOURCE_URL)
+            || !source.getString("origin").equals(STB_SOURCE_URL)
+            || !source.getString("kind").equals("mi-stb-public-api")
+            || !source.getString("country").equals("MY"))
+            throw new IllegalArgumentException("Unsupported Mi online catalogue source.");
     }
     private static void checkSource(JSONObject source) throws Exception {
         String url = source.optString("url", source.optString("repository"));
@@ -152,21 +219,39 @@ final class IrCatalog {
     }
     void transmit(String profileId, String command) throws Exception {
         if(!hasEmitter()) throw new IllegalStateException("This phone has no infrared transmitter. An IR-equipped Android phone is required.");
-        JSONObject code = loadProfile(profileId).getJSONObject("commands").optJSONObject(command);
-        if(code == null) throw new IllegalArgumentException("This Mi remote profile does not include that button.");
-        transmitSignal(code.getInt("carrierHz"), checkedPattern(code));
+        JSONObject commands = loadProfile(profileId).getJSONObject("commands");
+        recordedSender.send(profileId, command, commands, this::transmitSignal);
     }
     void transmitSignal(int frequency, int[] pattern) throws Exception {
-        if(!hasEmitter()) throw new IllegalStateException("This phone has no infrared transmitter. An IR-equipped Android phone is required.");
+        transmitSignal(ir==null?null:new Emitter() {
+            @Override public boolean hasEmitter(){return ir.hasIrEmitter();}
+            @Override public int[][] carrierRanges(){
+                ConsumerIrManager.CarrierFrequencyRange[] ranges=ir.getCarrierFrequencies();
+                if(ranges==null)return null;
+                int[][] values=new int[ranges.length][];
+                for(int i=0;i<ranges.length;i++)if(ranges[i]!=null)values[i]=new int[]{ranges[i].getMinFrequency(),ranges[i].getMaxFrequency()};
+                return values;
+            }
+            @Override public void transmit(int carrier,int[] timings){ir.transmit(carrier,timings);}
+        },frequency,pattern);
+    }
+    static void transmitSignal(Emitter emitter,int frequency,int[] pattern) {
+        if(emitter==null||!emitter.hasEmitter()) throw new IllegalStateException("This phone has no infrared transmitter. An IR-equipped Android phone is required.");
         validateSignal(frequency, pattern);
-        ConsumerIrManager.CarrierFrequencyRange[] ranges = ir.getCarrierFrequencies();
-        if(ranges != null && ranges.length > 0) {
-            boolean match = false;
-            for(ConsumerIrManager.CarrierFrequencyRange range : ranges)
-                if(frequency >= range.getMinFrequency() && frequency <= range.getMaxFrequency()) match = true;
-            if(!match) throw new IllegalStateException("Your phone does not support this IR carrier frequency.");
+        int[][] ranges;
+        // Android may confirm an emitter while omitting its optional carrier capabilities.
+        // Only a complete, valid set of nonmatching ranges establishes unsupported frequency.
+        try { ranges=emitter.carrierRanges(); }
+        catch(RuntimeException unavailable){ranges=null;}
+        if(ranges!=null&&ranges.length>0) {
+            boolean match=false,unknown=false;
+            for(int[] range:ranges) {
+                if(range==null||range.length!=2||range[0]<=0||range[1]<range[0]){unknown=true;continue;}
+                if(frequency>=range[0]&&frequency<=range[1])match=true;
+            }
+            if(!match&&!unknown)throw new IllegalStateException("Your phone does not support this IR carrier frequency.");
         }
-        ir.transmit(frequency, pattern);
+        emitter.transmit(frequency,pattern);
     }
     static void validateSignal(int frequency, int[] pattern) {
         if(frequency < 20000 || frequency > 60000) throw new IllegalArgumentException("IR frequency must be between 20 and 60 kHz.");

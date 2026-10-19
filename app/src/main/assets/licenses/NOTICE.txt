@@ -8,7 +8,7 @@ Their license texts are included in this directory.
 https://github.com/square/okhttp/tree/parent-3.14.9
 https://github.com/square/okio/tree/okio-parent-1.17.2
 
-The bundled infrared JSON derives exclusively from the GitHub JSON database
+The unchanged base infrared JSON catalogue derives from the GitHub JSON database
 published by ysard/mi_remote_database, release v2.1, by ysard and contributors.
 The upstream repository carries AGPL-3.0-or-later notices. Its license is
 included here as mi_remote_database-LICENSE.txt. This dataset is not MIT.
@@ -24,9 +24,28 @@ Original archive, the standalone AGPL-3.0-or-later conversion tool, complete
 input/output hash manifest and rebuild instructions are published at:
 https://github.com/junyongtio-lab/test-2/tree/main/tools/mi_catalogue
 The conversion tool is not linked into or executed by the Android app.
+This base catalogue contributes 3,706 keysets and 140,949 command associations.
 Per-profile source paths, hashes, coverage and exclusions are in assets/ir/mi/.
-See assets/ir/ATTRIBUTION.md for attribution and format boundaries.
+
+Version 1.3.0 additionally includes five Astro candidate keysets and 216 recorded
+command associations from Xiaomi's public regional STB JSON service:
+https://sg-urc.io.mi.com
+Source attribution: Xiaomi/Kookong; Astro brand ID 3833, Malaysia (MY).
+The source identifies code-set IDs, without Ultra Box or Ulti Box retail labels.
+Original response JSON, request provenance, hashes, the independently written
+offline converter and generated output manifest are published at:
+https://github.com/junyongtio-lab/test-2/tree/main/tools/mi_stb
+Supplement assets and source associations are in assets/ir/mi_stb/.
+Public availability does not establish a reuse license. The application MIT
+license and the GitHub catalogue AGPL notices are not assigned to this separate
+vendor data. No additional rights over Xiaomi/Kookong data are asserted.
+The combined catalogue has 3,711 keysets and 141,165 command associations.
+
+See assets/ir/ATTRIBUTION.md for attribution and format boundaries. The Android
+app bundles the converted JSON, makes no Xiaomi API requests and requires no
+smartphone JSON import. No Xiaomi native libraries, decompiled implementation
+or copied Xiaomi graphics are included in the app.
 
 Earlier IR datasets, the user-supplied Astro profile and the native
-IRremoteESP8266 AC engine have been removed from version 1.2.0.
+IRremoteESP8266 AC engine remain removed since version 1.2.0.
 No manufacturer endorsement or physical compatibility certification is implied.

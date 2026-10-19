@@ -51,7 +51,7 @@ SDK publication is evidence of the interface, not evidence that every LG model o
 
 ## Mi Remote JSON infrared source
 
-All bundled IR data in version 1.2.0 comes exclusively from the published GitHub JSON archive of [ysard/mi_remote_database](https://github.com/ysard/mi_remote_database), release [v2.1](https://github.com/ysard/mi_remote_database/releases/tag/v2.1). The archive is pinned by SHA-256 `44dcf13d815383c907884f7cdb294afcd085b7063c1de4780589e0626cb61895`; upstream format documentation is pinned to commit `8a60b419506e8c407f2b756ec8ab4b4bc446678d`.
+Version 1.3.0 retains the unchanged published GitHub JSON catalogue of [ysard/mi_remote_database](https://github.com/ysard/mi_remote_database), release [v2.1](https://github.com/ysard/mi_remote_database/releases/tag/v2.1): 3,706 keysets and 140,949 source command associations. It also bundles the separate Astro supplement described below. The GitHub archive is pinned by SHA-256 `44dcf13d815383c907884f7cdb294afcd085b7063c1de4780589e0626cb61895`; upstream format documentation is pinned to commit `8a60b419506e8c407f2b756ec8ab4b4bc446678d`.
 
 The archive is committed under `tools/mi_catalogue/source/` for reproducible offline conversion. The standalone generator verifies the archive and input JSON hashes, decodes supported encrypted/compressed raw timing arrays and preserves the exact carrier in hertz and timings in microseconds. It never contacts Xiaomi or executes embedded source definitions. Android receives only the converted JSON assets and uses `ConsumerIrManager` to transmit them. The source's TVKill output uses carrier-cycle counts and is not used as Android timings.
 
@@ -65,9 +65,19 @@ The previous native IRremoteESP8266 stateful AC engine and all non-Mi captures h
 
 Most upstream AC definitions use proprietary templates, unsupported representations or executable Lua/Java fragments. The generator excludes these rather than executing them or fabricating a waveform. Invalid carrier frequencies and empty model responses are also excluded. Accepted counts and exclusion reasons appear in the index; the upstream README's broad totals are not a claim that every source model is usable in Android.
 
-## Astro, NJOI, PRISM+ and other brands
+## Astro public STB JSON supplement
 
-No Astro, NJOI, PRISM+ or PrismPlus brand was found in the included release categories. The prior repository-owner Astro JSON and its two unverified bit-order interpretations have been deleted. This build therefore has no Astro Ultra Box / Ulti Box profile. A different receiver brand must not be relabelled Astro without a verified source association.
+Static inspection of the user-supplied Mi Remote 7.2.4M APK identified the regional STB route at `https://sg-urc.io.mi.com`. Development-time anonymous GET requests to `/app/public/get_stb_brand`, `/app/public/get_stb_match` and `/app/public/get_stb_keyset` retrieved source JSON for Malaysia and **Astro brand ID 3833**. The source keysets are `kk_2_3833_536`, `kk_2_3833_1819`, `kk_2_3833_350`, `kk_2_3833_211` and `kk_2_3833_2160`.
+
+All **216 recorded command associations** from those five keysets are decoded offline with their exact carrier hertz and microsecond timings preserved. The separate [supplement index](../app/src/main/assets/ir/mi_stb/index.json), [source provenance](../tools/mi_stb/provenance.json) and [generated hash manifest](../tools/mi_stb/generated-manifest.json) record the actual source associations and reproducible outputs. The app bundles the converted JSON and does not call Xiaomi, require a Xiaomi account or ask for a smartphone JSON import. No copied Xiaomi implementation, native library or graphics are shipped.
+
+The public service does not label these keysets Ultra Box or Ulti Box. They are Astro candidates requiring guided testing on the actual decoder, with no guaranteed retail-model match. The user's successful Mi Remote Ultra Box test does not identify the exact working keyset or establish Palm Remote compatibility. No physical Palm Remote decoder response has been verified. The earlier owner-supplied Astro JSON and guessed bit-order interpretations remain deleted.
+
+Public availability of these Xiaomi/Kookong response data does not establish a reuse license. The application's MIT license and the GitHub archive's AGPL notices are not assigned to this separate source. Attribution and hashes are retained; no additional vendor-data rights, manufacturer certification or endorsement are asserted.
+
+## NJOI, PRISM+ and other brands
+
+No NJOI-labelled, PRISM+ or PrismPlus profile is included. A different receiver brand must not be relabelled Astro without a verified source association.
 
 No suitable all-model, manufacturer-published phone remote API was verified for Panasonic, Hisense, Daewoo or PRISM+ during the original build. Their presence in an IR database does not establish a network API. Hisense televisions also use multiple platforms; one platform's protocol cannot cover the entire brand. Roku ECP is not implemented in this build.
 

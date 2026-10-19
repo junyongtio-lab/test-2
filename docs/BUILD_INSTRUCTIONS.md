@@ -1,6 +1,6 @@
 # Build and validate Palm Remote
 
-The app uses Java and Android's consumer IR service. The tested build toolchain is JDK 21, Android SDK Platform 35, Build Tools 35.0.0 and Gradle 8.13. The checked-in Gradle wrapper downloads the pinned Gradle release and verifies its SHA-256. Version 1.2.0 has no native AC encoder: NDK and CMake are no longer required. No API keys, app registration or hosted backend are needed to build it.
+The app uses Java and Android's consumer IR service. The tested build toolchain is JDK 21, Android SDK Platform 35, Build Tools 35.0.0 and Gradle 8.13. The checked-in Gradle wrapper downloads the pinned Gradle release and verifies its SHA-256. Version 1.3.0 has no native AC encoder: NDK and CMake are no longer required. No API keys, app registration or hosted backend are needed to build it.
 
 ## Build and install
 
@@ -85,3 +85,16 @@ emulator -avd PalmRemoteAPI29 -no-window -no-audio -no-boot-anim \
 ```
 
 Create the `PalmRemoteAPI29` AVD first with Android Studio or `avdmanager` if it does not exist. Platform Tools 37.0.1 may try to write `$HOME/.android` despite `ANDROID_USER_HOME`. In a managed cloud home that is read-only, smoke checks use a workspace-local Python `adb-shell` client connected to the emulator's `127.0.0.1:5555`. Normal development on a writable home can use standard `adb` commands.
+
+## Mi Remote APK research
+
+The original static-analysis tools are in [tools/apk_inspection](../tools/apk_inspection/README.md). The supplied exact APK was inspected, including a nested RAR/SQLite catalogue; see [findings and online Astro retrieval](MI_REMOTE_724M_INVESTIGATION.md). The third-party APK is not an app build dependency. Palm Remote 1.3.0 retains the pinned GitHub catalogue, adds five independently converted public Astro keysets and uses original interface code/artwork.
+
+Verify the separate offline Astro supplement before building:
+
+```sh
+/workspace/toolchains/mi-catalogue-venv/bin/python tools/mi_stb/generate_stb.py --check
+/workspace/toolchains/mi-catalogue-venv/bin/python -m unittest discover -s tools/mi_stb -p 'test_*.py'
+```
+
+The converter checks saved public-response hashes and preserves decoded microsecond timings. No live service access or Xiaomi APK is needed to rebuild these assets. See [source records and conversion](../tools/mi_stb/README.md).

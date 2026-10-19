@@ -1,0 +1,119 @@
+{
+  "inspectionDate": "2026-10-18",
+  "staticOnly": true,
+  "sourceArchive": {
+    "userUploadCommit": "f91a98e76015ad3011e3e4a674ffde229ff10bf8",
+    "bytes": 24137558,
+    "sha256": "72fc2fc859255e19963370ecd3252889af3f8a2e609d2c74c2d995e03b4267a6"
+  },
+  "apk": {
+    "package": "com.duokan.phone.remotecontroller",
+    "versionName": "7.2.4M",
+    "versionCode": 6500,
+    "bytes": 34320753,
+    "sha256": "4c20655f2b636d86152202994da2a1b88f4ebf5bddf58b7ef6c2bf8e42fa5c73",
+    "minSdk": 22,
+    "targetSdk": 34,
+    "signaturesVerified": [
+      "v1",
+      "v2",
+      "v3"
+    ],
+    "signerCertificateSha256": "7d5096707835623b3879f417cad3df0d6717246acd8dad55d2959d526d95ab0a",
+    "publisherCertificateIndependentlyCorroborated": false
+  },
+  "flatInventory": {
+    "counts": {
+      "asset": 10,
+      "dex": 4,
+      "json": 4,
+      "native": 5,
+      "other": 694,
+      "resource": 4157
+    },
+    "entries": 4874,
+    "skipped": 0
+  },
+  "decompilation": {
+    "tool": "JADX 1.5.6",
+    "javaFiles": 14523,
+    "reportedErrors": 340,
+    "completeSourceRecoveryClaimed": false
+  },
+  "localDatabase": {
+    "bytes": 5878784,
+    "sha256": "727a271f25889d97fc94b021b240f62d1ce559ce8a98cf14b7ac0d3efb657bfa",
+    "applicationTables": 19,
+    "schemasIncludingSqliteSequence": 20,
+    "encryptedJsonRecordsDecoded": 3616,
+    "decodeErrors": 0,
+    "attributableAstroUltraUltiProfileRecovered": false,
+    "unnamedNumericalIdsRemain": true
+  },
+  "nativeLibraries": [
+    {
+      "name": "lib/arm64-v8a/libairkanopus-jni.so",
+      "bytes": 1372800,
+      "sha256": "77bece3edb1c76a4e6a492bc4ccaef117f36892347e79a882303e5170bb7efd5"
+    },
+    {
+      "name": "lib/arm64-v8a/libkksdk.so",
+      "bytes": 993976,
+      "sha256": "b14b8cd2136f2afaaff67f22a1825d0d0820615f77c7e1ddd02c33b38e5e051c"
+    },
+    {
+      "name": "lib/arm64-v8a/libluajava.so",
+      "bytes": 273192,
+      "sha256": "521cc26e580332938da7e3fe6ab33a3b0e2f1cddfec4127bb59c8bc997b0f246"
+    },
+    {
+      "name": "lib/arm64-v8a/libmiir.so",
+      "bytes": 77544,
+      "sha256": "dedfe8cacbb1bd18e1a648584029db344591a81b2d095ffa0014d23f570de473"
+    },
+    {
+      "name": "lib/arm64-v8a/libphotocli.so",
+      "bytes": 77240,
+      "sha256": "914767313e34a4c1692d62cf4bd87f321a4fa1873e8add059768d66c02e58474"
+    }
+  ],
+  "onlineStbQueries": {
+    "queryDate": "2026-10-19",
+    "countriesAttempted": [
+      "ID",
+      "MY"
+    ],
+    "brandResponses": 2,
+    "matchResponses": 1,
+    "fullAstroKeysetsRetrieved": 5,
+    "decodedCommands": 216,
+    "decodeErrors": 0,
+    "httpStatus": 200,
+    "serviceCode": 0,
+    "runtimeDesiredPolicy": "unrestricted",
+    "runtimeObservationState": "enforced",
+    "actualAccessEstablished": true,
+    "historicalFailure": "18 October managed proxy CONNECT HTTP 403; resolved after restored environment applied network policy",
+    "sourceDataProvenance": "tools/mi_stb/provenance.json"
+  },
+  "palmRemote": {
+    "versionName": "1.3.0",
+    "newAstroSupportClaimed": true,
+    "irCatalogueChanged": true,
+    "proprietaryImplementationOrGraphicsCopied": false,
+    "physicalHardwareTested": false,
+    "retailModelCompatibilityClaimed": false
+  },
+  "initialOnlineStbQueries": {
+    "countriesAttempted": [
+      "ID",
+      "MY"
+    ],
+    "acceptedPayloads": 0,
+    "curlDiagnosis": "Managed proxy CONNECT HTTP 403",
+    "runtimeDesiredPolicy": "unrestricted",
+    "runtimeObservationState": "unknown",
+    "actualAccessEstablished": false
+  },
+  "supplementalRetrievalDate": "2026-10-19"
+}

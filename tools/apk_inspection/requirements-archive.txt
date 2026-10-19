@@ -1,0 +1,2 @@
+# Optional exact uploaded-archive extraction helper; ZIP inventory remains stdlib-only.
+py7zr==1.0.0

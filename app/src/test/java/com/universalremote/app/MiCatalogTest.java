@@ -53,6 +53,18 @@ public class MiCatalogTest {
         assertFalse(catalog.find(entries[1].getString("id")).has("commands"));assertEquals(9,reads.get());
         catalog.loadProfile(entries[1].getString("id"));assertEquals(10,reads.get());
     }
+    @Test public void selectedRemoteCanBeRestoredAfterGuidedBrowsingEvictsItsSignals() throws Exception {
+        JSONObject[] entries=new JSONObject[10];for(int i=0;i<entries.length;i++)entries[i]=metadata(String.format("mi_%016x",i),"tv");
+        AtomicInteger reads=new AtomicInteger();IrCatalog catalog=catalogue(index(entries),signals(),reads);
+        String selected=entries[0].getString("id");catalog.loadProfile(selected);
+        for(int i=1;i<entries.length;i++)catalog.loadProfile(entries[i].getString("id"));
+        assertFalse(catalog.isLoaded(selected));assertFalse(catalog.supports(selected,"Power:source"));
+        JSONObject restored=catalog.loadProfile(selected);
+        assertTrue(catalog.isLoaded(selected));assertTrue(catalog.supports(selected,"Power:source"));
+        assertEquals("Original power label",restored.getJSONObject("commands").getJSONObject("Power:source").getString("label"));
+        assertEquals(11,reads.get());assertSame(restored,catalog.find(selected));
+        assertFalse(catalog.isLoaded(entries[2].getString("id")));
+    }
     @Test public void invalidIndexCannotEscapeAssetsOrClaimAnUnrelatedSource() throws Exception {
         for(String mutation:new String[]{"asset","id","category","source","digest","duplicate","count","tested"}) {
             JSONObject p=metadata(ID,"tv"),root=index(p);

@@ -7,11 +7,16 @@ import java.util.List;
 /** Checks actual APK Mi data and Android hardware services without sending IR. */
 public final class CatalogDeviceChecks {
     private CatalogDeviceChecks() {}
-    public static int run(Context context) throws Exception {
+    interface Progress { void report(String message); }
+    public static int run(Context context) throws Exception { return run(context, message -> {}); }
+    static int run(Context context, Progress progress) throws Exception {
+        progress.report("Loading packaged catalogue");
         IrCatalog catalog=new IrCatalog(context);int checks=0;
-        if(catalog.profileCount()!=3706)throw new AssertionError("Mi index missing profiles");checks++;
-        if(catalog.coverage().getInt("commands")!=140949)throw new AssertionError("Mi command coverage differs");checks++;
+        progress.report("Catalogue metadata loaded");
+        if(catalog.profileCount()!=3711)throw new AssertionError("Mi index missing profiles");checks++;
+        if(catalog.coverage().getInt("commands")!=141165)throw new AssertionError("Mi command coverage differs");checks++;
         for(String category:new String[]{"tv","set_top_box","air_conditioner","fan"}) {
+            progress.report("Checking recorded " + category + " signals");
             if(catalog.brands(category).isEmpty())throw new AssertionError("Missing category "+category);checks++;
             String brand=catalog.brands(category).iterator().next();
             List<JSONObject> profiles=catalog.forBrand(brand,category);
@@ -29,20 +34,41 @@ public final class CatalogDeviceChecks {
         }
         if(catalog.find("astro_ultrabox_msb")!=null||catalog.find("samsung_bn59")!=null)
             throw new AssertionError("Legacy IR profile survived");checks++;
-        if(!catalog.forBrand("Astro","set_top_box").isEmpty()||!catalog.forBrand("PRISM+","tv").isEmpty())
+        if(!catalog.forBrand("PRISM+","tv").isEmpty())
             throw new AssertionError("Absent Mi brand was fabricated");checks++;
+        progress.report("Checking bundled online Astro keysets");
+        List<JSONObject> astro=catalog.forBrand("Astro","set_top_box");
+        if(astro.size()!=5)throw new AssertionError("Astro source keysets missing");checks++;
+        int astroCommands=0;
+        for(JSONObject metadata:astro) {
+            JSONObject profile=catalog.loadProfile(metadata.getString("id"));
+            if(profile.optBoolean("hardwareTested")||!profile.getString("model").equals(profile.getJSONObject("source").getString("modelId")))
+                throw new AssertionError("Astro hardware compatibility was relabelled");
+            JSONObject commands=profile.getJSONObject("commands");
+            java.util.Iterator<String> keys=commands.keys();
+            while(keys.hasNext()) {
+                String key=keys.next();JSONObject command=commands.getJSONObject(key);
+                if(!key.equals(command.getString("sourceKey")))throw new AssertionError("Astro source key changed");
+                IrCatalog.checkedPattern(command);astroCommands++;
+            }
+        }
+        if(astroCommands!=216)throw new AssertionError("Astro recorded commands missing");checks++;
         if(catalog.forBrand("Samsung","tv").isEmpty()||catalog.forBrand("LG","tv").isEmpty())
             throw new AssertionError("Mi TV profiles missing");checks++;
+        progress.report("Checking Android IR service");
         IrHardware.Result hardware=IrHardware.inspect(context);
         if(hardware.state==IrHardware.State.CHECKING||hardware.title.isEmpty()||hardware.hasEmitter!=(hardware.state==IrHardware.State.READY))
             throw new AssertionError("Android IR detection did not finish");checks++;
+        progress.report("Checking Keystore credential migration");
         checks+=verifyCredentialMigration(context,catalog);
+        progress.report("Catalogue and credential migration complete");
         return checks;
     }
     private static int verifyCredentialMigration(Context context,IrCatalog catalog) throws Exception {
-        DeviceStore store=new DeviceStore(context);List<JSONObject> original=store.load();
+        DeviceStore store=new DeviceStore(context);
         String suffix=java.util.UUID.randomUUID().toString(),lg="test_lg_"+suffix,cloud="test_cloud_"+suffix;
         android.content.SharedPreferences prefs=context.getSharedPreferences("devices",Context.MODE_PRIVATE);
+        String originalProfiles=prefs.getString("profiles",null);
         try {
             JSONObject lgDevice=new JSONObject().put("id",lg).put("mode","lg").put("host","192.0.2.1").put("name","Migration probe LG");
             JSONObject cloudDevice=new JSONObject().put("id",cloud).put("mode","smartthings").put("cloudId","test-device").put("name","Migration probe Samsung");
@@ -63,7 +89,12 @@ public final class CatalogDeviceChecks {
             if(store.removeUnavailableIrDevices(catalog)!=0)throw new AssertionError("Migration is not idempotent");
             return 5;
         } finally {
-            store.save(original);store.delete(lg);store.delete(cloud);
+            // Restore the original value exactly, including malformed metadata, and wait for
+            // disk writes before instrumentation finishes or the runner restarts the app.
+            android.content.SharedPreferences.Editor cleanup=prefs.edit()
+                .remove("credential."+lg).remove("credential."+cloud);
+            if(originalProfiles==null)cleanup.remove("profiles");else cleanup.putString("profiles",originalProfiles);
+            if(!cleanup.commit())throw new AssertionError("Could not persist test fixture cleanup");
         }
     }
 }
