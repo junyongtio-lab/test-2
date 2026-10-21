@@ -1,7 +1,7 @@
 {
   "package": "com.universalremote.app",
-  "versionName": "1.4.0",
-  "androidCatalogueChecks": 32,
+  "versionName": "1.5.0",
+  "androidCatalogueChecks": 35,
   "hardwareState": "No IR transmitter detected",
   "physicalHardwareTested": false,
   "uiChecks": [
@@ -17,18 +17,25 @@
     "The toggle-only Panasonic profile exposes a disabled explicit toggle action rather than on/off claims",
     "Recorded fan controls remain available and cannot transmit without hardware",
     "Devices retains source fixtures and the persistent IR hardware indicator",
-    "Help retains hardware status and the source/capability guidance"
+    "Help retains hardware status and the source/capability guidance",
+    "All-734 AC inventory searches exact source IDs and clearly labels data-only profiles without control actions",
+    "Complete original AC source and referenced data open without importing, sending or saving a device",
+    "Complete AC inventory opens the exact supported Panasonic source with no-emitter transmission gates intact",
+    "Complete AC inventory opens exact recorded controls without treating source-data inclusion as a confirmed appliance match"
   ],
   "passed": true,
-  "installed_sha256": "40f947fdb31b81b6b2b9b81463d6f218146e1c3b42aac0008277d2556ea82775",
-  "uiCheckCount": 13,
+  "installed_sha256": "dbabb53cb66b24d17cddd3370cb4ef94f3236cfa7604c650bff7f1fca9b9c9a8",
+  "uiCheckCount": 17,
   "fixtureCount": 5,
   "originalPreferencesRestored": true,
   "systemUiWaitDialogs": 0,
-  "expected_sha256": "40f947fdb31b81b6b2b9b81463d6f218146e1c3b42aac0008277d2556ea82775",
-  "versionCode": 7,
-  "install": "Success (in-place update)",
+  "expected_sha256": "dbabb53cb66b24d17cddd3370cb4ef94f3236cfa7604c650bff7f1fca9b9c9a8",
+  "versionCode": 8,
+  "install": "Existing in-place update; installed bytes verified",
   "emulatorApi": 29,
   "emulatorAbi": "x86_64",
-  "validationDate": "2026-10-21"
+  "validationDate": "2026-10-21",
+  "completeAcSourceProfiles": 734,
+  "sourceAcControlsImplemented": 36,
+  "sourceAcControlsUnavailable": 698
 }

@@ -7,11 +7,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.Rect;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.SystemClock;
-import android.view.InputDevice;
-import android.view.MotionEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -39,7 +37,7 @@ final class UiDeviceChecks {
         this.progress=progress;this.automation=instrumentation.getUiAutomation();
         File external=context.getExternalFilesDir(null);
         if(external==null)throw new AssertionError("External app-specific validation directory unavailable");
-        output=new File(external,"palm-validation-v140");
+        output=new File(external,"palm-validation-v150");
         if(!output.isDirectory()&&!output.mkdirs())throw new AssertionError("Could not create UI evidence directory");
         for(String owned:new String[]{"ui-failure.png","ui-failure-tree.txt","ui-verification.json"}) {
             File previous=new File(output,owned);
@@ -56,7 +54,7 @@ final class UiDeviceChecks {
     private int exercise(int coreChecks) throws Exception {
         SharedPreferences preferences=context.getSharedPreferences("devices",Context.MODE_PRIVATE);
         String original=preferences.getString("profiles",null);
-        JSONObject report=new JSONObject().put("package",context.getPackageName()).put("versionName","1.4.0")
+        JSONObject report=new JSONObject().put("package",context.getPackageName()).put("versionName","1.5.0")
             .put("androidCatalogueChecks",coreChecks).put("hardwareState","No IR transmitter detected")
             .put("physicalHardwareTested",false).put("uiChecks",checks).put("passed",false);
         try {
@@ -78,10 +76,11 @@ final class UiDeviceChecks {
             if(!preferences.edit().putString("profiles",fixtures.toString()).commit())throw new AssertionError("Could not persist UI fixtures");
             activity=instrumentation.startActivitySync(new Intent(context,MainActivity.class)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK));
+            waitForStartupData(astro.getString("id"));
             waitFor("No IR transmitter detected",false,false);banner();shot("ui-home.png");
             pass("Home shows the actual absent-emitter hardware banner");
             click("Check IR",false,false,false);
-            waitFor("Palm Remote 1.4.0",true,false);waitFor("Source keyset: "+astro.getString("model"),true,false);
+            waitFor("Palm Remote 1.5.0",true,false);waitFor("Source keyset: "+astro.getString("model"),true,false);
             shot("ui-ir-check.png");click("Done",false,false,false);
             pass("Check IR reports installed version and selected source keyset without transmitting");
 
@@ -167,6 +166,37 @@ final class UiDeviceChecks {
             pass("Devices retains source fixtures and the persistent IR hardware indicator");
             nav("Help");banner();shot("ui-help.png");
             pass("Help retains hardware status and the source/capability guidance");
+            AcSourceDatabase completeAc=new AcSourceDatabase(context);
+            JSONObject unsupported=null,recorded=null,encoded=null;
+            for(JSONObject metadata:completeAc.profiles(null)) {
+                String kind=metadata.getJSONObject("control").getString("kind");
+                if(kind.equals("unavailable")&&unsupported==null)unsupported=metadata;
+                if(kind.equals("recorded")&&recorded==null)recorded=metadata;
+                if(kind.equals("panasonic216")&&encoded==null)encoded=metadata;
+            }
+            require(unsupported!=null&&recorded!=null&&encoded!=null,"AC source support kinds missing");
+            String beforeSourceBrowsing=preferences.getString("profiles",null);
+            chooseAcSource(unsupported);
+            waitFor("Data included; controls unavailable",true,false);
+            require(find("Open controls",false,false)==null,"Data-only AC source exposes working controls");
+            shot("ui-ac-data-only.png");
+            pass("All-734 AC inventory searches exact source IDs and clearly labels data-only profiles without control actions");
+            click("View included data",false,false,false);
+            waitFor("Included AC data · "+unsupported.getString("model"),false,false);
+            waitFor("referencedSourceRow",true,false);waitFor("definition",true,false);
+            shot("ui-ac-source-data.png");click("Done",false,false,false);
+            require(java.util.Objects.equals(beforeSourceBrowsing,preferences.getString("profiles",null)),"Browsing source data changed saved remotes");
+            pass("Complete original AC source and referenced data open without importing, sending or saving a device");
+            chooseAcSource(encoded);click("Open controls",false,false,false);
+            int encodedPosition=0;for(int i=0;i<states.size();i++)if(states.get(i).getString("model").equals(encoded.getString("model")))encodedPosition=i+1;
+            waitFor("AC remote "+encodedPosition+" of 6 · "+encoded.getString("model"),false,false);
+            disabled("Test power on · Cool 24 °C");disabled("Use this remote");shot("ui-ac-encoded-link.png");click("Close",false,false,false);
+            pass("Complete AC inventory opens the exact supported Panasonic source with no-emitter transmission gates intact");
+            chooseAcSource(recorded);click("Open controls",false,false,false);
+            waitFor("Remote 1 of 1 · "+recorded.getString("model"),false,false);
+            disabled("Send test signal");disabled("Use this remote");shot("ui-ac-recorded-link.png");click("Close",false,false,false);
+            require(java.util.Objects.equals(beforeSourceBrowsing,preferences.getString("profiles",null)),"Opening AC controls saved a source record");
+            pass("Complete AC inventory opens exact recorded controls without treating source-data inclusion as a confirmed appliance match");
             nav("Home");shot("ui-home.png");
             report.put("installed_sha256",fileSha256(new File(context.getPackageCodePath())))
                 .put("passed",true).put("uiCheckCount",checks.length()).put("fixtureCount",profileCount(preferences));
@@ -200,6 +230,17 @@ final class UiDeviceChecks {
             if(cleanupError!=null)throw new AssertionError("UI cleanup failed",cleanupError);
         }
     }
+    private void chooseAcSource(JSONObject metadata) throws Exception {
+        nav("Home");click("Browse all 734 AC profiles",false,false,true);
+        waitFor("All 734 Mi APK AC profiles",false,false);
+        AccessibilityNodeInfo search=findNode(n->n.isVisibleToUser()&&value(n.getClassName()).equals("android.widget.EditText"));
+        require(search!=null,"AC source search field missing");
+        Bundle arguments=new Bundle();arguments.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,metadata.getString("model"));
+        try{require(search.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT,arguments),"Cannot search AC source IDs");}finally{search.recycle();}
+        instrumentation.waitForIdleSync();SystemClock.sleep(250);
+        click(" · "+metadata.getString("model")+" ·",true,false,false);
+        waitFor("AC source · "+metadata.getString("model"),false,false);
+    }
     private JSONObject rawFixture(String id,String name,JSONObject profile) throws Exception {
         return new JSONObject().put("id","validation_"+id).put("name",name).put("mode","ir")
             .put("brand",profile.getString("brand")).put("category",profile.getString("category"))
@@ -213,6 +254,35 @@ final class UiDeviceChecks {
     private void nav(String page) throws Exception{click(page+" tab",true,true,false);banner();}
     private void selectFixture(String name) throws Exception {
         nav("Remote");click("Switch device",true,false,true);click(name,false,false,false);waitFor(name,false,false);banner();
+    }
+    private void waitForStartupData(String profileId) throws Exception {
+        progress.report("Waiting for startup data and selected signals to settle");
+        long deadline=SystemClock.uptimeMillis()+180000,stableSince=0,lastGeneration=-1;
+        while(SystemClock.uptimeMillis()<deadline) {
+            boolean[] ready={false};long[] generation={-1};
+            instrumentation.runOnMainSync(()->{
+                require(!((Boolean)activityField("irCatalogFailed")),"Startup IR catalogue failed to load");
+                require(!((Boolean)activityField("panasonicFailed")),"Startup Panasonic encoder failed to load");
+                require(!((Boolean)activityField("acSourceFailed")),"Startup complete AC database failed to load");
+                require(((String)activityField("irProfileError")).isEmpty(),"Startup Astro signals failed to load");
+                IrCatalog catalogue=(IrCatalog)activityField("infrared");
+                ready[0]=catalogue!=null&&activityField("panasonic")!=null&&activityField("acSourceDatabase")!=null
+                    &&!((Boolean)activityField("hardwareChecking"))&&catalogue.isLoaded(profileId);
+                generation[0]=(Long)activityField("renderedControlsGeneration");
+            });
+            if(ready[0]) {
+                if(generation[0]!=lastGeneration){stableSince=SystemClock.uptimeMillis();lastGeneration=generation[0];}
+                if(SystemClock.uptimeMillis()-stableSince>=500){instrumentation.waitForIdleSync();progress.report("Startup data and selected signals ready");return;}
+            } else {stableSince=0;lastGeneration=-1;}
+            SystemClock.sleep(100);
+        }
+        throw new AssertionError("Startup catalogue, encoder, complete AC data, and Astro signals did not settle");
+    }
+    private Object activityField(String name) {
+        try {
+            java.lang.reflect.Field field=MainActivity.class.getDeclaredField(name);field.setAccessible(true);
+            return field.get(activity);
+        }catch(ReflectiveOperationException error){throw new AssertionError("Cannot inspect startup field "+name,error);}
     }
     private void waitRawCommands() throws Exception {
         long end=SystemClock.uptimeMillis()+90000;
@@ -310,19 +380,28 @@ final class UiDeviceChecks {
             }
         }
         require(node!=null,"Cannot locate clickable UI control: "+label);
+        boolean nativeClosure=false;
+        int closingWindow=-1;
         try {
             require(node.isEnabled(),"Attempted to click a disabled UI control: "+label);
-            if(!node.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                Rect bounds=new Rect();node.getBoundsInScreen(bounds);require(!bounds.isEmpty(),"UI target has no bounds");
-                long now=SystemClock.uptimeMillis();
-                MotionEvent down=MotionEvent.obtain(now,now,MotionEvent.ACTION_DOWN,bounds.exactCenterX(),bounds.exactCenterY(),0);
-                MotionEvent up=MotionEvent.obtain(now,now+40,MotionEvent.ACTION_UP,bounds.exactCenterX(),bounds.exactCenterY(),0);
-                down.setSource(InputDevice.SOURCE_TOUCHSCREEN);up.setSource(InputDevice.SOURCE_TOUCHSCREEN);
-                try{require(automation.injectInputEvent(down,true)&&automation.injectInputEvent(up,true),"Could not inject UI pointer action");}
-                finally{down.recycle();up.recycle();}
-            }
+            nativeClosure=!contains&&!description&&value(node.getClassName()).equals("android.widget.Button")
+                &&(label.equalsIgnoreCase("Done")||label.equalsIgnoreCase("Close"));
+            closingWindow=node.getWindowId();
+            // Exactly one dispatch: never combine an accessibility action with a touch fallback.
+            require(node.performAction(AccessibilityNodeInfo.ACTION_CLICK),"UI click action was not accepted: "+label);
         } finally{node.recycle();}
         instrumentation.waitForIdleSync();SystemClock.sleep(120);
+        if(nativeClosure)waitForDialogDismissal(closingWindow,label);
+    }
+    private void waitForDialogDismissal(int windowId,String label) {
+        long deadline=SystemClock.uptimeMillis()+5000;
+        while(SystemClock.uptimeMillis()<deadline) {
+            AccessibilityNodeInfo current=findNode(n->n.isVisibleToUser());
+            try{if(current!=null&&current.getWindowId()!=windowId)return;}
+            finally{if(current!=null)current.recycle();}
+            SystemClock.sleep(100);
+        }
+        throw new AssertionError("Native dialog remained open after tapping "+label);
     }
     private void clickVisibleOrScroll(String label) throws Exception {
         AccessibilityNodeInfo node=find(label,false,false);if(node!=null){node.recycle();return;}

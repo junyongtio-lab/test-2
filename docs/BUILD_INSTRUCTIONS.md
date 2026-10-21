@@ -49,6 +49,8 @@ The additional raw TV/AC records come from the exact user-uploaded **Mi Remote 7
 /tmp/mi-catalogue-venv/bin/python tools/panasonic_ac/generate.py --check
 /tmp/mi-catalogue-venv/bin/python -m unittest discover -s tools/panasonic_ac -p 'test_*.py'
 /tmp/mi-catalogue-venv/bin/python tools/panasonic_ac/verify_sources.py
+/tmp/mi-catalogue-venv/bin/python tools/mi_ac_database/generate.py --check
+/tmp/mi-catalogue-venv/bin/python -m unittest discover -s tools/mi_ac_database -p 'test_*.py'
 ```
 
 The importer defaults to bounded temporary extraction of the committed archive; `--apk` accepts an already extracted exact APK. Matching order preserves all 2,810 original TV profile associations while restoring source-tree priority. The Panasonic generator uses pinned, non-executable parameters for six Panasonic216 profiles, including three from the supplied APK and three from the existing GitHub source. It does not implement every proprietary AC family. See [APK import](../tools/mi_apk_catalogue/README.md), [matching order](../tools/mi_matching/README.md) and [Panasonic encoding](../tools/panasonic_ac/README.md).

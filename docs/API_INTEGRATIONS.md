@@ -1,5 +1,7 @@
 # Integration sources and boundaries
 
+Version 1.5.0 also bundles [all 734 AC source records](COMPLETE_AC_DATABASE.md) from the exact supplied Mi APK as inspectable inert JSON. This source copy makes no network request and evaluates no vendor hook. Existing transmission controls cover 36 of those source records; the other 698 are explicitly data-only.
+
 This Android build has no application account, subscription, advertising service or application backend. It cannot provide an account-free network interface where a television manufacturer requires authorization. A manufacturer account used to authorize SmartThings is separate from an account for this app.
 
 There is no verified public remote-control API covering every model of Samsung, LG, Panasonic and Hisense. Brand names cover different generations and operating systems. Manufacturer developer APIs for applications running **on a television** are not automatically APIs for a phone to control that television.

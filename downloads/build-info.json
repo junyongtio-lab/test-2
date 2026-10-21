@@ -1,14 +1,14 @@
 {
   "applicationId": "com.universalremote.app",
-  "versionName": "1.4.0",
-  "versionCode": 7,
+  "versionName": "1.5.0",
+  "versionCode": 8,
   "minSdk": 23,
   "targetSdk": 35,
   "buildType": "debug",
   "signing": "Same development certificate as earlier Palm Remote versions; not Play release signing",
   "signingCertificateSha256": "75e8320e3978d0cc65f0fb98c0bb82354a05dd02e1c34d96823d883cab9e4e64",
-  "apkBytes": 11914545,
-  "sha256": "40f947fdb31b81b6b2b9b81463d6f218146e1c3b42aac0008277d2556ea82775",
+  "apkBytes": 13770317,
+  "sha256": "dbabb53cb66b24d17cddd3370cb4ef94f3236cfa7604c650bff7f1fca9b9c9a8",
   "buildDate": "2026-10-21",
   "nativeLibrariesIncluded": false,
   "irSource": {
@@ -22,7 +22,7 @@
     "limitations": [
       "Pinned GitHub JSON, separate online Astro JSON, converted uploaded-APK TV/AC records and supported Panasonic parameters; no Xiaomi requests by the Android app.",
       "Original model identifiers are code-set IDs, not verified hardware model numbers.",
-      "Opaque AC programs are not executed. Six Panasonic216 parameter sets have a separate independent Java encoder; other unsupported stateful families remain excluded.",
+      "Complete AC parameter/hook text is included as inert data and never executed. Six Panasonic216 parameter sets use an independent Java encoder; 698 of the 734 APK source records remain data-only.",
       "The original GitHub archive has no Astro, NJOI or PRISM+; a separate five-profile Astro supplement is bundled without retail-model verification.",
       "Source coverage does not guarantee compatibility with a particular appliance."
     ],
@@ -74,6 +74,13 @@
   "apk16kZipAlignment": true,
   "irHardwareProbeTests": 11,
   "automatedTests": [
+    {
+      "name": "com.universalremote.app.AcSourceDatabaseTest",
+      "tests": "8",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
     {
       "name": "com.universalremote.app.ApkCatalogTest",
       "tests": "7",
@@ -166,13 +173,13 @@
       "skipped": "0"
     }
   ],
-  "androidCatalogueChecks": 32,
-  "uiChecksPassed": 13,
+  "androidCatalogueChecks": 35,
+  "uiChecksPassed": 17,
   "emulatorApi": 29,
   "emulatorAbi": "x86_64",
   "irTransmissionTests": 10,
   "apkResearchToolTests": 29,
-  "automatedTestCount": 112,
+  "automatedTestCount": 120,
   "miRemote724mAnalysis": {
     "inspectionDate": "2026-10-18",
     "staticOnly": true,
@@ -272,15 +279,22 @@
       "sourceDataProvenance": "tools/mi_stb/provenance.json"
     },
     "palmRemote": {
-      "versionName": "1.4.0",
+      "versionName": "1.5.0",
       "newAstroSupportClaimed": true,
       "irCatalogueChanged": true,
-      "proprietaryImplementationOrGraphicsCopied": false,
       "physicalHardwareTested": false,
       "retailModelCompatibilityClaimed": false,
       "rawApkProfilesAdded": 604,
       "panasonicParameterProfilesAdded": 6,
-      "userReportsPalmUltraBoxWorks": true
+      "userReportsPalmUltraBoxWorks": true,
+      "completeAcSourceProfiles": 734,
+      "sourceAcControlsImplemented": 36,
+      "sourceAcControlsUnavailable": 698,
+      "vendorNativeLibrariesCopied": false,
+      "decompiledJavaImplementationCopied": false,
+      "vendorGraphicsCopied": false,
+      "sourceParameterAndHookTextCopied": true,
+      "vendorProgramsExecuted": false
     }
   },
   "uiRedesign": {
@@ -290,7 +304,10 @@
     "guidedKeysetTester": true,
     "allRecordedCommandsAccessible": true,
     "emitterRequiredForTestConfirmation": true,
-    "selectedProfileCacheRestoredAfterBrowsing": true
+    "selectedProfileCacheRestoredAfterBrowsing": true,
+    "completeAcSourceBrowser": true,
+    "dataOnlyProfilesCannotOpenControls": true,
+    "acSourceWorkerSeparateFromControls": true
   },
   "frequencyQueryOptionalWhenEmitterConfirmed": true,
   "githubIrCoverage": {
@@ -371,7 +388,7 @@
     "warnings": 15,
     "warningScope": "SetTextI18n English UI localization warnings"
   },
-  "packagedAssetsVerifiedAgainstWorkspace": 4325,
+  "packagedAssetsVerifiedAgainstWorkspace": 5060,
   "uiEvidence": "downloads/emulator-verification.json",
   "recordedSourceCoverage": {
     "mi": {
@@ -440,7 +457,7 @@
     "profileAssociationsLost": 0,
     "generator": "tools/mi_matching/generate_order.py"
   },
-  "pythonTestCount": 68,
+  "pythonTestCount": 74,
   "miApkConverterTests": 8,
   "tvMatchingTests": 8,
   "panasonicParameterTests": 6,
@@ -478,7 +495,31 @@
     "credentialsOrSigningMaterialUsed": false,
     "fullOnlineCatalogueRecovered": false
   },
-  "installedApkSha256": "40f947fdb31b81b6b2b9b81463d6f218146e1c3b42aac0008277d2556ea82775",
+  "completeAcSourceTests": 6,
+  "completeAcLoaderTests": 8,
+  "completeAcSourceDatabase": {
+    "sourceVersion": "7.2.4M",
+    "sourceVersionCode": 6500,
+    "profiles": 734,
+    "brands": 45,
+    "recorded": 33,
+    "stateful": 701,
+    "sourceRecordsOmitted": 0,
+    "sourceRecordInclusionPercent": 100,
+    "controlsImplemented": 36,
+    "controlsUnavailable": 698,
+    "scope": "Exact bundled AC source-record inclusion; not all implemented encoders or online-only Mi data",
+    "fullOriginalRowsAndReferencedDataPreserved": true,
+    "originalParameterAndHookTextPreserved": true,
+    "vendorProgramsExecuted": false,
+    "assetIndex": "app/src/main/assets/ir/mi_ac_database/index.json",
+    "manifest": "tools/mi_ac_database/generated-manifest.json",
+    "offlineRegenerationVerified": true,
+    "everyRecordComparedWithSource": true,
+    "sourceOnlyRecordsCountedAsWorkingRemotes": false
+  },
+  "totalSelectableProfilesScope": "Existing raw and adjustable control profiles; complete source-data browser records are counted separately, not as 734 additional working remotes",
+  "installedApkSha256": "dbabb53cb66b24d17cddd3370cb4ef94f3236cfa7604c650bff7f1fca9b9c9a8",
   "emulatorVerificationDate": "2026-10-21",
   "uiOriginalPreferencesRestored": true,
   "emulatorSystemUiWaitDialogs": 0

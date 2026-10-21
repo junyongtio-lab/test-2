@@ -1,4 +1,6 @@
-# Supported-device scope, version 1.4.0
+# Supported-device scope, version 1.5.0
+
+All **734 AC source records / 45 brand labels** from the supplied Mi APK are now included as complete inspectable data: 33 recorded and 701 stateful. **36 have implemented controls; 698 are data-only** and cannot transmit through the source-data view. This auxiliary source copy does not add 734 working remotes to the raw coverage table. See [complete AC data](COMPLETE_AC_DATABASE.md).
 
 Palm Remote runs on Android 6.0 or newer using Java and Android's consumer IR service. It has no native AC library or processor-specific encoder and cannot run on iPhone. The user reports Palm Remote 1.3.0 controls an Astro Ultra Box. No physical appliance was attached during cloud validation; source labels and software checks do not certify other appliance matches.
 

@@ -28,6 +28,9 @@ INSTRUMENTATION_STATUS_CODE: 0
 INSTRUMENTATION_STATUS: stream=Checking packaged Panasonic AC encoding
 
 INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=Checking all 734 bundled AC source records
+
+INSTRUMENTATION_STATUS_CODE: 0
 INSTRUMENTATION_STATUS: stream=Checking Android IR service
 
 INSTRUMENTATION_STATUS_CODE: 0
@@ -35,6 +38,12 @@ INSTRUMENTATION_STATUS: stream=Checking Keystore credential migration
 
 INSTRUMENTATION_STATUS_CODE: 0
 INSTRUMENTATION_STATUS: stream=Catalogue and credential migration complete
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=Waiting for startup data and selected signals to settle
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=Startup data and selected signals ready
 
 INSTRUMENTATION_STATUS_CODE: 0
 INSTRUMENTATION_STATUS: stream=PASS UI: Home shows the actual absent-emitter hardware banner
@@ -76,11 +85,23 @@ INSTRUMENTATION_STATUS_CODE: 0
 INSTRUMENTATION_STATUS: stream=PASS UI: Help retains hardware status and the source/capability guidance
 
 INSTRUMENTATION_STATUS_CODE: 0
-INSTRUMENTATION_STATUS: stream=UI evidence: /storage/emulated/0/Android/data/com.universalremote.app/files/palm-validation-v140
+INSTRUMENTATION_STATUS: stream=PASS UI: All-734 AC inventory searches exact source IDs and clearly labels data-only profiles without control actions
 
 INSTRUMENTATION_STATUS_CODE: 0
-INSTRUMENTATION_RESULT: catalogChecks=32
-INSTRUMENTATION_RESULT: stream=PASS 32 Android Mi catalogue/hardware checks and 13 emulator UI checks
+INSTRUMENTATION_STATUS: stream=PASS UI: Complete original AC source and referenced data open without importing, sending or saving a device
 
-INSTRUMENTATION_RESULT: uiChecks=13
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=PASS UI: Complete AC inventory opens the exact supported Panasonic source with no-emitter transmission gates intact
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=PASS UI: Complete AC inventory opens exact recorded controls without treating source-data inclusion as a confirmed appliance match
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=UI evidence: /storage/emulated/0/Android/data/com.universalremote.app/files/palm-validation-v150
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_RESULT: catalogChecks=35
+INSTRUMENTATION_RESULT: stream=PASS 35 Android Mi catalogue/hardware checks and 17 emulator UI checks
+
+INSTRUMENTATION_RESULT: uiChecks=17
 INSTRUMENTATION_CODE: -1

@@ -97,15 +97,22 @@
     "sourceDataProvenance": "tools/mi_stb/provenance.json"
   },
   "palmRemote": {
-    "versionName": "1.4.0",
+    "versionName": "1.5.0",
     "newAstroSupportClaimed": true,
     "irCatalogueChanged": true,
-    "proprietaryImplementationOrGraphicsCopied": false,
     "physicalHardwareTested": false,
     "retailModelCompatibilityClaimed": false,
     "rawApkProfilesAdded": 604,
     "panasonicParameterProfilesAdded": 6,
-    "userReportsPalmUltraBoxWorks": true
+    "userReportsPalmUltraBoxWorks": true,
+    "completeAcSourceProfiles": 734,
+    "sourceAcControlsImplemented": 36,
+    "sourceAcControlsUnavailable": 698,
+    "vendorNativeLibrariesCopied": false,
+    "decompiledJavaImplementationCopied": false,
+    "vendorGraphicsCopied": false,
+    "sourceParameterAndHookTextCopied": true,
+    "vendorProgramsExecuted": false
   },
   "initialOnlineStbQueries": {
     "countriesAttempted": [
@@ -205,5 +212,26 @@
         "reportedDate": "2026-10-21"
       }
     ]
+  },
+  "completeAcSourceDatabase": {
+    "sourceVersion": "7.2.4M",
+    "sourceVersionCode": 6500,
+    "profiles": 734,
+    "brands": 45,
+    "recorded": 33,
+    "stateful": 701,
+    "sourceRecordsOmitted": 0,
+    "sourceRecordInclusionPercent": 100,
+    "controlsImplemented": 36,
+    "controlsUnavailable": 698,
+    "scope": "Exact bundled AC source-record inclusion; not all implemented encoders or online-only Mi data",
+    "fullOriginalRowsAndReferencedDataPreserved": true,
+    "originalParameterAndHookTextPreserved": true,
+    "vendorProgramsExecuted": false,
+    "assetIndex": "app/src/main/assets/ir/mi_ac_database/index.json",
+    "manifest": "tools/mi_ac_database/generated-manifest.json",
+    "offlineRegenerationVerified": true,
+    "everyRecordComparedWithSource": true,
+    "sourceOnlyRecordsCountedAsWorkingRemotes": false
   }
 }

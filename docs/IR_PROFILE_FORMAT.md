@@ -1,6 +1,12 @@
 # Bundled Mi Remote IR formats
 
-Version 1.4.0 bundles three independently attributed raw catalogues, TV candidate-order metadata and six Panasonic216 parameter profiles. There is **no smartphone JSON-import feature** or Xiaomi refresh request. Current saved Mi selections remain valid; upgrades from before 1.2.0 remove obsolete imports and unavailable IR selections after catalogue validation. The earlier user-supplied `astro_ultrabox.json` remains removed.
+Version 1.5.0 bundles three independently attributed raw catalogues, TV candidate-order metadata, six Panasonic216 parameter profiles and complete source data for all 734 AC records in the supplied APK. There is **no smartphone JSON-import feature** or Xiaomi refresh request. Current saved Mi selections remain valid; upgrades from before 1.2.0 remove obsolete imports and unavailable IR selections after catalogue validation. The earlier user-supplied `astro_ultrabox.json` remains removed.
+
+## Complete Mi APK AC source records
+
+`ir/mi_ac_database/index.json` has schema 1, kind `mi724-complete-ac-source-data`, exact archive/APK/database hashes and 734 source entries. Its coverage separately reports 33 recorded / 701 stateful definitions and 36 implemented / 698 unavailable controls. All 45 source brand labels are retained.
+
+Each indexed asset is `ir/mi_ac_database/profiles/ac724_{24 hex characters}.json`, bound by SHA-256 and source identity. It preserves `sourceRow`, `referencedSourceRow`, `definition`, `brandSourceRow` and `brandData` in full, with `programsExecuted: false`. Original encrypted strings and source hook text remain data, never evaluated code. `AcSourceDatabase` bounds reads, verifies hashes and identities and does not implement a transmission interface. `control.kind` is `recorded`, `panasonic216` or `unavailable`; unavailable entries have no control-profile ID. Existing validated controls are linked by exact source identity. See [complete source data](COMPLETE_AC_DATABASE.md) and [exporter](../tools/mi_ac_database/README.md).
 
 ## Raw indexes and provenance
 

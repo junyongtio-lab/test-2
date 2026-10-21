@@ -44,6 +44,8 @@ jobs:
           python3 tools/panasonic_ac/generate.py --check
           python3 -m unittest discover -s tools/panasonic_ac -p 'test_*.py' -v
           python3 tools/panasonic_ac/verify_sources.py
+          python3 tools/mi_ac_database/generate.py --check
+          python3 -m unittest discover -s tools/mi_ac_database -p 'test_*.py' -v
       - uses: actions/upload-artifact@v4
         with:
           name: PalmRemote-Android-APK

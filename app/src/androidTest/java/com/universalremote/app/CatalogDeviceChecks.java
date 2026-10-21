@@ -111,6 +111,29 @@ public final class CatalogDeviceChecks {
         if(java.util.Arrays.equals(PanasonicAcEncoder.encode(firstPanasonic,cold,false).packet,
             PanasonicAcEncoder.encode(firstPanasonic,warm,false).packet))
             throw new AssertionError("Panasonic requested temperature does not affect the packet");checks++;
+        progress.report("Checking all 734 bundled AC source records");
+        AcSourceDatabase completeAc=new AcSourceDatabase(context);
+        if(completeAc.size()!=734||completeAc.brands().size()!=45)throw new AssertionError("Complete AC source metadata missing");checks++;
+        int sourceRaw=0,sourceStateful=0,sourceControls=0;
+        for(JSONObject metadata:completeAc.profiles(null)) {
+            JSONObject record=completeAc.readRecord(metadata.getString("id"));
+            if(record.getBoolean("programsExecuted"))throw new AssertionError("AC data claims source execution");
+            if(metadata.getString("definitionKind").equals("recorded"))sourceRaw++;else sourceStateful++;
+            JSONObject control=metadata.getJSONObject("control");String kind=control.getString("kind");
+            if(kind.equals("recorded")) {
+                JSONObject target=catalog.find(control.getString("profile"));
+                if(target==null||!target.getString("model").equals(metadata.getString("model"))
+                    ||!target.getJSONObject("source").getString("sourceSha256").equals(metadata.getString("sourceRecordSha256")))
+                    throw new AssertionError("AC recorded control link differs");
+                sourceControls++;
+            }else if(kind.equals("panasonic216")) {
+                JSONObject target=panasonic.find(control.getString("profile"));
+                if(target==null||!target.getString("model").equals(metadata.getString("model")))throw new AssertionError("AC Panasonic link differs");
+                sourceControls++;
+            }else if(control.has("profile"))throw new AssertionError("Unsupported AC data exposes a control link");
+        }
+        if(sourceRaw!=33||sourceStateful!=701)throw new AssertionError("Complete AC source data missing");checks++;
+        if(sourceControls!=36)throw new AssertionError("AC data confused with implemented controls");checks++;
         progress.report("Checking Android IR service");
         IrHardware.Result hardware=IrHardware.inspect(context);
         if(hardware.state==IrHardware.State.CHECKING||hardware.title.isEmpty()||hardware.hasEmitter!=(hardware.state==IrHardware.State.READY))

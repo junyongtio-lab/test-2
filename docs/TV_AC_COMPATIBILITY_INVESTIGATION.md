@@ -1,5 +1,7 @@
 # TV and air-conditioner compatibility investigation
 
+**1.5.0 update:** All 734 bundled AC source records are now preserved as complete inert JSON, with zero omissions. Controls remain implemented for 36 source records; 698 are explicitly data-only. See [complete AC source data](COMPLETE_AC_DATABASE.md). The 1.3.0/1.4.0 investigation below remains historical and describes the raw converter's narrower scope.
+
 User report received **21 October 2026, Asia/Kuala_Lumpur**. The release under investigation is Palm Remote **1.3.0 / code 6**. The supplied Xiaomi archive contains Mi Remote **7.2.4M / code 6500**; references to “7.4.2M” in the follow-up request do not identify a different uploaded release. APK integrity, database hashes and extraction limits are recorded in the [original investigation](MI_REMOTE_724M_INVESTIGATION.md).
 
 ## What the user tested

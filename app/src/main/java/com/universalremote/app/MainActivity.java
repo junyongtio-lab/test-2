@@ -24,10 +24,13 @@ public final class MainActivity extends Activity {
         TEXT=0xfff5f7fc, MUTED=0xffa8b3c8, MINT=0xff91e5d0, LILAC=0xffbcb3ff;
     private final ExecutorService worker = Executors.newSingleThreadExecutor();
     private final ExecutorService hardwareWorker = Executors.newSingleThreadExecutor();
+    private final ExecutorService acSourceWorker = Executors.newSingleThreadExecutor();
     private IrHardware.Result irHardware = IrHardware.checking();
     private DeviceStore store;
     private IrCatalog infrared;
     private PanasonicAcEncoder panasonic;
+    private AcSourceDatabase acSourceDatabase;
+    private boolean acSourceFailed;
     private final List<JSONObject> devices = new ArrayList<>();
     private JSONObject selected;
     private NetworkRemote network;
@@ -84,6 +87,12 @@ public final class MainActivity extends Activity {
             } catch(Exception error) {
                 ui(()->{panasonicFailed=true;if(selectedUsesPanasonic()){updateIrRemoteAvailability();render();}});
             }
+        });
+        acSourceWorker.execute(()->{
+            try {
+                AcSourceDatabase loaded=new AcSourceDatabase(this);
+                ui(()->{acSourceDatabase=loaded;render();});
+            }catch(Exception error){ui(()->{acSourceFailed=true;render();});}
         });
     }
     @Override protected void onResume() {
@@ -244,6 +253,8 @@ public final class MainActivity extends Activity {
         categoryTile(first,"set_top_box","Decoder","Recorded IR controls",LILAC);content.addView(first);
         LinearLayout second=row();categoryTile(second,"air_conditioner","Air conditioner","Recorded IR settings",0xffffcc97);
         categoryTile(second,"fan","Fan","Speed, swing & more",0xff9ccfff);content.addView(second);gap(content,14);
+        LinearLayout ac=card("All 734 Mi AC profiles","Complete AC source data from the supplied Mi Remote 7.2.4M APK is included offline. Controls are implemented for 36 source profiles; 698 need an encoder.");
+        gap(ac,12);full(ac,action("Browse all 734 AC profiles",()->browseAcSource(null),false),52);
         if(!devices.isEmpty()) {
             section("Ready when you are","Tap a saved device to open its remote.");
             for(JSONObject device:devices)savedDeviceCard(device,false);
@@ -435,6 +446,8 @@ public final class MainActivity extends Activity {
         full(content,action("+ Add a remote",this::addBrand,true),54);gap(content,12);
     }
     private void helpPage() {
+        LinearLayout ac=card("Complete Mi APK AC database","All 734 source AC profiles across 45 brand labels are included: 33 recorded profiles and 701 stateful definitions. Complete source fields and referenced data are retained. Controls are currently implemented for 36 of these profiles; 698 are data-only. Source script text is stored as data and is never executed.");
+        gap(ac,12);full(ac,action("Browse all 734 AC profiles",()->browseAcSource(null),false),52);
         card("Mi Remote infrared catalogue", "Bundled IR signals include the published Mi GitHub catalogue, 604 additional TV/AC profiles recovered from the uploaded Mi Remote 7.2.4M database and five Astro keysets from its regional service. They work offline without a profile-import step. No Palm account, subscriptions, advertisements or analytics.");
         if(infrared!=null)card("Available remote keysets",infrared.profileCount()+" keysets across televisions, set-top boxes, air conditioners and fans. Search by the database brand, then try a recorded remote on your appliance. Source keyset IDs are not retail model numbers; a brand match alone does not establish compatibility.");
         card("Astro decoder setup", "Use Set up Astro on Home, then Find a working remote. Five actual Astro keysets are available. Test several buttons and confirm the decoder responds before saving. The source does not identify Ultra Box, Ulti Box or NJOI models, so those matches require testing. The earlier unverified Astro codes remain removed. PRISM+ is absent from the catalogue.");
@@ -468,6 +481,7 @@ public final class MainActivity extends Activity {
         if(infrared==null){message(irCatalogFailed?"The IR catalogue could not load. Restart the app to retry.":"The IR catalogue is loading. Try again in a moment.");return;}
         Set<String> brands=new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         brands.addAll(infrared.brands(category));
+        if(category.equals("air_conditioner")&&acSourceDatabase!=null)brands.addAll(acSourceDatabase.brands());
         // These two connection options remain available independently of the IR catalogue.
         if(category.equals("tv")){brands.add("Samsung");brands.add("LG");}
         List<Choice> options=new ArrayList<>();
@@ -477,6 +491,60 @@ public final class MainActivity extends Activity {
         }));
         if(options.isEmpty()){message("No decoded "+categoryLabel(category).toLowerCase(Locale.ROOT)+" profiles are available in this snapshot.");return;}
         choices(categoryLabel(category)+" brand · Mi Remote",options);
+    }
+    private void browseAcSource(String brand) {
+        if(acSourceDatabase==null){message(acSourceFailed?"The complete AC database could not load. Existing remotes remain available.":"The complete AC database is loading. Try again shortly.");return;}
+        List<Choice> options=new ArrayList<>();
+        for(JSONObject profile:acSourceDatabase.profiles(brand)) {
+            String status=profile.optJSONObject("control").optString("kind").equals("unavailable")?"Data included · controls unavailable":"Controls available";
+            options.add(new Choice(profile.optString("brand")+" · "+profile.optString("model")+" · "+status,()->showAcSourceDetails(profile)));
+        }
+        choices((brand==null?"All 734 Mi APK AC profiles":brand+" · "+options.size()+" Mi APK AC profiles"),options);
+    }
+    private void showAcSourceDetails(JSONObject profile) {
+        String kind=profile.optJSONObject("control").optString("kind");boolean available=!kind.equals("unavailable");
+        String details="Complete source data included offline.\n\n"+(available?"Controls available: "+(kind.equals("recorded")?"recorded signals":"Panasonic temperature and mode controls")+".":"Data included; controls unavailable. This stateful profile needs an encoder. No signal can be sent from this source-data view.")
+            +"\n\nSource profile: "+profile.optString("model")+"\nBrand: "+profile.optString("brand")
+            +"\nCarrier: "+profile.optInt("carrierHz")+" Hz\nDefinition fields: "+profile.optInt("definitionFieldCount")
+            +"\nIR hardware: "+irHardware.title+"\n\nSource IDs are not retail model numbers. Included data does not establish an appliance match.";
+        AlertDialog.Builder builder=new AlertDialog.Builder(this).setTitle("AC source · "+profile.optString("model"))
+            .setMessage(details).setNeutralButton("View included data",(dialog,which)->viewAcSourceData(profile));
+        if(available)builder.setPositiveButton("Open controls",(dialog,which)->openAcSourceControls(profile)).setNegativeButton("Close",null);
+        else builder.setPositiveButton("Close",null);
+        builder.show();
+    }
+    private void openAcSourceControls(JSONObject profile) {
+        JSONObject control=profile.optJSONObject("control");String kind=control.optString("kind"),id=control.optString("profile");
+        if(kind.equals("recorded")) {
+            JSONObject target=infrared==null?null:infrared.find(id);
+            if(target==null||!target.optString("model").equals(profile.optString("model"))
+                ||!target.optJSONObject("source").optString("sourceSha256").equals(profile.optString("sourceRecordSha256"))) {
+                message("The recorded control link is unavailable. Source data remains included.");return;
+            }
+            matchIrProfiles(target.optString("brand"),Collections.singletonList(target));
+        }else if(kind.equals("panasonic216")) {
+            JSONObject target=panasonic==null?null:panasonic.find(id);
+            if(target==null||!target.optString("model").equals(profile.optString("model"))) {
+                message("The Panasonic controls are unavailable. Source data remains included.");return;
+            }
+            panasonicSetup(null,id);
+        }
+    }
+    private void viewAcSourceData(JSONObject profile) {
+        final AcSourceDatabase database=acSourceDatabase;
+        if(database==null){message("The AC source database is unavailable.");return;}
+        acSourceWorker.execute(()->{
+            try {
+                String data=database.readRecord(profile.optString("id")).toString(2);
+                ui(()->{
+                    LinearLayout body=column();body.setPadding(dp(18),dp(8),dp(18),dp(8));
+                    body.addView(text("Included source data only. Stored script text is never executed. This view cannot transmit IR.",13,MUTED,false));gap(body,12);
+                    TextView source=text(data,11,TEXT,false);source.setTextIsSelectable(true);
+                    ScrollView scroll=new ScrollView(this);scroll.addView(source);body.addView(scroll,new LinearLayout.LayoutParams(-1,dp(320)));
+                    new AlertDialog.Builder(this).setTitle("Included AC data · "+profile.optString("model")).setView(body).setPositiveButton("Done",null).show();
+                });
+            }catch(Exception error){ui(()->message("Could not read included AC data: "+error.getMessage()));}
+        });
     }
     private static final class Choice {
         final String label;final Runnable action;
@@ -604,11 +672,15 @@ public final class MainActivity extends Activity {
     }
     private void panasonicSetup() { panasonicSetup(null); }
     private void panasonicSetup(JSONObject replacement) {
+        panasonicSetup(replacement,"");
+    }
+    private void panasonicSetup(JSONObject replacement,String initialProfile) {
         final PanasonicAcEncoder encoder=panasonic;
         if(encoder==null){message(panasonicFailed?"Panasonic AC definitions could not load. Recorded AC remotes remain available.":"Panasonic AC definitions are loading. Try again shortly.");return;}
         final List<JSONObject> profiles=encoder.profiles();
         if(profiles.isEmpty()){message("No verified Panasonic AC parameter profiles are available.");return;}
-        int initial=0;if(replacement!=null)for(int i=0;i<profiles.size();i++)if(profiles.get(i).optString("id").equals(replacement.optString("profile")))initial=i;
+        String requestedProfileId=replacement==null?initialProfile:replacement.optString("profile");
+        int initial=0;for(int i=0;i<profiles.size();i++)if(profiles.get(i).optString("id").equals(requestedProfileId))initial=i;
         final int[] current={initial};final boolean[] sending={false},signalSent={false};
         final java.util.concurrent.atomic.AtomicBoolean active=new java.util.concurrent.atomic.AtomicBoolean(true);
         LinearLayout body=column();body.setPadding(dp(20),dp(8),dp(20),dp(12));
@@ -800,6 +872,8 @@ public final class MainActivity extends Activity {
         if(infrared==null){message("IR catalogue is unavailable.");return;}
         List<Choice> options=new ArrayList<>();
         List<JSONObject> profiles=infrared.forBrand(brand,category);
+        if(category.equals("air_conditioner")&&acSourceDatabase!=null&&!acSourceDatabase.profiles(brand).isEmpty())
+            options.add(new Choice("All included Mi APK AC profiles · "+acSourceDatabase.profiles(brand).size()+" source records",()->browseAcSource(brand)));
         if(brand.equalsIgnoreCase("Panasonic")&&category.equals("air_conditioner")) {
             options.add(new Choice("Find a Panasonic AC remote · Temperature and mode controls",this::panasonicSetup));
         }
@@ -1051,5 +1125,5 @@ public final class MainActivity extends Activity {
     }
     private void message(String value) {Toast.makeText(this,value==null?"Connection failed":value,Toast.LENGTH_LONG).show();}
     private void ui(Runnable task) {if(!destroyed)runOnUiThread(()->{if(!destroyed)task.run();});}
-    @Override protected void onDestroy(){destroyed=true;connectionGeneration++;if(network!=null)network.dispose();worker.shutdownNow();hardwareWorker.shutdownNow();super.onDestroy();}
+    @Override protected void onDestroy(){destroyed=true;connectionGeneration++;if(network!=null)network.dispose();worker.shutdownNow();hardwareWorker.shutdownNow();acSourceWorker.shutdownNow();super.onDestroy();}
 }

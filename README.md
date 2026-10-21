@@ -1,6 +1,8 @@
 # Palm Remote for Android
 
-Version **1.4.0** adds **604 TV/AC raw remote profiles and 24,204 recorded commands recovered from the uploaded Mi Remote APK**, six Panasonic AC parameter profiles, and TV candidate ordering derived from the source matching trees. On a phone with an IR emitter, selecting a TV candidate opens guided testing before it can be saved as a working match. Existing saved recorded remotes can be tested again with **Find a working remote**.
+Version **1.5.0** includes **all 734 AC source profiles across 45 brand labels** from the supplied Mi Remote APK, with no records omitted. Complete source rows, referenced data, decoded definitions and original parameter/hook text are bundled offline. Open **Home → Browse all 734 AC profiles** to search and inspect them. **Controls are implemented for 36 source profiles; 698 are included as data with controls unavailable.** Source hook text is never executed. See [complete AC data and its control limits](docs/COMPLETE_AC_DATABASE.md).
+
+The existing 604 converted TV/AC raw profiles, six Panasonic AC parameter profiles and source-prioritized TV matching remain. On a phone with an IR emitter, selecting a TV candidate opens guided testing before it can be saved as a working match. Existing saved recorded remotes can be tested again with **Find a working remote**.
 
 The supplied archive identifies **Mi Remote 7.2.4M / code 6500**. Its nested IR database is converted into bundled JSON offline. The existing GitHub Mi catalogue and five Astro profiles remain available. The complete Mi online catalogue and all proprietary AC encoders are not contained in this import; see [supported scope](docs/SUPPORTED_DEVICES.md) and the [TV/AC investigation](docs/TV_AC_COMPATIBILITY_INVESTIGATION.md).
 
@@ -10,7 +12,7 @@ The user reports that Palm Remote 1.3.0 controls their **Astro Ultra Box**. Thos
 
 Download [PalmRemote.apk](downloads/PalmRemote.apk) on an Android phone running Android 6.0 or later. Open it and allow installation from that source if prompted. The development-signed APK retains the package and signing certificate for an in-place update. APKs do not run on iPhone.
 
-Version 1.4.0 retains saved current Mi remotes and Samsung/LG Wi-Fi devices with their encrypted credentials. Upgrades from before 1.2.0 remove obsolete IR selections and imports after the replacement catalogues validate. The earlier unverified Astro JSON and native AC engine remain removed.
+Version 1.5.0 retains saved current Mi remotes and Samsung/LG Wi-Fi devices with their encrypted credentials. Upgrades from before 1.2.0 remove obsolete IR selections and imports after the replacement catalogues validate. The earlier unverified Astro JSON and native AC engine remain removed.
 
 ## Included controls
 
@@ -34,7 +36,7 @@ Use **Home → category → brand**. For a Daewoo TV, choose **Find a working re
 
 For Panasonic AC, choose **Air conditioner → Panasonic → Find a Panasonic AC remote**. Test the six parameter candidates; the test sends a power-on or power-toggle message with Cool 24 °C. Save after confirming the AC responds. An explicitly labelled untested preview is also available, with sending disabled when no emitter is detected. Editing requested settings sends nothing until **Send requested settings** or a power button is tapped. Existing recorded Panasonic choices remain available separately.
 
-Recorded remotes group available power/input, navigation, volume/channel and keypad controls. **More commands** and **All recorded buttons** retain access to every recorded source key. Actual `key_r` captures provide alternate sends where present; no missing waveform or off command is invented. Saved remotes remain available from Home and Devices. See [1.4 screenshots](docs/screenshots/v1.4/) and [validation evidence](docs/VALIDATION.md).
+Recorded remotes group available power/input, navigation, volume/channel and keypad controls. **More commands** and **All recorded buttons** retain access to every recorded source key. Actual `key_r` captures provide alternate sends where present; no missing waveform or off command is invented. Saved remotes remain available from Home and Devices. See [1.5 screenshots](docs/screenshots/v1.5/) and [validation evidence](docs/VALIDATION.md).
 
 ## Check the phone's IR hardware
 
@@ -62,4 +64,4 @@ Offline source tools cover the [GitHub catalogue](tools/mi_catalogue/README.md),
 
 Device names, selected profiles and requested AC settings stay in private phone storage. Pairing keys and SmartThings tokens use Android Keystore encryption. Android backup is disabled. Samsung requests go to `api.smartthings.com`; LG control goes to the selected private-LAN TV. Removing a saved Wi-Fi device deletes its credential.
 
-Application code and independent new helpers are MIT. The GitHub Mi dataset and its standalone conversion tooling retain AGPL-3.0-or-later notices. Xiaomi/Kookong APK data and public Astro responses are attributed separately and are not relicensed MIT or AGPL. No Xiaomi graphics, decompiled implementation, native libraries or executable model scripts are shipped. See [IR attribution](app/src/main/assets/ir/ATTRIBUTION.md), [third-party notices](app/src/main/assets/licenses/NOTICE.txt) and [integration sources](docs/API_INTEGRATIONS.md).
+Application code and independent new helpers are MIT. The GitHub Mi dataset and its standalone conversion tooling retain AGPL-3.0-or-later notices. Xiaomi/Kookong APK data and public Astro responses are attributed separately and are not relicensed MIT or AGPL. No Xiaomi graphics, decompiled Java implementation or native libraries are shipped. Original AC parameter/hook text is retained as inert source data and is never executed. See [IR attribution](app/src/main/assets/ir/ATTRIBUTION.md), [third-party notices](app/src/main/assets/licenses/NOTICE.txt) and [integration sources](docs/API_INTEGRATIONS.md).

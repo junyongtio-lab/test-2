@@ -1,6 +1,6 @@
 # Mi Remote infrared data attribution
 
-Palm Remote **1.4.0** bundles three separately attributed raw-signal sources and six Panasonic 216-bit parameter profiles. Independently written Android code reads the converted JSON or encodes supported Panasonic settings through Android ConsumerIrManager. The app makes no Xiaomi API requests and requires no smartphone JSON import. It includes no Xiaomi native libraries, decompiled implementation, vendor Lua or copied Xiaomi graphics.
+Palm Remote **1.5.0** bundles three separately attributed raw-signal sources, six Panasonic 216-bit parameter profiles and complete source data for all 734 AC records in the supplied APK. Independently written Android code reads the converted JSON or encodes supported Panasonic settings through Android ConsumerIrManager. The app makes no Xiaomi API requests and requires no smartphone JSON import. It includes no Xiaomi native libraries, decompiled Java implementation or copied Xiaomi graphics. Vendor parameter/hook text is preserved as inert source data and is never executed.
 
 ## GitHub catalogue and matching metadata
 
@@ -27,9 +27,15 @@ Original response JSON, request timestamps, hashes, the independent converter an
 
 The user supplied the archive for package `com.duokan.phone.remotecontroller`, version **7.2.4M / code 6500**. The extracted APK SHA-256 is `4c20655f2b636d86152202994da2a1b88f4ebf5bddf58b7ef6c2bf8e42fa5c73`. Its pinned RAR resource contains `irlocaldata.db`, SHA-256 `727a271f25889d97fc94b021b240f62d1ce559ce8a98cf14b7ac0d3efb657bfa`.
 
-The independent importer under `tools/mi_apk_catalogue/` verifies the APK, RAR, database, schemas and row counts and preserves attributable brand/table/row identities. It converts **571 TV profiles / 23,885 commands** and **33 raw AC profiles / 319 commands** into `mi_apk/`, with no raw-profile exclusions. All complete validated raw arrays remain microseconds. Another **701 stateful AC definitions** require separate encoding and are not imported as raw commands. The APK's full SQLite database, scripts and native engines are not included in the app.
+The independent importer under `tools/mi_apk_catalogue/` verifies the APK, RAR, database, schemas and row counts and preserves attributable brand/table/row identities. It converts **571 TV profiles / 23,885 commands** and **33 raw AC profiles / 319 commands** into `mi_apk/`, with no raw-profile exclusions. All complete validated raw arrays remain microseconds. Another **701 stateful AC definitions** require separate encoding and are not imported as raw commands. The APK's full SQLite database and native engines are not included in the app.
 
 These vendor data are attributed to Xiaomi/Kookong and the respective source brands. APK possession and signature verification do not establish a redistribution license or independently authenticate the publisher certificate. No additional vendor-data rights or MIT/AGPL relicensing are asserted.
+
+## Complete AC source-data copy
+
+At the user's request, `mi_ac_database/` additionally retains **all 734 AC source records across 45 brand labels**, with no omissions: 33 recorded profiles and 701 stateful definitions. Each JSON asset preserves the original database row, complete referenced source row, decoded definition, original brand row and decoded brand data. Original encrypted strings and parameter/hook text remain unchanged. The independent generator and per-file hashes are under `tools/mi_ac_database/`. This is vendor source data under the same separate attribution above, not newly MIT/AGPL-licensed data.
+
+These assets are read as data only. No interpreter, vendor Java compiler, Lua runtime or native AC engine is included or invoked. Existing controls implement 36 source profiles (33 recorded and three Panasonic216); the remaining 698 are explicitly labelled as included data with controls unavailable. Preserving their source data is not implementation of their encoders or a physical compatibility claim. The three additional GitHub Panasonic profiles are outside the 734-source count.
 
 ## Independent Panasonic 216-bit encoder
 

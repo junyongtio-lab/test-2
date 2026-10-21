@@ -51,8 +51,19 @@ written Java encoder. Three derive from the pinned APK database; three additiona
 profiles derive from the GitHub archive and retain its source notices. Framing,
 packet fields, checksums and capability limits remain source attributed:
 https://github.com/junyongtio-lab/test-2/tree/main/tools/panasonic_ac
-This is not Mi Remote's complete AC engine. No vendor Lua, native library or
-decompiled implementation is executed or copied into Palm Remote.
+This is not Mi Remote's complete AC engine. No vendor native library or
+decompiled Java implementation is executed or copied into Palm Remote.
+
+Version 1.5.0 additionally includes all 734 AC source records from that exact
+APK as inert JSON under assets/ir/mi_ac_database (45 brand labels; no omissions).
+Each record preserves its original row, referenced source row, decoded complete
+definition, original brand row and decoded brand data. Vendor parameter/hook
+text, including script text, is preserved unchanged as DATA ONLY; no interpreter
+or vendor program is executed. Controls are implemented for 36 source records;
+698 stateful profiles are included with controls unavailable. Inclusion is not
+physical compatibility or a port of all AC encoders. Vendor source rights and
+attribution above apply; independent generator/app code retains its MIT license.
+https://github.com/junyongtio-lab/test-2/tree/main/tools/mi_ac_database
 
 Combined raw coverage is 4,315 profiles and 165,369 command associations.
 Six adjustable Panasonic profiles are counted separately.

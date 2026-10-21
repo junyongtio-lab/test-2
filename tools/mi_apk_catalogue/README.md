@@ -43,6 +43,12 @@ catalogue. Their source IDs and exclusion reason are retained in
 [`import-summary.json`](import-summary.json). Separate supported Panasonic state
 encoding is documented in [tools/panasonic_ac](../panasonic_ac/).
 
+Palm Remote 1.5.0 additionally preserves **all 734 AC source records**, including
+those 701 definitions, through the separate [complete AC source-data exporter](../mi_ac_database/README.md).
+This raw importer's exclusion counts describe raw transmission conversion, not
+the complete source-data copy. Complete data inclusion does not implement the
+remaining 698 stateful control profiles.
+
 This is the recoverable raw TV/AC data bundled in the supplied APK. It is not Mi
 Remote's complete online catalogue or a port of its full AC engine. Other device
 categories are outside this converter. The bundled database has no named Daewoo
