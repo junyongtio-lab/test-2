@@ -19,11 +19,20 @@ import java.util.TreeSet;
 final class IrCatalog {
     static final String SOURCE_URL = "https://github.com/ysard/mi_remote_database";
     static final String STB_SOURCE_URL = "https://sg-urc.io.mi.com";
+    static final String APK_SOURCE_URL = "https://github.com/junyongtio-lab/test-2";
+    static final String APK_SHA256 = "4c20655f2b636d86152202994da2a1b88f4ebf5bddf58b7ef6c2bf8e42fa5c73";
+    static final String APK_ARCHIVE_SHA256 = "72fc2fc859255e19963370ecd3252889af3f8a2e609d2c74c2d995e03b4267a6";
+    static final String APK_DATABASE_SHA256 = "727a271f25889d97fc94b021b240f62d1ce559ce8a98cf14b7ac0d3efb657bfa";
+    static final String ARCHIVE_SHA256 = "44dcf13d815383c907884f7cdb294afcd085b7063c1de4780589e0626cb61895";
+    static final String ARCHIVE_INDEX_SHA256 = "221bfefd1307b846b89093489a1a1676132fe4c4f1f516e39dfafd6bc71bc7ac";
     static final int PROFILE_LIMIT = 512 * 1024;
     private static final int INDEX_LIMIT = 16 * 1024 * 1024, CACHE_SIZE = 8;
+    private static final int ARCHIVE = 0, STB = 1, APK = 2;
     interface AssetReader { InputStream open(String asset) throws Exception; }
     interface Emitter extends IrHardware.Probe { void transmit(int frequency,int[] pattern); }
     private final Map<String, JSONObject> profiles = new LinkedHashMap<>();
+    private final Set<String> archiveProfileIds = new java.util.HashSet<>();
+    private final Map<String,Integer> matchingRanks = new LinkedHashMap<>();
     private final LinkedHashMap<String, JSONObject> cache = new LinkedHashMap<>(CACHE_SIZE, .75f, true);
     private final ConsumerIrManager ir;
     private final AssetReader assets;
@@ -32,38 +41,43 @@ final class IrCatalog {
 
     IrCatalog(Context context) throws Exception {
         this(readIndex(context, "ir/mi/index.json"), readIndex(context, "ir/mi_stb/index.json"),
+            readIndex(context, "ir/mi_apk/index.json"), readIndex(context, "ir/matching_order.json"),
             asset -> context.getAssets().open(asset),
             (ConsumerIrManager) context.getSystemService(Context.CONSUMER_IR_SERVICE));
-        // Only remove the superseded import value after both replacement indexes validate.
+        // Only remove the superseded import value after every replacement index validates.
         context.getSharedPreferences("ir_imports", Context.MODE_PRIVATE).edit().remove("custom").apply();
     }
-    IrCatalog(JSONObject index, AssetReader assets) throws Exception { this(index, null, assets, null); }
+    IrCatalog(JSONObject index, AssetReader assets) throws Exception { this(index, null, null, null, assets, null); }
     IrCatalog(JSONObject index, JSONObject supplement, AssetReader assets) throws Exception {
-        this(index, supplement, assets, null);
+        this(index, supplement, null, null, assets, null);
     }
-    private IrCatalog(JSONObject index, JSONObject supplement, AssetReader assets, ConsumerIrManager ir) throws Exception {
-        addIndex(index, false);
+    IrCatalog(JSONObject index, JSONObject supplement, JSONObject apk, JSONObject matchingOrder, AssetReader assets) throws Exception {
+        this(index, supplement, apk, matchingOrder, assets, null);
+    }
+    private IrCatalog(JSONObject index, JSONObject supplement, JSONObject apk, JSONObject matchingOrder, AssetReader assets, ConsumerIrManager ir) throws Exception {
+        addIndex(index, ARCHIVE);
         this.coverage = new JSONObject(index.getJSONObject("coverage").toString());
-        if(supplement != null) {
-            addIndex(supplement, true);
-            mergeCoverage();
-        }
+        if(supplement != null) addIndex(supplement, STB);
+        if(apk != null) addIndex(apk, APK);
+        if(matchingOrder != null) addMatchingOrder(matchingOrder);
+        if(supplement != null || apk != null) mergeCoverage();
         this.assets = assets;
         this.ir = ir;
     }
-    private void addIndex(JSONObject index, boolean supplemental) throws Exception {
+    private void addIndex(JSONObject index, int kind) throws Exception {
         if(index.getDouble("schemaVersion") != 2) throw new IllegalArgumentException("Unsupported Mi catalogue version.");
-        if(supplemental) checkStbSource(index.getJSONObject("source"));
+        if(kind == STB) checkStbSource(index.getJSONObject("source"));
+        else if(kind == APK) checkApkSource(index.getJSONObject("source"));
         else checkSource(index.getJSONObject("source"));
         JSONArray array = index.getJSONArray("profiles");
-        if(array.length() == 0 || array.length() > (supplemental ? 64 : 50000))
-            throw new IllegalArgumentException("Invalid Mi catalogue size.");
+        int limit = kind == STB ? 64 : kind == APK ? 10000 : 50000;
+        if(array.length() == 0 || array.length() > limit) throw new IllegalArgumentException("Invalid Mi catalogue size.");
         Set<String> supplementalModels = new java.util.HashSet<>();
         for(int i = 0; i < array.length(); i++) {
             JSONObject profile = array.getJSONObject(i);
             String id = profile.getString("id");
             if(!id.matches("mi_[a-f0-9]{8,64}") || profiles.containsKey(id)) throw new IllegalArgumentException("Invalid or duplicate Mi profile ID.");
-            String directory = supplemental ? "ir/mi_stb/profiles/" : "ir/mi/profiles/";
+            String directory = kind == STB ? "ir/mi_stb/profiles/" : kind == APK ? "ir/mi_apk/profiles/" : "ir/mi/profiles/";
             if(!profile.getString("asset").equals(directory + id + ".json")) throw new IllegalArgumentException("Invalid Mi profile asset path.");
             if(!profile.getString("assetSha256").matches("[a-f0-9]{64}")) throw new IllegalArgumentException("Invalid Mi signal asset digest.");
             String category = profile.getString("category");
@@ -80,7 +94,7 @@ final class IrCatalog {
             checkedText(source.getString("brandFile"), 240, "brand file");
             checkedText(source.getString("modelId"), 240, "source model");
             if(!source.getString("sourceSha256").matches("[a-f0-9]{64}")) throw new IllegalArgumentException("Invalid Mi source digest.");
-            if(supplemental) {
+            if(kind == STB) {
                 String model = source.getString("modelId");
                 if(!category.equals("set_top_box") || !profile.getString("brand").equals("Astro")
                     || !Boolean.FALSE.equals(profile.get("hardwareTested"))
@@ -91,9 +105,29 @@ final class IrCatalog {
                     || !source.getString("sourceFile").equals("tools/mi_stb/source/keyset_" + model + ".json")
                     || !source.getString("brandFile").equals("tools/mi_stb/source/brands_my.json"))
                     throw new IllegalArgumentException("Invalid Mi online Astro provenance.");
+            } else if(kind == APK) {
+                checkApkProfile(profile, source, supplementalModels);
             }
             profiles.put(id, profile);
+            if(kind == ARCHIVE) archiveProfileIds.add(id);
         }
+    }
+    private static void checkApkProfile(JSONObject profile, JSONObject source, Set<String> rows) throws Exception {
+        String table = source.getString("sourceTable"), model = source.getString("modelId"), category = profile.getString("category");
+        Object brandValue = source.get("brandId"), deviceValue = source.get("sourceDeviceId");
+        if(!table.equals("mi_remote_ircode") && !table.equals("kk_remote_ircode") && !table.equals("xm_remote_ircode"))
+            throw new IllegalArgumentException("Invalid Mi APK source table.");
+        if(!(brandValue instanceof String) || !((String)brandValue).matches("[0-9]{1,10}")
+            || !(deviceValue instanceof Number) || (source.getDouble("sourceDeviceId") != 1 && source.getDouble("sourceDeviceId") != 3)
+            || !category.equals(source.getInt("sourceDeviceId") == 1 ? "tv" : "air_conditioner")
+            || !model.matches("[A-Za-z0-9_]{1,100}") || !rows.add(table + "/" + model)
+            || !profile.getString("model").equals(model) || !Boolean.FALSE.equals(profile.get("hardwareTested"))
+            || !source.getString("sourceFile").equals("irlocaldata.db/" + table + "/" + model)
+            || !source.getString("brandFile").equals("irlocaldata.db/brand/" + brandValue)
+            || !source.getString("brandSha256").matches("[a-f0-9]{64}")
+            || !source.getString("format").equals(table.equals("xm_remote_ircode")
+                ? "aes-gzip-microsecond-json-array" : "microsecond-json-array"))
+            throw new IllegalArgumentException("Invalid Mi APK profile provenance.");
     }
     private void mergeCoverage() throws Exception {
         Set<String> allBrands = new java.util.HashSet<>();
@@ -141,6 +175,53 @@ final class IrCatalog {
         String url = source.optString("url", source.optString("repository"));
         if(!url.equals(SOURCE_URL) && !url.startsWith(SOURCE_URL + "/")) throw new IllegalArgumentException("Only the bundled Mi remote database is supported.");
     }
+    private static void checkApkSource(JSONObject source) throws Exception {
+        if(!source.getString("repository").equals(APK_SOURCE_URL)
+            || !source.getString("kind").equals("mi-apk-bundled-database")
+            || !source.getString("apkSha256").equals(APK_SHA256)
+            || !source.getString("archiveSha256").equals(APK_ARCHIVE_SHA256)
+            || !source.getString("frequencyUnit").equals("Hz") || !source.getString("timingUnit").equals("microseconds")
+            || !source.getString("databaseSha256").equals(APK_DATABASE_SHA256)
+            || !source.getString("versionName").equals("7.2.4M")
+            || !(source.get("versionCode") instanceof Number) || source.getDouble("versionCode") != 6500)
+            throw new IllegalArgumentException("Unsupported Mi APK database source.");
+    }
+    private void addMatchingOrder(JSONObject order) throws Exception {
+        JSONObject source = order.getJSONObject("source");
+        if(order.getDouble("schemaVersion") != 1 || !source.getString("repository").equals(SOURCE_URL)
+            || !source.getString("release").equals("v2.1") || !source.getString("archiveSha256").equals(ARCHIVE_SHA256)
+            || !source.getString("indexSha256").equals(ARCHIVE_INDEX_SHA256) || !source.getString("country").equals("MY"))
+            throw new IllegalArgumentException("Unsupported Mi matching-order source.");
+        JSONArray groups = order.getJSONArray("groups");
+        if(groups.length() == 0 || groups.length() > archiveProfileIds.size())
+            throw new IllegalArgumentException("Invalid Mi matching groups.");
+        Set<String> groupsSeen = new java.util.HashSet<>();int rank = 0;
+        for(int i = 0; i < groups.length(); i++) {
+            JSONObject group = groups.getJSONObject(i);
+            String brand = group.getString("brand"), file = group.getString("sourceBrandFile"), digest = group.getString("sourceBrandSha256");
+            if(!group.getString("category").equals("tv") || !digest.matches("[a-f0-9]{64}") || !groupsSeen.add(file))
+                throw new IllegalArgumentException("Invalid Mi matching group provenance.");
+            JSONArray entries = group.getJSONArray("profiles");
+            if(entries.length() == 0 || entries.length() > archiveProfileIds.size())
+                throw new IllegalArgumentException("Invalid Mi matching group size.");
+            for(int j = 0; j < entries.length(); j++) {
+                JSONObject entry = entries.getJSONObject(j);String id = entry.getString("id");
+                JSONObject metadata = profiles.get(id);
+                if(metadata == null || !archiveProfileIds.contains(id) || matchingRanks.containsKey(id))
+                    throw new IllegalArgumentException("Unknown or duplicate Mi matching profile.");
+                JSONObject original = metadata.getJSONObject("source");
+                if(!metadata.getString("category").equals("tv") || !metadata.getString("brand").equals(brand)
+                    || !original.getString("brandFile").equals(file) || !original.getString("brandSha256").equals(digest)
+                    || !original.getString("modelId").equals(entry.getString("modelId")))
+                    throw new IllegalArgumentException("Mi matching profile source changed.");
+                matchingRanks.put(id, rank++);
+            }
+        }
+        for(String id : archiveProfileIds) {
+            if(profiles.get(id).getString("category").equals("tv") && !matchingRanks.containsKey(id))
+                throw new IllegalArgumentException("Mi matching order omitted a TV profile.");
+        }
+    }
     private static void checkedText(String value, int limit, String field) {
         if(value.trim().isEmpty() || value.length() > limit || value.matches("(?s).*[\\p{Cntrl}].*"))
             throw new IllegalArgumentException("Invalid Mi " + field + ".");
@@ -160,6 +241,10 @@ final class IrCatalog {
         List<JSONObject> result = new ArrayList<>();
         for(JSONObject profile : profiles.values())
             if(brand.equalsIgnoreCase(profile.optString("brand")) && category.equals(profile.optString("category"))) result.add(profile);
+        if(category.equals("tv") && !matchingRanks.isEmpty()) java.util.Collections.sort(result, (left, right) -> {
+            Integer a = matchingRanks.get(left.optString("id")), b = matchingRanks.get(right.optString("id"));
+            return Integer.compare(a == null ? Integer.MAX_VALUE : a, b == null ? Integer.MAX_VALUE : b);
+        });
         return result;
     }
     Set<String> brands(String category) {

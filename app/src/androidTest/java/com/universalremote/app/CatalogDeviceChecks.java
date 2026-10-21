@@ -13,8 +13,8 @@ public final class CatalogDeviceChecks {
         progress.report("Loading packaged catalogue");
         IrCatalog catalog=new IrCatalog(context);int checks=0;
         progress.report("Catalogue metadata loaded");
-        if(catalog.profileCount()!=3711)throw new AssertionError("Mi index missing profiles");checks++;
-        if(catalog.coverage().getInt("commands")!=141165)throw new AssertionError("Mi command coverage differs");checks++;
+        if(catalog.profileCount()!=4315)throw new AssertionError("Mi index missing profiles");checks++;
+        if(catalog.coverage().getInt("commands")!=165369)throw new AssertionError("Mi command coverage differs");checks++;
         for(String category:new String[]{"tv","set_top_box","air_conditioner","fan"}) {
             progress.report("Checking recorded " + category + " signals");
             if(catalog.brands(category).isEmpty())throw new AssertionError("Missing category "+category);checks++;
@@ -55,6 +55,62 @@ public final class CatalogDeviceChecks {
         if(astroCommands!=216)throw new AssertionError("Astro recorded commands missing");checks++;
         if(catalog.forBrand("Samsung","tv").isEmpty()||catalog.forBrand("LG","tv").isEmpty())
             throw new AssertionError("Mi TV profiles missing");checks++;
+        progress.report("Checking TV source matching order");
+        List<JSONObject> daewoo=catalog.forBrand("Daewoo","tv");
+        java.util.Set<String> daewooIds=new java.util.HashSet<>();
+        for(JSONObject profile:daewoo)daewooIds.add(profile.getString("id"));
+        if(daewoo.size()!=13||daewooIds.size()!=13
+            ||!daewoo.get(0).getJSONObject("source").getString("modelId").equals("xm_1_3399")
+            ||!daewoo.get(1).getJSONObject("source").getString("modelId").equals("xm_1_3390"))
+            throw new AssertionError("Daewoo source matching candidates changed");checks++;
+        progress.report("Checking profiles recovered from the supplied Mi APK");
+        JSONObject apkIndex;
+        try(java.io.InputStream in=context.getAssets().open("ir/mi_apk/index.json")) {
+            apkIndex=new JSONObject(IrCatalog.readBounded(in,16*1024*1024));
+        }
+        org.json.JSONArray apkProfiles=apkIndex.getJSONArray("profiles");
+        if(apkProfiles.length()!=604||apkIndex.getJSONObject("coverage").getInt("commands")!=24204)
+            throw new AssertionError("APK database coverage changed");checks++;
+        java.util.Map<String,JSONObject> representative=new java.util.LinkedHashMap<>();int apkCommands=0;
+        for(int i=0;i<apkProfiles.length();i++) {
+            JSONObject metadata=apkProfiles.getJSONObject(i),actual=catalog.find(metadata.getString("id"));
+            if(actual==null||!actual.getString("model").equals(metadata.getString("model")))
+                throw new AssertionError("APK profile metadata missing");
+            String kind=metadata.getJSONObject("source").getString("sourceTable")+"/"+metadata.getString("category");
+            if(!representative.containsKey(kind))representative.put(kind,metadata);
+            apkCommands+=metadata.getInt("commandCount");
+        }
+        if(apkCommands!=24204||representative.size()!=4)throw new AssertionError("APK source associations missing");checks++;
+        for(JSONObject metadata:representative.values()) {
+            JSONObject profile=catalog.loadProfile(metadata.getString("id")),commands=profile.getJSONObject("commands");
+            if(commands.length()!=metadata.getInt("commandCount"))throw new AssertionError("Packaged APK signal count changed");
+            java.util.Iterator<String> keys=commands.keys();
+            while(keys.hasNext()) {
+                String key=keys.next();JSONObject command=commands.getJSONObject(key);
+                if(!key.equals(command.getString("sourceKey")))throw new AssertionError("APK source command changed");
+                IrCatalog.checkedPattern(command);
+            }
+        }
+        checks++;
+        progress.report("Checking packaged Panasonic AC encoding");
+        PanasonicAcEncoder panasonic=new PanasonicAcEncoder(context);
+        if(panasonic.profiles().size()!=6)throw new AssertionError("Panasonic parameter profiles missing");checks++;
+        for(JSONObject profile:panasonic.profiles()) {
+            PanasonicAcEncoder.State requested=PanasonicAcEncoder.defaults(profile);
+            PanasonicAcEncoder.Signal signal=PanasonicAcEncoder.encode(profile,requested,true);
+            if(signal.packet.length!=27||signal.pattern.length!=440)
+                throw new AssertionError("Panasonic packet framing changed");
+            IrCatalog.validateSignal(signal.carrierHz,signal.pattern);
+            if(!profile.getString("model").equals(panasonic.find(profile.getString("id")).getString("model")))
+                throw new AssertionError("Panasonic source identity changed");
+        }
+        checks++;
+        JSONObject firstPanasonic=panasonic.profiles().get(0);
+        PanasonicAcEncoder.State cold=PanasonicAcEncoder.defaults(firstPanasonic),warm=cold.copy();
+        cold.temperature=16;warm.temperature=30;
+        if(java.util.Arrays.equals(PanasonicAcEncoder.encode(firstPanasonic,cold,false).packet,
+            PanasonicAcEncoder.encode(firstPanasonic,warm,false).packet))
+            throw new AssertionError("Panasonic requested temperature does not affect the packet");checks++;
         progress.report("Checking Android IR service");
         IrHardware.Result hardware=IrHardware.inspect(context);
         if(hardware.state==IrHardware.State.CHECKING||hardware.title.isEmpty()||hardware.hasEmitter!=(hardware.state==IrHardware.State.READY))

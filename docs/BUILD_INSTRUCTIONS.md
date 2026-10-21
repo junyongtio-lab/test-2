@@ -1,6 +1,6 @@
 # Build and validate Palm Remote
 
-The app uses Java and Android's consumer IR service. The tested build toolchain is JDK 21, Android SDK Platform 35, Build Tools 35.0.0 and Gradle 8.13. The checked-in Gradle wrapper downloads the pinned Gradle release and verifies its SHA-256. Version 1.3.0 has no native AC encoder: NDK and CMake are no longer required. No API keys, app registration or hosted backend are needed to build it.
+The app uses Java and Android's consumer IR service. The tested build toolchain is JDK 21, Android SDK Platform 35, Build Tools 35.0.0 and Gradle 8.13. The checked-in Gradle wrapper downloads the pinned Gradle release and verifies its SHA-256. Version 1.4.0 includes an independently written Java Panasonic AC encoder; NDK and CMake are unnecessary. No API keys, app registration or hosted backend are needed to build it.
 
 ## Build and install
 
@@ -36,6 +36,23 @@ python3 -m venv /tmp/mi-catalogue-venv
 
 The Android APK build consumes the checked-in JSON assets and does not need Python or contact Xiaomi. Keep the per-input/per-output hashes in `tools/mi_catalogue/source-manifest.json` synchronized when regenerating data.
 
+## Verify the uploaded-APK data and Panasonic parameters
+
+The additional raw TV/AC records come from the exact user-uploaded **Mi Remote 7.2.4M/code 6500** archive under `downloads`. No separate 7.4.2M archive is present. The importer validates the 7z, APK, nested RAR and SQLite hashes before converting 604 raw profiles and 24,204 command associations. It does not execute the APK, native libraries or embedded AC programs. System libarchive with RAR4 support is required; Ubuntu provides it through `libarchive13`, `libarchive13t64` or `libarchive-dev`.
+
+```sh
+/tmp/mi-catalogue-venv/bin/pip install -r tools/mi_apk_catalogue/requirements.txt
+/tmp/mi-catalogue-venv/bin/python tools/mi_apk_catalogue/generate_apk.py --check
+/tmp/mi-catalogue-venv/bin/python -m unittest discover -s tools/mi_apk_catalogue -p 'test_*.py'
+/tmp/mi-catalogue-venv/bin/python tools/mi_matching/generate_order.py --check
+/tmp/mi-catalogue-venv/bin/python -m unittest discover -s tools/mi_matching -p 'test_*.py'
+/tmp/mi-catalogue-venv/bin/python tools/panasonic_ac/generate.py --check
+/tmp/mi-catalogue-venv/bin/python -m unittest discover -s tools/panasonic_ac -p 'test_*.py'
+/tmp/mi-catalogue-venv/bin/python tools/panasonic_ac/verify_sources.py
+```
+
+The importer defaults to bounded temporary extraction of the committed archive; `--apk` accepts an already extracted exact APK. Matching order preserves all 2,810 original TV profile associations while restoring source-tree priority. The Panasonic generator uses pinned, non-executable parameters for six Panasonic216 profiles, including three from the supplied APK and three from the existing GitHub source. It does not implement every proprietary AC family. See [APK import](../tools/mi_apk_catalogue/README.md), [matching order](../tools/mi_matching/README.md) and [Panasonic encoding](../tools/panasonic_ac/README.md).
+
 ## Android catalogue checks
 
 The instrumentation runner checks bundled catalogue loading without sending IR:
@@ -45,9 +62,17 @@ adb install -r app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
 adb shell am instrument -w -r com.universalremote.app.test/com.universalremote.app.CatalogInstrumentation
 ```
 
+The optional UI suite is restricted to an emulator that reports no IR emitter. It temporarily uses source-backed fixture selections, restores the exact original device metadata afterward, and never sends IR:
+
+```sh
+adb shell am instrument -w -r -e palm.ui true com.universalremote.app.test/com.universalremote.app.CatalogInstrumentation
+```
+
+Its JSON report and screenshots are written to the app-specific external directory `Android/data/com.universalremote.app/files/palm-validation-v140`. Runtime catalogue/encoder checks and UI assertion counts are reported separately. The test does not certify physical TV/AC/decoder response.
+
 The persistent **IR ready**, **No IR transmitter detected** and **IR check unavailable** indicators remain available before adding devices. **Check IR** reports the installed version, phone model and carrier support. A hardware-free emulator normally reports no transmitter.
 
-An update keeps the application ID and signing identity. After the new catalogue validates, previous imported profiles, saved old IR remotes and generated AC remotes are removed. Samsung SmartThings/LG Wi-Fi devices and their encrypted credentials remain. New remotes must be selected from the bundled Mi JSON; there is no phone import step.
+An update keeps the application ID and signing identity. Existing current Mi selections, including Astro, remain. Obsolete pre-1.2 IR selections are removed only after the replacement catalogue validates. Samsung SmartThings/LG Wi-Fi metadata and encrypted credentials remain. No phone import is needed.
 
 ## Prepared cloud environment
 
@@ -88,7 +113,7 @@ Create the `PalmRemoteAPI29` AVD first with Android Studio or `avdmanager` if it
 
 ## Mi Remote APK research
 
-The original static-analysis tools are in [tools/apk_inspection](../tools/apk_inspection/README.md). The supplied exact APK was inspected, including a nested RAR/SQLite catalogue; see [findings and online Astro retrieval](MI_REMOTE_724M_INVESTIGATION.md). The third-party APK is not an app build dependency. Palm Remote 1.3.0 retains the pinned GitHub catalogue, adds five independently converted public Astro keysets and uses original interface code/artwork.
+The original static-analysis tools are in [tools/apk_inspection](../tools/apk_inspection/README.md). The supplied exact APK was inspected, including a nested RAR/SQLite catalogue; see [findings and online Astro retrieval](MI_REMOTE_724M_INVESTIGATION.md) and the [TV/AC investigation](TV_AC_COMPATIBILITY_INVESTIGATION.md). It is a verified input for offline database regeneration, while an ordinary Android build uses the committed converted JSON. Palm Remote 1.4.0 retains the GitHub and Astro data, adds converted TV/AC records and Panasonic parameter encoding, and uses original interface code/artwork.
 
 Verify the separate offline Astro supplement before building:
 

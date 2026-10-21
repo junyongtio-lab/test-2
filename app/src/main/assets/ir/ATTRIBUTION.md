@@ -1,29 +1,44 @@
-# Mi Remote infrared JSON attribution
+# Mi Remote infrared data attribution
 
-Palm Remote version 1.3.0 bundles the published GitHub JSON archive of [ysard/mi_remote_database](https://github.com/ysard/mi_remote_database), maintained by ysard and contributors, plus a separate public regional STB JSON supplement for Astro attributed to Xiaomi/Kookong. No earlier Flipper-IRDB captures, owner-supplied Astro JSON, learned imports or IRremoteESP8266 stateful encoders remain in this app version.
+Palm Remote **1.4.0** bundles three separately attributed raw-signal sources and six Panasonic 216-bit parameter profiles. Independently written Android code reads the converted JSON or encodes supported Panasonic settings through Android ConsumerIrManager. The app makes no Xiaomi API requests and requires no smartphone JSON import. It includes no Xiaomi native libraries, decompiled implementation, vendor Lua or copied Xiaomi graphics.
 
-## GitHub catalogue
+## GitHub catalogue and matching metadata
 
-- GitHub release: [v2.1](https://github.com/ysard/mi_remote_database/releases/tag/v2.1)
-- Source archive: [database_dump.tar.xz](https://github.com/ysard/mi_remote_database/releases/download/v2.1/database_dump.tar.xz), 7,892,348 bytes
-- Archive SHA-256: `44dcf13d815383c907884f7cdb294afcd085b7063c1de4780589e0626cb61895`
-- Upstream format-reference commit: `8a60b419506e8c407f2b756ec8ab4b4bc446678d`
-- Upstream license notices: **AGPL-3.0-or-later**, retained at `licenses/mi_remote_database-LICENSE.txt` in the APK
+The unchanged base catalogue comes from [ysard/mi_remote_database](https://github.com/ysard/mi_remote_database), maintained by ysard and contributors:
 
-The original archive and the independent offline AGPL-3.0-or-later generator are published in this repository under `tools/mi_catalogue/`. The source data is not relicensed under the application code's MIT license. No additional rights over Xiaomi or manufacturer material are asserted. The upstream project is a community database and is not represented as a manufacturer-published API, certification or endorsement.
+- Release [v2.1](https://github.com/ysard/mi_remote_database/releases/tag/v2.1); archive 7,892,348 bytes.
+- Archive SHA-256: `44dcf13d815383c907884f7cdb294afcd085b7063c1de4780589e0626cb61895`.
+- Format-reference revision: `8a60b419506e8c407f2b756ec8ab4b4bc446678d`.
+- Upstream **AGPL-3.0-or-later** notices are retained at `licenses/mi_remote_database-LICENSE.txt`.
 
-Included source device IDs are 1 (TV), 2 (set-top box), 3 (AC), 6 (fan), 11 (cable/satellite) and 12 (internet box). Source brand-to-keyset references and original command keys are retained. Readable display labels are derived from those keys. Model identifiers describe code sets and are not independently verified appliance model numbers. Accepted encrypted/compressed raw arrays are decoded offline; carrier hertz and microsecond timing integers are preserved. The TVKill carrier-cycle export is not used.
+The source archive, independent offline AGPL converter and input/output hashes are retained under `tools/mi_catalogue/` in the project repository. The base `mi/` assets remain unchanged: **3,706 profiles and 140,949 command associations**. Original source keys, brand associations, Hz carriers and complete microsecond timing arrays are preserved. The TVKill carrier-cycle export is not used. Source code-set identifiers are not verified retail model numbers.
 
-Proprietary AC templates, executable fragments, unsupported representations, invalid carriers and empty responses are excluded rather than guessed or executed. Exact accepted coverage and exclusions appear in `mi/index.json`. Each profile records original brand/model JSON paths and SHA-256 hashes. `tools/mi_catalogue/source-manifest.json` records all input/output hashes and supports deterministic offline verification.
+The separate `matching_order.json` derives TV candidate ordering from the same pinned brand trees and Malaysian regional priorities. It adds no profiles or signals and changes no waveform. Its original generator and provenance are under `tools/mi_matching/`. It does not reproduce Mi's complete conditional matching tree.
 
-This unchanged GitHub source contributes 3,706 keysets and 140,949 source command associations. Its included categories have no Astro, NJOI, PRISM+ or PrismPlus brand. The separate Astro supplement below does not alter the original archive or its attribution.
+This community source is not a manufacturer-published API or endorsement. Its data is not relicensed under the application's MIT license. Proprietary/executable AC definitions omitted by the raw converter remain explicit exclusions in `mi/index.json`; no vendor program is executed.
 
-## Astro regional STB supplement
+## Astro public regional supplement
 
-Development-time anonymous queries to Xiaomi's public regional STB service at `https://sg-urc.io.mi.com` supplied brand, match-list and keyset JSON for Malaysia. The source identifies Astro brand ID 3833 and five code sets: `kk_2_3833_536`, `kk_2_3833_1819`, `kk_2_3833_350`, `kk_2_3833_211` and `kk_2_3833_2160`. Their 216 recorded command associations are decoded offline with source carriers and complete microsecond timings preserved. These JSON assets are recorded separately in `mi_stb/index.json` and `mi_stb/profiles/`.
+Development-time anonymous queries to `https://sg-urc.io.mi.com` returned **Astro brand ID 3833**, Malaysia (MY), and five keysets: `kk_2_3833_536`, `kk_2_3833_1819`, `kk_2_3833_350`, `kk_2_3833_211` and `kk_2_3833_2160`. Their **216 command associations** retain exact carriers, complete timings and alternate captures under `mi_stb/`.
 
-The original independently written converter, retained public response JSON, request provenance, SHA-256 hashes and generated output manifest are published under `tools/mi_stb/` in the project repository. The response data is attributed to Xiaomi/Kookong. Public access does not establish a reuse license, and neither the application's MIT license nor the GitHub source's AGPL notices are assigned to this separate vendor source. No additional rights over vendor data, certification or endorsement are asserted.
+Original response JSON, request timestamps, hashes, the independent converter and generated manifest are retained under `tools/mi_stb/`. Data is attributed to the Xiaomi/Kookong service. Public access does not establish a reuse license; neither MIT nor the GitHub source's AGPL notices are assigned to this separate vendor source. No additional rights, certification or endorsement are asserted. No Ultra Box/Ulti Box retail-model label was returned, and no other brand is relabelled Astro.
 
-The source does not label these candidates Ultra Box or Ulti Box. No NJOI-labelled or PRISM+ keyset is included. The earlier unverified Astro file remains removed; no substitute brand is relabelled Astro. The combined catalogue contains 3,711 keysets and 141,165 command associations. All bundled profiles have `hardwareTested: false`; no physical appliance testing was performed in the cloud. Android hardware detection and successful transmission do not establish compatibility with a particular appliance.
+## Mi Remote 7.2.4M bundled TV/AC data
 
-The Android app makes no Xiaomi API requests and requires no smartphone JSON import. It independently reads the bundled converted JSON and transmits only supported raw commands through Android ConsumerIrManager. It does not include upstream Python, either standalone converter, Xiaomi native libraries, decompiled implementation or copied Xiaomi graphics in its runtime.
+The user supplied the archive for package `com.duokan.phone.remotecontroller`, version **7.2.4M / code 6500**. The extracted APK SHA-256 is `4c20655f2b636d86152202994da2a1b88f4ebf5bddf58b7ef6c2bf8e42fa5c73`. Its pinned RAR resource contains `irlocaldata.db`, SHA-256 `727a271f25889d97fc94b021b240f62d1ce559ce8a98cf14b7ac0d3efb657bfa`.
+
+The independent importer under `tools/mi_apk_catalogue/` verifies the APK, RAR, database, schemas and row counts and preserves attributable brand/table/row identities. It converts **571 TV profiles / 23,885 commands** and **33 raw AC profiles / 319 commands** into `mi_apk/`, with no raw-profile exclusions. All complete validated raw arrays remain microseconds. Another **701 stateful AC definitions** require separate encoding and are not imported as raw commands. The APK's full SQLite database, scripts and native engines are not included in the app.
+
+These vendor data are attributed to Xiaomi/Kookong and the respective source brands. APK possession and signature verification do not establish a redistribution license or independently authenticate the publisher certificate. No additional vendor-data rights or MIT/AGPL relicensing are asserted.
+
+## Independent Panasonic 216-bit encoder
+
+`panasonic_ac/index.json` contains six non-executable parameter profiles for an independently written Java encoder. Records `137_2587`, `kk_3_137_4646` and `kk_3_137_7406` derive from the pinned APK database. Additional records `kk_3_137_7790`, `kk_3_137_7791` and `kk_3_137_7793` derive from the pinned GitHub archive and retain its source notices. Parameter hashes, provenance and the original extraction/generation tool are under `tools/panasonic_ac/`.
+
+The encoder uses verified framing, packet fields and checksums; it does not execute or copy a vendor script or native encoder. Supported modes, temperature ranges, fan/swing fields and explicit-power versus power-toggle behavior are restricted by each parameter profile. This is a supported subset, not Mi Remote's complete AC engine or all Panasonic models. Settings describe the requested transmission, not appliance readings.
+
+## Scope and physical evidence
+
+The three raw sources total **4,315 profiles and 165,369 command associations**; the six adjustable Panasonic profiles are counted separately. Duplicate waveforms under different source associations remain distinct. All generated per-profile `hardwareTested` flags remain false. The user reports Palm Remote 1.3.0 controls an Astro Ultra Box, without identifying its exact keyset; that report does not mark all five profiles tested. No physical TV/AC testing occurred in the cloud.
+
+The earlier owner-supplied Astro JSON, Flipper-IRDB captures, learned imports and native IRremoteESP8266 engine remain removed. There is no NJOI-labelled or PRISM+ profile. Source presence, hardware detection and a successful Android transmit do not certify appliance compatibility.

@@ -13,6 +13,7 @@ import android.view.WindowInsets;
 import android.widget.*;
 import com.universalremote.app.protocols.*;
 import com.universalremote.app.smartthings.SmartThingsClient;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import java.util.*;
 import java.util.concurrent.*;
@@ -26,6 +27,7 @@ public final class MainActivity extends Activity {
     private IrHardware.Result irHardware = IrHardware.checking();
     private DeviceStore store;
     private IrCatalog infrared;
+    private PanasonicAcEncoder panasonic;
     private final List<JSONObject> devices = new ArrayList<>();
     private JSONObject selected;
     private NetworkRemote network;
@@ -36,9 +38,15 @@ public final class MainActivity extends Activity {
     private TextView irHardwareTitle, irHardwareDetail;
     private Button irHardwareButton;
     private String currentPage="Home", status="Choose a device to get started", notice="", irProfileError="";
-    private boolean connected, busy, destroyed, hardwareChecking, irCatalogFailed;
-    private long connectionGeneration;
+    private boolean connected, busy, hardwareChecking, irCatalogFailed, panasonicFailed;
+    private volatile boolean destroyed;
+    private volatile long connectionGeneration;
+    private long renderedControlsGeneration;
     private final Map<View,String> commandButtons = new HashMap<>();
+    private final List<View> panasonicSendButtons = new ArrayList<>();
+    private final List<View> panasonicEditors = new ArrayList<>();
+    private PanasonicAcEncoder.State panasonicDraft;
+    private String panasonicDraftDeviceId="";
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -66,6 +74,15 @@ public final class MainActivity extends Activity {
                 });
             } catch(Exception error) {
                 ui(()->{irCatalogFailed=true;notice="IR profiles could not load: "+error.getMessage();render();if(selected!=null)connect();});
+            }
+        });
+        // AC parameter loading is independent: a bad AC asset must not disable working Astro/TV remotes.
+        worker.execute(()->{
+            try {
+                PanasonicAcEncoder loaded=new PanasonicAcEncoder(this);
+                ui(()->{panasonic=loaded;if(selectedUsesPanasonic())connect();render();});
+            } catch(Exception error) {
+                ui(()->{panasonicFailed=true;if(selectedUsesPanasonic()){updateIrRemoteAvailability();render();}});
             }
         });
     }
@@ -99,13 +116,25 @@ public final class MainActivity extends Activity {
         String details="Palm Remote "+version+"\nPhone: "+android.os.Build.MANUFACTURER+" "+android.os.Build.MODEL
             +"\nAndroid: "+android.os.Build.VERSION.RELEASE+"\n\n"+irHardware.diagnostics
             +"\n\nThis checks the phone's built-in IR hardware. It does not test whether your TV, decoder or air conditioner responds. USB accessories and external IR hubs are not supported by this APK.";
+        if(selected!=null)details+="\n\nSelected remote: "+selected.optString("name")
+            +"\nSource keyset: "+selected.optString("sourceModelId",selected.optString("profile"));
         new AlertDialog.Builder(this).setTitle(irHardware.title).setMessage(details)
             .setPositiveButton("Done",null).setNeutralButton("Check again",(dialog,which)->checkIrHardware(true)).show();
     }
     private boolean selectedUsesIr() {
         return selected!=null&&selected.optString("mode").equals("ir");
     }
+    private boolean selectedUsesPanasonic() {
+        return selected!=null&&selected.optString("mode").equals("panasonic_ac");
+    }
     private void updateIrRemoteAvailability() {
+        if(selectedUsesPanasonic()) {
+            if(panasonic==null)updateStatus(panasonicFailed?"Panasonic AC definitions could not load.":"Panasonic AC definitions are loading…",false);
+            else if(panasonic.find(selected.optString("profile"))==null)updateStatus("This Panasonic AC profile is unavailable. Choose a matching AC remote again.",false);
+            else if(infrared==null)updateStatus(irCatalogFailed?"The infrared catalogue could not load. Restart the app to retry.":"The infrared transmitter service is loading…",false);
+            else updateStatus(irHardware.title+(irHardware.hasEmitter?" · appliance response unverified":""),irHardware.hasEmitter);
+            return;
+        }
         if(!selectedUsesIr())return;
         if(infrared==null) {
             updateStatus(irCatalogFailed?"IR catalogue could not load. Restart the app to retry.":"IR catalogue is loading…",false);
@@ -147,7 +176,8 @@ public final class MainActivity extends Activity {
     }
     private void full(LinearLayout into,View view,int height) { into.addView(view,new LinearLayout.LayoutParams(-1,dp(height))); }
     private void render() {
-        commandButtons.clear();statusText=null;
+        renderedControlsGeneration++;
+        commandButtons.clear();panasonicSendButtons.clear();panasonicEditors.clear();statusText=null;
         root=column(); root.setBackgroundColor(BG); root.setPadding(dp(20),dp(8),dp(20),0);
         root.setOnApplyWindowInsetsListener((v,insets)->{
             if (android.os.Build.VERSION.SDK_INT>=30) {
@@ -256,6 +286,7 @@ public final class MainActivity extends Activity {
             return;
         }
         if(selected.optString("mode").equals("ir")){recordedIrPage();return;}
+        if(selectedUsesPanasonic()){panasonicAcPage();return;}
         if(!usesNetwork(selected)){legacyUnavailablePage();return;}
         LinearLayout device=card(selected.optString("name"), selected.optString("brand")+"  ·  "+connectionLabel(selected));
         statusText=text(status,13,connected?MINT:MUTED,false);gap(device,8);device.addView(statusText);
@@ -299,7 +330,7 @@ public final class MainActivity extends Activity {
         full(content,action("Open saved devices",()->{currentPage="Devices";render();},false),48);
     }
     private String connectionLabel(JSONObject device) {
-        switch(device.optString("mode")) { case "ir":return "Mi Remote infrared";case "lg":return "Local Wi-Fi";case "smartthings":return "SmartThings cloud";default:return "Unavailable legacy remote"; }
+        switch(device.optString("mode")) { case "ir":return "Mi Remote infrared";case "panasonic_ac":return "Panasonic AC infrared";case "lg":return "Local Wi-Fi";case "smartthings":return "SmartThings cloud";default:return "Unavailable legacy remote"; }
     }
     private void spacer(LinearLayout row) { row.addView(new View(this),new LinearLayout.LayoutParams(0,dp(58),1)); }
     private void command(LinearLayout row,String label,String code,boolean primary) { weighted(row,key(label,code,primary),58); }
@@ -326,6 +357,10 @@ public final class MainActivity extends Activity {
         for (Map.Entry<View,String> entry:commandButtons.entrySet()) {
             boolean enabled=supports(entry.getValue());entry.getKey().setEnabled(enabled);entry.getKey().setAlpha(enabled?1f:.3f);
         }
+        boolean acReady=selectedUsesPanasonic()&&panasonic!=null&&infrared!=null&&irHardware.hasEmitter&&!busy
+            &&panasonic.find(selected.optString("profile"))!=null;
+        for(View button:panasonicSendButtons){button.setEnabled(acReady);button.setAlpha(acReady?1f:.3f);}
+        for(View editor:panasonicEditors)editor.setEnabled(!busy);
     }
     private void updateStatus(String value,boolean ready) {
         status=value;connected=ready;
@@ -356,6 +391,7 @@ public final class MainActivity extends Activity {
         irProfileError="";
         if(selected==null)return;
         JSONObject device=selected;
+        if(selectedUsesPanasonic()){updateIrRemoteAvailability();return;}
         if(device.optString("mode").equals("ir")) {
             updateIrRemoteAvailability();
             if(infrared==null||infrared.isLoaded(device.optString("profile")))return;
@@ -399,10 +435,11 @@ public final class MainActivity extends Activity {
         full(content,action("+ Add a remote",this::addBrand,true),54);gap(content,12);
     }
     private void helpPage() {
-        card("Mi Remote infrared catalogue", "Bundled IR signals come from github.com/ysard/mi_remote_database and five Astro keysets retrieved from Mi Remote’s regional catalogue. They are built into this app and work offline. There is no profile-import step. No Palm account, subscriptions, advertisements or analytics.");
+        card("Mi Remote infrared catalogue", "Bundled IR signals include the published Mi GitHub catalogue, 604 additional TV/AC profiles recovered from the uploaded Mi Remote 7.2.4M database and five Astro keysets from its regional service. They work offline without a profile-import step. No Palm account, subscriptions, advertisements or analytics.");
         if(infrared!=null)card("Available remote keysets",infrared.profileCount()+" keysets across televisions, set-top boxes, air conditioners and fans. Search by the database brand, then try a recorded remote on your appliance. Source keyset IDs are not retail model numbers; a brand match alone does not establish compatibility.");
         card("Astro decoder setup", "Use Set up Astro on Home, then Find a working remote. Five actual Astro keysets are available. Test several buttons and confirm the decoder responds before saving. The source does not identify Ultra Box, Ulti Box or NJOI models, so those matches require testing. The earlier unverified Astro codes remain removed. PRISM+ is absent from the catalogue.");
-        card("Recorded buttons", "Every remote shows the actual decoded command labels from its source JSON. Only those captured signals are available. The app does not invent missing buttons or generate arbitrary temperatures, modes or fan speeds. Some source files cannot be decoded and are excluded.");
+        card("Recorded buttons", "Recorded remotes show the actual decoded command labels from their source data. Only captured signals are available in those remotes; missing buttons are not invented. Some source formats cannot be decoded and are excluded.");
+        card("Panasonic AC settings", "Choose Air conditioner, then Panasonic and Find a Panasonic AC remote. Six supported parameter profiles can prepare complete messages for 16–30 °C, supported modes and available fan/swing settings. Test each candidate on your AC. Other Panasonic families and Mi Remote’s remaining AC formats are not covered by this encoder. Settings are requested values, not readings from the appliance; editing them sends nothing until you tap a send or power button.");
         card("Air conditioners and fans", "A recorded AC command may change several settings at once. Labels describe the source capture, not readings from the appliance. Choose the matching keyset and test each command. The app cannot read or synchronize appliance state.");
         card("Samsung", "Use the published SmartThings API with an existing Samsung account and a token permitted to read devices and execute commands. Only capabilities exposed by your TV are enabled. Power-on depends on TV network settings.");
         card("LG webOS", "Connect the phone and TV to the same trusted Wi-Fi. Enter the TV’s local IP and approve the pairing prompt. This build uses LG’s published Connect SDK protocol on port 3000. Secure-only models are not supported by this transport.");
@@ -471,6 +508,177 @@ public final class MainActivity extends Activity {
         statusText=text(status,13,connected?MINT:MUTED,false);statusText.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
         gap(device,8);device.addView(statusText);gap(device,10);full(device,action("Switch device  ▾",this::pickDevice,false),44);
     }
+    private boolean ensurePanasonicDraft(JSONObject profile) {
+        String identity=selected.optString("id")+"|"+selected.optString("profile");
+        if(identity.equals(panasonicDraftDeviceId)&&panasonicDraft!=null)return true;
+        panasonicDraftDeviceId=identity;
+        try{panasonicDraft=PanasonicAcEncoder.defaults(profile);}catch(Exception error){panasonicDraft=null;return false;}
+        try {
+            JSONObject saved=selected.optJSONObject("requestedState");
+            if(saved!=null) {
+                PanasonicAcEncoder.State restored=PanasonicAcEncoder.State.fromJson(saved);
+                PanasonicAcEncoder.encode(profile,restored,false);
+                panasonicDraft=restored;
+            }
+        }catch(Exception ignored){/* Invalid saved requests become a safe draft, never an automatic transmission. */}
+        return true;
+    }
+    private interface IndexChoice { void choose(int index); }
+    private Spinner acSelector(LinearLayout parent,String heading,List<String> labels,int current,IndexChoice chosen) {
+        final long generation=renderedControlsGeneration;
+        parent.addView(text(heading,12,MUTED,true));gap(parent,4);
+        Spinner spinner=new Spinner(this);
+        ArrayAdapter<String> adapter=new ArrayAdapter<>(this,android.R.layout.simple_spinner_item,labels);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);spinner.setAdapter(adapter);
+        spinner.setSelection(Math.max(0,Math.min(current,labels.size()-1)));
+        spinner.setContentDescription(heading);parent.addView(spinner,new LinearLayout.LayoutParams(-1,dp(48)));
+        panasonicEditors.add(spinner);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
+            @Override public void onItemSelected(AdapterView<?> p,View v,int position,long id){
+                if(!destroyed&&!busy&&generation==renderedControlsGeneration&&position>=0&&position<labels.size())chosen.choose(position);
+            }
+            @Override public void onNothingSelected(AdapterView<?> p){}
+        });
+        gap(parent,12);return spinner;
+    }
+    private Button acSendButton(String label,Runnable send,boolean primary) {
+        Button button=action(label,send,primary);panasonicSendButtons.add(button);return button;
+    }
+    private void panasonicAcPage() {
+        deviceHeading();
+        JSONObject profile=panasonic==null?null:panasonic.find(selected.optString("profile"));
+        if(profile==null) {
+            card("Panasonic AC definitions",panasonicFailed?"The bundled AC definitions could not load. Other remotes remain available.":"Loading the bundled AC definitions…");return;
+        }
+        if(!ensurePanasonicDraft(profile)){card("Panasonic AC profile unavailable","The saved AC definition could not be validated. Choose another profile.");return;}
+        boolean toggle=profile.optBoolean("powerToggle");
+        card("Requested settings", "These controls prepare a complete AC message. They do not read the air conditioner's current state. Nothing is sent until you tap a send or power button.");
+        LinearLayout controls=card("Panasonic AC · "+profile.optString("model"),toggle?"Power uses a toggle signal; the actual on/off state is unknown.":"Requested power: "+(panasonicDraft.power?"On":"Off"));
+        TextView temperature=text(panasonicDraft.temperature+" °C",34,MINT,true);temperature.setGravity(Gravity.CENTER);controls.addView(temperature);gap(controls,8);
+        LinearLayout temperatureButtons=row();
+        Button lower=action("Temperature −",()->{if(!busy&&panasonicDraft.temperature>16){panasonicDraft.temperature--;temperature.setText(panasonicDraft.temperature+" °C");}},false);
+        Button higher=action("Temperature +",()->{if(!busy&&panasonicDraft.temperature<30){panasonicDraft.temperature++;temperature.setText(panasonicDraft.temperature+" °C");}},false);
+        panasonicEditors.add(lower);panasonicEditors.add(higher);
+        weighted(temperatureButtons,lower,52);weighted(temperatureButtons,higher,52);
+        controls.addView(temperatureButtons);gap(controls,12);
+        List<String> modes=new ArrayList<>();JSONArray sourceModes=profile.optJSONArray("modes");
+        if(sourceModes!=null)for(int i=0;i<sourceModes.length();i++)modes.add(sourceModes.optString(i));
+        if(!modes.isEmpty())acSelector(controls,"Mode",modes,modes.indexOf(panasonicDraft.mode),index->panasonicDraft.mode=modes.get(index));
+        if(profile.optBoolean("supportsFan"))acSelector(controls,"Fan speed",Arrays.asList("Auto","Low","Medium","High"),panasonicDraft.fan,index->panasonicDraft.fan=index);
+        if(profile.optBoolean("supportsSwing"))acSelector(controls,"Vertical swing",Arrays.asList("Auto swing","Position 1","Position 2","Position 3","Position 4","Position 5"),panasonicDraft.swing,index->panasonicDraft.swing=index);
+        full(controls,acSendButton("Send requested settings",()->sendPanasonic(panasonicDraft.copy(),false,"requested settings"),true),54);gap(controls,10);
+        if(toggle) {
+            full(controls,acSendButton("Send power toggle",()->sendPanasonic(panasonicDraft.copy(),true,"power toggle"),false),52);
+        } else {
+            LinearLayout power=row();
+            weighted(power,acSendButton("Power on",()->{PanasonicAcEncoder.State next=panasonicDraft.copy();next.power=true;sendPanasonic(next,true,"power on");},false),52);
+            weighted(power,acSendButton("Power off",()->{PanasonicAcEncoder.State next=panasonicDraft.copy();next.power=false;sendPanasonic(next,true,"power off");},false),52);
+            controls.addView(power);
+        }
+        if(!profile.optBoolean("supportsFan")) {gap(controls,12);controls.addView(text("This source profile has no verified fan-speed mapping; its captured default is preserved.",12,MUTED,false));}
+        gap(content,8);full(content,action("Find a different Panasonic remote",()->panasonicSetup(selected),false),48);
+        gap(content,12);content.addView(text("Source keyset: "+profile.optString("model")+". Temperature, mode and supported fan/swing settings come from this profile's verified parameters; other Panasonic families may need a different remote.",12,MUTED,false));
+        refreshButtons();
+    }
+    private void sendPanasonic(PanasonicAcEncoder.State requested,boolean powerButtonPress,String label) {
+        if(!selectedUsesPanasonic()||panasonic==null||infrared==null||!irHardware.hasEmitter||busy){message("A detected built-in IR transmitter and a loaded Panasonic profile are required.");return;}
+        final JSONObject device=selected,profile=panasonic.find(selected.optString("profile"));
+        if(profile==null){message("Choose a supported Panasonic profile first.");return;}
+        final IrCatalog transmitter=infrared;final long generation=connectionGeneration;
+        final PanasonicAcEncoder.State snapshot=requested.copy();busy=true;refreshButtons();
+        worker.execute(()->{
+            try {
+                if(destroyed||generation!=connectionGeneration||selected!=device)return;
+                PanasonicAcEncoder.Signal signal=PanasonicAcEncoder.encode(profile,snapshot,powerButtonPress);
+                if(destroyed||generation!=connectionGeneration||selected!=device)return;
+                transmitter.transmitSignal(signal.carrierHz,signal.pattern);
+                ui(()->{
+                    if(generation!=connectionGeneration||selected!=device)return;
+                    try {device.put("requestedState",snapshot.toJson());store.save(devices);panasonicDraft=snapshot.copy();}
+                    catch(Exception ignored){message("IR was sent, but the requested settings could not be saved.");}
+                    updateStatus("IR sent · "+label+". Confirm the AC responds.",true);render();
+                });
+            }catch(Exception error){ui(()->{if(generation==connectionGeneration){updateStatus("Signal could not be sent: "+error.getMessage(),irHardware.hasEmitter);message(error.getMessage());}});}
+            finally{ui(()->{if(generation==connectionGeneration){busy=false;refreshButtons();}});}
+        });
+    }
+    private void panasonicSetup() { panasonicSetup(null); }
+    private void panasonicSetup(JSONObject replacement) {
+        final PanasonicAcEncoder encoder=panasonic;
+        if(encoder==null){message(panasonicFailed?"Panasonic AC definitions could not load. Recorded AC remotes remain available.":"Panasonic AC definitions are loading. Try again shortly.");return;}
+        final List<JSONObject> profiles=encoder.profiles();
+        if(profiles.isEmpty()){message("No verified Panasonic AC parameter profiles are available.");return;}
+        int initial=0;if(replacement!=null)for(int i=0;i<profiles.size();i++)if(profiles.get(i).optString("id").equals(replacement.optString("profile")))initial=i;
+        final int[] current={initial};final boolean[] sending={false},signalSent={false};
+        final java.util.concurrent.atomic.AtomicBoolean active=new java.util.concurrent.atomic.AtomicBoolean(true);
+        LinearLayout body=column();body.setPadding(dp(20),dp(8),dp(20),dp(12));
+        TextView position=text("",17,TEXT,true);body.addView(position);gap(body,10);
+        body.addView(text("Try each candidate while aiming at the AC. The test requests Cool at 24 °C. Only you can confirm whether the appliance responds. These source IDs are not retail model numbers.",13,MUTED,false));gap(body,12);
+        TextView result=text("",13,MUTED,false);result.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);body.addView(result);gap(body,12);
+        Button test=action("Test AC signal",()->{},true);full(body,test,60);gap(body,12);
+        LinearLayout pages=row();Button previous=action("Previous",()->{},false),next=action("Next remote",()->{},false);weighted(pages,previous,48);weighted(pages,next,48);body.addView(pages);
+        AlertDialog dialog=new AlertDialog.Builder(this).setTitle("Find a Panasonic AC remote").setView(body)
+            .setNegativeButton("Close",null).setNeutralButton("Save preview",null).setPositiveButton("Use this remote",null).create();
+        Runnable refresh=()->{
+            JSONObject profile=profiles.get(current[0]);
+            position.setText("AC remote "+(current[0]+1)+" of "+profiles.size()+" · "+profile.optString("model"));
+            test.setText(profile.optBoolean("powerToggle")?"Test power toggle · Cool 24 °C":"Test power on · Cool 24 °C");
+            test.setEnabled(!sending[0]&&irHardware.hasEmitter&&infrared!=null);
+            result.setText(irHardware.hasEmitter?"Tap the test button once, then check the AC yourself.":irHardware.title+". You can save a preview; infrared sending remains disabled.");
+            previous.setEnabled(!sending[0]&&current[0]>0);next.setEnabled(!sending[0]&&current[0]<profiles.size()-1);
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(!sending[0]&&signalSent[0]);
+            dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setEnabled(!sending[0]);
+        };
+        previous.setOnClickListener(v->{if(!sending[0]&&current[0]>0){current[0]--;signalSent[0]=false;refresh.run();}});
+        next.setOnClickListener(v->{if(!sending[0]&&current[0]<profiles.size()-1){current[0]++;signalSent[0]=false;refresh.run();}});
+        test.setOnClickListener(v->{
+            if(sending[0]||!irHardware.hasEmitter||infrared==null)return;
+            final int tested=current[0];final JSONObject profile=profiles.get(tested);final IrCatalog transmitter=infrared;
+            sending[0]=true;test.setEnabled(false);previous.setEnabled(false);next.setEnabled(false);
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setEnabled(false);
+            result.setText("Sending the requested AC test message…");
+            worker.execute(()->{
+                boolean accepted=false;String outcome;
+                try {
+                    if(destroyed||!active.get())return;
+                    PanasonicAcEncoder.State requested=PanasonicAcEncoder.defaults(profile);
+                    PanasonicAcEncoder.Signal signal=PanasonicAcEncoder.encode(profile,requested,true);
+                    if(destroyed||!active.get())return;
+                    transmitter.transmitSignal(signal.carrierHz,signal.pattern);accepted=true;
+                    outcome="IR sent. Did the AC respond? Confirm only if it did, or try the next remote.";
+                }catch(Exception error){outcome="Signal could not be sent: "+error.getMessage();}
+                final boolean sent=accepted;final String message=outcome;
+                ui(()->{
+                    if(!active.get()||tested!=current[0])return;
+                    sending[0]=false;signalSent[0]|=sent;refresh.run();result.setText(message);
+                });
+            });
+        });
+        dialog.setOnDismissListener(d->active.set(false));
+        dialog.setOnShowListener(d->{
+            dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(v->{
+                if(sending[0])return;JSONObject profile=profiles.get(current[0]);
+                new AlertDialog.Builder(this).setTitle("Save an untested preview?")
+                    .setMessage("This saves the selected controls without claiming they work with your AC. No infrared signal is sent by saving. Sending still requires a detected built-in emitter.")
+                    .setNegativeButton("Keep testing",null).setPositiveButton("Save preview",(confirm,which)->{dialog.dismiss();savePanasonic(profile,false,replacement);}).show();
+            });
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v->{
+                if(sending[0]||!signalSent[0])return;JSONObject profile=profiles.get(current[0]);
+                new AlertDialog.Builder(this).setTitle("Did your AC respond?")
+                    .setMessage("Save this candidate as tested only if the AC responded correctly. Check other settings after saving; Palm cannot read the appliance's state.")
+                    .setNegativeButton("Keep testing",null).setPositiveButton("Yes, save remote",(confirm,which)->{dialog.dismiss();savePanasonic(profile,true,replacement);}).show();
+            });refresh.run();
+        });dialog.show();
+    }
+    private void savePanasonic(JSONObject profile,boolean responseConfirmed,JSONObject replacement) {
+        try {
+            JSONObject device=replacement==null?baseDevice("Panasonic","panasonic_ac","Panasonic AC · "+profile.getString("model")):new JSONObject(replacement.toString());
+            device.put("name","Panasonic AC · "+profile.getString("model")).put("brand","Panasonic").put("mode","panasonic_ac")
+                .put("profile",profile.getString("id")).put("category","air_conditioner").put("sourceModelId",profile.getString("model"))
+                .put("responseConfirmed",responseConfirmed).put("requestedState",PanasonicAcEncoder.defaults(profile).toJson());
+            panasonicDraft=null;panasonicDraftDeviceId="";saveOrReplaceDevice(device,replacement);
+        }catch(Exception error){message("Could not save the Panasonic remote: "+error.getMessage());}
+    }
     private void recordedIrPage() {
         deviceHeading();
         JSONObject profile=infrared==null?null:infrared.find(selected.optString("profile"));
@@ -521,6 +729,9 @@ public final class MainActivity extends Activity {
             }
         }
         gap(content,14);full(content,action("Reload remote",this::connect,false),48);
+        if(profile!=null) {
+            gap(content,8);full(content,action("Find a working remote",()->retestIr(selected),false),48);
+        }
         if(!notice.isEmpty()){gap(content,10);content.addView(text(notice,13,MUTED,false));}
         refreshButtons();
     }
@@ -589,25 +800,39 @@ public final class MainActivity extends Activity {
         if(infrared==null){message("IR catalogue is unavailable.");return;}
         List<Choice> options=new ArrayList<>();
         List<JSONObject> profiles=infrared.forBrand(brand,category);
+        if(brand.equalsIgnoreCase("Panasonic")&&category.equals("air_conditioner")) {
+            options.add(new Choice("Find a Panasonic AC remote · Temperature and mode controls",this::panasonicSetup));
+        }
         if(!profiles.isEmpty())options.add(new Choice("Find a working remote · Guided testing",()->matchIrProfiles(brand,profiles)));
         for(int index=0;index<profiles.size();index++) {
             JSONObject profile=profiles.get(index);
+            final int candidate=index;
             final String remoteName="Remote "+(index+1);
             String label=remoteName;
             if(profile.has("commandCount"))label+=" · "+profile.optInt("commandCount")+" recorded buttons";
-            if(brand.equalsIgnoreCase("Astro"))label+=" · "+profile.optString("model");
+            label+=" · "+profile.optString("model");
             options.add(new Choice(label,()->{
                 if(!irHardware.hasEmitter) {
                     new AlertDialog.Builder(this).setTitle(irHardware.title)
                         .setMessage("You can save this Mi Remote keyset. IR sending stays disabled until a built-in emitter is detected. Tap Check IR above the page for phone hardware details. A matching appliance model is required.")
                         .setPositiveButton("Save anyway",(d,w)->saveIr(brand,profile,remoteName)).setNegativeButton("Cancel",null).show();
-                }else saveIr(brand,profile,remoteName);
+                }else matchIrProfiles(brand,profiles,candidate,null);
             }));
         }
         if(options.isEmpty()){message("No decoded Mi Remote keysets are available for this brand and category.");return;}
         choices(brand+" · Mi Remote keyset",options);
     }
     private void matchIrProfiles(String brand,List<JSONObject> profiles) {
+        matchIrProfiles(brand,profiles,0,null);
+    }
+    private void retestIr(JSONObject device) {
+        if(infrared==null||device==null)return;
+        List<JSONObject> profiles=infrared.forBrand(device.optString("brand"),device.optString("category","tv"));
+        // Re-testing starts with the source-prioritized candidates, including after an
+        // older build saved the last candidate as its former "Remote 1".
+        matchIrProfiles(device.optString("brand"),profiles,0,device);
+    }
+    private void matchIrProfiles(String brand,List<JSONObject> profiles,int startIndex,JSONObject replacement) {
         final IrCatalog catalogue=infrared;
         if(catalogue==null||profiles.isEmpty())return;
         LinearLayout body=column();body.setPadding(dp(20),dp(8),dp(20),dp(12));
@@ -622,15 +847,14 @@ public final class MainActivity extends Activity {
         weighted(paging,previous,48);weighted(paging,next,48);body.addView(paging);
         AlertDialog dialog=new AlertDialog.Builder(this).setTitle(brand+" · Find your remote").setView(body)
             .setNegativeButton("Close",null).setPositiveButton("Use this remote",null).create();
-        final int[] current={0};final boolean[] sending={false},signalSent={false};
+        final int[] current={Math.max(0,Math.min(startIndex,profiles.size()-1))};final boolean[] sending={false},signalSent={false};
         final List<String> codes=new ArrayList<>();
         final java.util.concurrent.atomic.AtomicInteger request=new java.util.concurrent.atomic.AtomicInteger();
         final java.util.concurrent.atomic.AtomicBoolean active=new java.util.concurrent.atomic.AtomicBoolean(true);
         Runnable[] load=new Runnable[1];
         load[0]=()->{
             int token=request.incrementAndGet();JSONObject metadata=profiles.get(current[0]);signalSent[0]=false;
-            position.setText("Remote "+(current[0]+1)+" of "+profiles.size()+
-                (brand.equalsIgnoreCase("Astro")?" · "+metadata.optString("model"):""));
+            position.setText("Remote "+(current[0]+1)+" of "+profiles.size()+" · "+metadata.optString("model"));
             result.setText("Loading recorded signals…");test.setEnabled(false);command.setEnabled(false);
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
             previous.setEnabled(current[0]>0);next.setEnabled(current[0]<profiles.size()-1);codes.clear();
@@ -665,7 +889,7 @@ public final class MainActivity extends Activity {
             worker.execute(()->{
                 String outcome;boolean accepted=false;
                 try {
-                    if(!active.get())return;
+                    if(destroyed||!active.get())return;
                     catalogue.transmit(metadata.optString("id"),sourceKey);
                     accepted=true;
                     outcome="IR sent. Did the appliance respond? Try another button to check, or choose the next remote. Palm cannot detect the response.";
@@ -692,22 +916,32 @@ public final class MainActivity extends Activity {
                 if(sending[0]||!signalSent[0])return;JSONObject chosen=profiles.get(current[0]);String name="Remote "+(current[0]+1);
                 new AlertDialog.Builder(this).setTitle("Did your appliance respond?")
                     .setMessage("Save this keyset only if the appliance responded correctly to your test. Palm cannot detect that response. Other buttons may still need testing.")
-                    .setNegativeButton("Keep testing",null).setPositiveButton("Yes, save remote",(confirm,which)->{dialog.dismiss();saveIr(brand,chosen,name);}).show();
+                    .setNegativeButton("Keep testing",null).setPositiveButton("Yes, save remote",(confirm,which)->{dialog.dismiss();saveIr(brand,chosen,name,true,replacement);}).show();
             });load[0].run();
         });dialog.show();
     }
     private void saveIr(String brand,JSONObject profile,String remoteName) {
+        saveIr(brand,profile,remoteName,false,null);
+    }
+    private void saveIr(String brand,JSONObject profile,String remoteName,boolean responseConfirmed,JSONObject replacement) {
         try {
-            JSONObject device=baseDevice(brand,"ir",brand+" · "+remoteName);
+            JSONObject device=replacement==null?baseDevice(brand,"ir",brand+" · "+remoteName):new JSONObject(replacement.toString());
+            device.put("name",brand+" · "+remoteName).put("brand",brand).put("mode","ir").put("responseConfirmed",responseConfirmed);
             device.put("profile",profile.getString("id"));device.put("category",profile.optString("category","tv"));
             JSONObject source=profile.optJSONObject("source");if(source!=null)device.put("sourceModelId",source.optString("modelId"));
-            saveDevice(device);
+            saveOrReplaceDevice(device,replacement);
         }catch(Exception e){message(e.getMessage());}
     }
     private JSONObject baseDevice(String brand,String mode,String name)throws Exception {
         return new JSONObject().put("id",UUID.randomUUID().toString()).put("brand",brand).put("mode",mode).put("name",name).put("category","tv");
     }
     private void saveDevice(JSONObject device) {devices.add(device);store.save(devices);select(device);}
+    private void saveOrReplaceDevice(JSONObject device,JSONObject replacement) {
+        if(replacement==null){saveDevice(device);return;}
+        for(int i=0;i<devices.size();i++)if(devices.get(i).optString("id").equals(replacement.optString("id"))){devices.set(i,device);store.save(devices);select(device);return;}
+        // The original entry may have been removed while the wizard was open.
+        saveDevice(device);
+    }
     private void select(JSONObject device) {selected=device;currentPage="Remote";status="Connecting…";notice="";render();connect();}
     private void pickDevice() {
         if(devices.isEmpty()){addBrand();return;}

@@ -1,45 +1,60 @@
-# Bundled Mi Remote JSON format
+# Bundled Mi Remote IR formats
 
-Version 1.3.0 bundles the unchanged GitHub JSON catalogue published by [ysard/mi_remote_database](https://github.com/ysard/mi_remote_database), release v2.1, plus a separate public regional STB JSON supplement for Astro. There is **no smartphone JSON-import feature**. Upgrades from before 1.2.0 remove obsolete imports and unavailable saved IR selections after the catalogue validates; current Mi selections are retained. The earlier user-supplied `astro_ultrabox.json` remains removed.
+Version 1.4.0 bundles three independently attributed raw catalogues, TV candidate-order metadata and six Panasonic216 parameter profiles. There is **no smartphone JSON-import feature** or Xiaomi refresh request. Current saved Mi selections remain valid; upgrades from before 1.2.0 remove obsolete imports and unavailable IR selections after catalogue validation. The earlier user-supplied `astro_ultrabox.json` remains removed.
 
-The offline [catalogue generator](../tools/mi_catalogue/README.md) converts the source's supported signals into Android-ready JSON. It verifies the archive SHA-256 and preserves each accepted signal's integer carrier frequency and complete sequence of microsecond timings. It does not infer protocols, reverse bits, substitute carriers, trim frames, add repeats, or execute proprietary AC programs.
+## Raw indexes and provenance
 
-## Index and provenance
+All raw indexes use `schemaVersion: 2`. Each profile has a stable `mi_…` ID, category, source code-set ID in `model`, source brand, command count, asset path/SHA-256 and `hardwareTested: false`. The source ID is not a verified retail appliance model number. A profile ID incorporates its source association so different records are not silently merged.
 
-The unchanged GitHub index at `app/src/main/assets/ir/mi/index.json` has `schemaVersion: 2` and contains:
+| Index and asset directory | Source | Profiles | Recorded associations |
+| --- | --- | ---: | ---: |
+| `ir/mi/index.json`, `ir/mi/profiles/` | Unchanged pinned GitHub Mi v2.1 archive | 3,706 | 140,949 |
+| `ir/mi_stb/index.json`, `ir/mi_stb/profiles/` | Pinned Astro regional public responses | 5 | 216 |
+| `ir/mi_apk/index.json`, `ir/mi_apk/profiles/` | Uploaded Mi Remote 7.2.4M database | 604 | 24,204 |
 
-- `source`: GitHub repository, release, pinned format-reference commit, archive URL/hash, units and source limitations.
-- `profiles`: metadata for each keyset: stable `mi_…` ID, category, brand, source code-set ID in `model`, command count, asset path/hash and `hardwareTested: false`.
-- Per-profile `source`: original model JSON path/hash, brand JSON path/hash, source device ID and source model ID.
-- `coverage`: accepted category totals, skipped-model/signal reasons and unavailable brands.
+The GitHub index records archive/repository provenance and per-profile model/brand JSON paths and hashes. Categories 2, 11 and 12 are combined as `set_top_box`; TV, AC and fan use `tv`, `air_conditioner` and `fan`.
 
-Categories are `tv`, `set_top_box`, `air_conditioner` and `fan`. Categories 2, 11 and 12 in the source are grouped as `set_top_box`; brand names are retained. A source code-set ID is not a verified appliance model number. IDs incorporate the source association so the same model referenced under multiple brands is not silently assigned to only one brand.
+The Astro index identifies `https://sg-urc.io.mi.com`, kind `mi-stb-public-api`, country `MY` and source brand ID 3833. Its profile source contains the actual keyset ID, original response path/hash, brand response path/hash, source URL and match rank. Ultra Box/Ulti Box retail labels were not returned. The user's successful Palm Ultra Box report does not identify which candidate to mark hardware-tested.
 
-The separate `app/src/main/assets/ir/mi_stb/index.json` also uses schema 2. Its source identifies `https://sg-urc.io.mi.com`, kind `mi-stb-public-api` and country `MY`. It adds five `set_top_box` keysets with brand `Astro`, source brand ID 3833 and 216 source commands. Per-profile provenance records the source keyset ID, original response file/hash, brand response file/hash, source URL and match rank. Stable `mi_…` IDs and asset hashes identify the converted keysets; their assets are under `ir/mi_stb/profiles/`.
+The APK index identifies kind `mi-apk-bundled-database`, version `7.2.4M` / code `6500`, exact archive/APK/database SHA-256 values, and Hz/microsecond units. Each profile records source table, logical `irlocaldata.db/{table}/{rowID}` path, model/brand identities, brand-row hash, canonical source-row hash and optional referenced waveform-source row. Only named raw TV/AC associations from the verified database are accepted. Another 701 stateful AC definitions are recorded separately as requiring an encoder; they are not executed by the raw importer.
 
-The original archive contributes 3,706 keysets and 140,949 command associations; the supplement contributes five and 216, for 3,711 keysets and 141,165 associations in the app. Original archive coverage and absence statements remain scoped to that archive. The Astro source keysets have no Ultra Box or Ulti Box retail-model labels and retain `hardwareTested: false`.
+The three indexes combine to **4,315 raw profiles / 165,369 recorded command associations**. The original GitHub files remain unchanged, including absence statements scoped to that archive. New data does not replace another brand's label with Daewoo, Panasonic or Astro.
 
-## Per-keyset command JSON
+## Raw command assets
 
-Each `ir/mi/profiles/mi_….json` or `ir/mi_stb/profiles/mi_….json` asset contains `schemaVersion: 2`, its original `sourceModelId`, and a `commands` object. The command object's key is the exact source button key. Each value contains:
+Each raw profile asset contains `schemaVersion: 2`, its original `sourceModelId`, and a `commands` object. The command object's key is the exact source button key. Each value contains:
 
-- `sourceKey`: that same source key, checked against the object key when loaded.
-- `label`: a readable display label derived from the source key; the original key remains in `sourceKey`.
-- `carrierHz`: the integer carrier frequency in hertz.
-- `pattern`: alternating **mark, space, mark, space** durations in integer microseconds, starting with a mark.
+- `sourceKey`: the same original key, checked against the object key on load.
+- `label`: a readable label derived from that key.
+- `carrierHz`: integer carrier frequency in hertz.
+- `pattern`: alternating **mark, space, mark, space** integer microsecond durations, starting with a mark.
 
-Source keys and command associations remain distinct even when waveforms match. No standard-TV button aliases or missing controls are fabricated. The UI lists the actual available commands for every category.
+Source keys remain distinct when waveforms are identical. Known spellings can select grouped UI controls without creating a new signal or removing the remaining source buttons.
 
-Where a recorded `key_r` counterpart exists, ordinary button presses alternate between the original and alternate captures. State is kept separately for each source profile and advances after a successful send; missing alternates fall back to the normal capture. Explicitly choosing an `_r` source button replays it exactly without advancing that automatic state. The app never generates an alternate waveform or treats `_r` as an off command.
+Where a real `key_r` counterpart exists, successful ordinary presses alternate normal/alternate captures per source profile; missing alternates fall back to normal. Explicit `_r` selection replays that source capture exactly without advancing automatic state. Failed sends do not advance state. `_r` is never inferred as an off command.
 
-For Android transmission, carriers must be 20,000–60,000 Hz. Patterns must contain 3–2,000 positive integer durations, each at most 1,000,000 microseconds, with total duration at most 1,900,000 microseconds. A complete valid set of reported carrier ranges must accept the signal. If Android detects an emitter but omits or fails the optional range query, support remains unknown and the app attempts the validated original signal without substituting a carrier. The generators exclude unsupported signals; runtime validation repeats these bounds before transmission.
+Signals require 20,000–60,000 Hz, 3–2,000 positive durations, each at most 1,000,000 µs, total at most 1,900,000 µs. Complete valid carrier ranges can reject a nonmatching frequency. If Android confirms an emitter but omits/fails its optional range query, the original validated carrier is attempted without substitution. Source arrays already contain microseconds; neither TVKill carrier-cycle counts nor Pronto values are accepted as raw Android durations.
 
-The source's TVKill export uses carrier-cycle counts. Those values are **not** Android microsecond timings and are not used here. The accepted source model payload decodes directly to microsecond arrays; it is not converted from TVKill or Pronto.
+## TV candidate ordering
 
-## Loading and regeneration
+`ir/matching_order.json` uses schema 1. Its source records the pinned GitHub archive hash, unchanged base-index hash and matching country `MY`. Groups record brand/category, exact source brand path/hash, original source country and ordered `{id, modelId}` references. All 2,810 original TV profile IDs appear exactly once across 1,023 source brand groups.
 
-Android loads the metadata index first and reads an individual keyset's waveform asset on a worker only when needed. A small bounded cache retains loaded keysets. Source IDs, command counts and every loaded signal are validated. An emitter capability check is independent of catalogue loading.
+Tree references retain first-occurrence depth-first priority, followed by regional/declarative `others` priority. Accepted records not otherwise referenced remain available. The loader validates IDs and their brand/source/model associations before applying the order. Uploaded-APK TV profiles are appended stably; Astro and other categories retain their source order. This flattened candidate order is not a claim to reproduce Mi's conditional matching tree or automatically identify an appliance.
 
-See the GitHub [offline regeneration instructions](../tools/mi_catalogue/README.md) and [source-manifest.json](../tools/mi_catalogue/source-manifest.json), plus the separate [Astro supplement converter](../tools/mi_stb/README.md), [response provenance](../tools/mi_stb/provenance.json) and [generated hash manifest](../tools/mi_stb/generated-manifest.json). Offline regeneration uses the retained source JSON; live retrieval is a development-time step. The app makes no Xiaomi API requests and has no online database refresh or profile upload. Raw AC commands remain recorded commands; their presence does not create arbitrary-temperature/state control.
+## Panasonic216 parameters and requested state
 
-All profiles are physically untested by this project. Neither a successful transmit call nor a matching brand label confirms that an appliance received or understood a command.
+`ir/panasonic_ac/index.json` uses schema 1, kind `panasonic216-parameters`, and the pinned non-executable parameter-source SHA-256. Six source identities use `pana_{modelId}` IDs. Their metadata specifies template bytes, carrier, frame timings, mode/temperature byte patches, supported fan patches, swing bit patches, power semantics and source hashes. No Lua, Java definition or vendor native binary is stored as an executable model dependency.
+
+Three parameter sets derive from the actual uploaded APK database; three derive from the existing GitHub Mi archive. The independent encoder copies a 27-byte Panasonic216 template, applies only supported state mappings, sets the model's power field/action, recomputes both section checksums and produces complete LSB-first 8-byte/19-byte frames with the source timings. It validates the result through the same raw transmission bounds.
+
+Requested states contain `power`, `mode`, `temperature`, `fan` and `swing`. Temperature is limited to 16–30 °C; supported mode/fan/swing choices vary by source profile. Auto operating mode is excluded. A value of `-1` preserves a source-default fan/swing field when that control has no mapping. `kk_3_137_7793` uses a power-toggle action rather than an explicit on/off state; ordinary settings messages do not add a toggle action.
+
+Saved devices use mode `panasonic_ac`, a parameter profile ID and locally stored requested state. No device reading or automatic transmission is implied by restoring or editing that state. A working-match save requires an accepted test and user confirmation; an untested preview is explicitly labelled. These six profiles are additional to the raw count, with no finite recorded-command association total assigned to generated settings.
+
+## Loading and reproduction
+
+The app loads metadata on a worker, then lazily validates raw asset hashes, source identities, command counts and timings. An eight-profile cache bounds loaded raw waveforms. Hardware detection remains independent of catalogue parsing. Source failure does not authorize clearing Wi-Fi metadata or encrypted credentials.
+
+Offline tools cover the [GitHub catalogue](../tools/mi_catalogue/README.md), [Astro responses](../tools/mi_stb/README.md), [uploaded APK](../tools/mi_apk_catalogue/), [TV ordering](../tools/mi_matching/README.md) and [Panasonic parameters](../tools/panasonic_ac/). All can be reproduced from retained pinned inputs without a phone-side upload or Xiaomi runtime request. See [build instructions](BUILD_INSTRUCTIONS.md) and [validation](VALIDATION.md).
+
+Passing source/encoder/software checks and an accepted Android transmit do not establish a physical appliance response. The user reports one Palm Astro Ultra Box match; the new TV/AC controls still need appliance testing.

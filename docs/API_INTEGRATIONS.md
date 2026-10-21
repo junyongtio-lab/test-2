@@ -49,21 +49,29 @@ Sources bearing LG Electronics copyright:
 
 SDK publication is evidence of the interface, not evidence that every LG model or firmware accepts it. Pre-webOS NetCast sets, other platforms and secure-only sets are not covered by this transport.
 
-## Mi Remote JSON infrared source
+## Mi Remote infrared data sources
 
-Version 1.3.0 retains the unchanged published GitHub JSON catalogue of [ysard/mi_remote_database](https://github.com/ysard/mi_remote_database), release [v2.1](https://github.com/ysard/mi_remote_database/releases/tag/v2.1): 3,706 keysets and 140,949 source command associations. It also bundles the separate Astro supplement described below. The GitHub archive is pinned by SHA-256 `44dcf13d815383c907884f7cdb294afcd085b7063c1de4780589e0626cb61895`; upstream format documentation is pinned to commit `8a60b419506e8c407f2b756ec8ab4b4bc446678d`.
+Version 1.4.0 combines three separately attributed raw sources: the unchanged [GitHub Mi v2.1 catalogue](../tools/mi_catalogue/README.md) (3,706 keysets / 140,949 command associations), the Astro public responses described below (five / 216), and the uploaded **Mi Remote 7.2.4M / code 6500** database (604 / 24,204). Together they supply 4,315 raw profiles and 165,369 source button associations. This is not a transfer of Mi Remote's complete online catalogue.
 
-The archive is committed under `tools/mi_catalogue/source/` for reproducible offline conversion. The standalone generator verifies the archive and input JSON hashes, decodes supported encrypted/compressed raw timing arrays and preserves the exact carrier in hertz and timings in microseconds. It never contacts Xiaomi or executes embedded source definitions. Android receives only the converted JSON assets and uses `ConsumerIrManager` to transmit them. The source's TVKill output uses carrier-cycle counts and is not used as Android timings.
+The GitHub archive SHA-256 is `44dcf13d815383c907884f7cdb294afcd085b7063c1de4780589e0626cb61895`; format documentation is pinned to commit `8a60b419506e8c407f2b756ec8ab4b4bc446678d`. Its standalone converter verifies input hashes, decodes supported raw arrays and retains carrier hertz and full microsecond timings. The source's TVKill output uses carrier cycles and is not used as Android timings. Source categories 1, 2, 3, 6, 11 and 12 supply TV, decoder, AC and fan records; decoder categories are combined without inventing brand aliases.
 
-The app includes source categories 1 (TV), 2 (set-top box), 3 (AC), 6 (fan), 11 (cable/satellite) and 12 (internet box). Set-top box categories are combined without inventing brand aliases. Exact source brand-to-keyset associations are retained, including repeated waveform/button associations. Source model identifiers denote code sets, not independently verified retail models. See [coverage and source paths](../app/src/main/assets/ir/mi/index.json) and the [input/output hash manifest](../tools/mi_catalogue/source-manifest.json).
+The [uploaded-APK importer](../tools/mi_apk_catalogue/) verifies the exact archive, APK, nested RAR and SQLite hashes before converting named raw TV/AC records. The APK SHA-256 is `4c20655f2b636d86152202994da2a1b88f4ebf5bddf58b7ef6c2bf8e42fa5c73`; database SHA-256 is `727a271f25889d97fc94b021b240f62d1ce559ce8a98cf14b7ac0d3efb657bfa`. Its 571 TV and 33 AC profiles retain source table/row/brand associations, keys, waveform-source references and hashes in the [separate index](../app/src/main/assets/ir/mi_apk/index.json). The database file itself, DEX, vendor libraries and model programs are not shipped as executable app dependencies.
 
-The upstream repository carries AGPL-3.0-or-later notices. Its license is included in the APK at `licenses/mi_remote_database-LICENSE.txt`. The standalone generator also uses AGPL-3.0-or-later and is outside the Android runtime. Source data is not relicensed under the application's MIT license. See [attribution](../app/src/main/assets/ir/ATTRIBUTION.md) and [offline tool instructions](../tools/mi_catalogue/README.md). This is a community database, not a manufacturer-published remote API or manufacturer endorsement.
+Both source-array paths were traced through Mi's raw decoder to `ConsumerIrManager.transmit`; those arrays already contain microseconds. They must not be rescaled through the separate Kookong carrier-cycle encoder path. The Android app independently reads the converted JSON offline and makes no Xiaomi requests.
 
-## Air conditioners, fans and unavailable formats
+The [TV ordering helper](../tools/mi_matching/README.md) derives candidate priority from original matching-tree references followed by regional `others` priority, retaining all 2,810 original TV IDs. It does not claim to reconstruct Mi's complete conditional matching tree. Numbered TV candidates on emitter phones enter guided testing; only the user can confirm an appliance response before saving a working match.
 
-The previous native IRremoteESP8266 stateful AC engine and all non-Mi captures have been removed. AC and fan remotes now replay only accepted raw commands from the Mi JSON. They cannot generate arbitrary temperature/mode/fan combinations or read appliance state. One command may set several properties simultaneously.
+GitHub source data and its standalone converter retain AGPL-3.0-or-later notices; the license is included as `licenses/mi_remote_database-LICENSE.txt`. Uploaded Xiaomi/Kookong data is attributed separately without assigning MIT or AGPL rights to it. The application and new independent helpers retain their own code license. See [attribution](../app/src/main/assets/ir/ATTRIBUTION.md) and [data format](IR_PROFILE_FORMAT.md). None of these sources implies manufacturer certification or endorsement.
 
-Most upstream AC definitions use proprietary templates, unsupported representations or executable Lua/Java fragments. The generator excludes these rather than executing them or fabricating a waveform. Invalid carrier frequencies and empty model responses are also excluded. Accepted counts and exclusion reasons appear in the index; the upstream README's broad totals are not a claim that every source model is usable in Android.
+## Air conditioners and fans
+
+Raw AC/fan profiles replay complete recorded commands, which may change several settings at once. The uploaded-APK raw importer separately lists **701 stateful AC definitions** requiring encoding. These are not 701 failed raw decodes. Proprietary programs, unsupported representations, invalid carriers and empty responses are not executed, guessed or truncated into raw signals.
+
+A separate, independently written Panasonic216 encoder handles six verified parameter profiles. Three (`137_2587`, `kk_3_137_4646`, `kk_3_137_7406`) derive numeric parameters from the uploaded APK; three (`kk_3_137_7790`, `kk_3_137_7791`, `kk_3_137_7793`) derive from the existing GitHub Mi data. Framing, packet templates, byte/bit field mappings and checksums are non-executable data under [tools/panasonic_ac](../tools/panasonic_ac/). No vendor Lua or native encoder is evaluated or copied into runtime.
+
+The encoder supports 16–30 °C, Cool/Heat/Dry, Fan operating mode where mapped, and per-profile fan/swing choices. Auto operating mode is excluded. Five families have explicit on/off fields; `kk_3_137_7793` uses a power-toggle action. Editing requested settings, opening a remote or restoring saved settings sends nothing automatically. Only a settings or power action transmits. The application cannot read or synchronize actual AC state, and other Panasonic families and other vendors' stateful engines remain outside this implementation.
+
+The previous native IRremoteESP8266 engine and non-Mi captures remain removed. The new Panasonic code uses independently implemented protocol facts and Mi numeric data; source verification and golden vectors do not establish physical compatibility with the user's unidentified AC.
 
 ## Astro public STB JSON supplement
 
@@ -71,9 +79,15 @@ Static inspection of the user-supplied Mi Remote 7.2.4M APK identified the regio
 
 All **216 recorded command associations** from those five keysets are decoded offline with their exact carrier hertz and microsecond timings preserved. The separate [supplement index](../app/src/main/assets/ir/mi_stb/index.json), [source provenance](../tools/mi_stb/provenance.json) and [generated hash manifest](../tools/mi_stb/generated-manifest.json) record the actual source associations and reproducible outputs. The app bundles the converted JSON and does not call Xiaomi, require a Xiaomi account or ask for a smartphone JSON import. No copied Xiaomi implementation, native library or graphics are shipped.
 
-The public service does not label these keysets Ultra Box or Ulti Box. They are Astro candidates requiring guided testing on the actual decoder, with no guaranteed retail-model match. The user's successful Mi Remote Ultra Box test does not identify the exact working keyset or establish Palm Remote compatibility. No physical Palm Remote decoder response has been verified. The earlier owner-supplied Astro JSON and guessed bit-order interpretations remain deleted.
+The public service does not label these keysets Ultra Box or Ulti Box. The user reports that Palm Remote 1.3.0 controls their Ultra Box; the exact working keyset remains unknown. This user report does not validate all five candidates, other Ultra Box units or Ulti Box support. All five source IDs and command data remain unchanged in 1.4.0. The earlier owner-supplied Astro JSON and guessed bit-order interpretations remain deleted.
 
 Public availability of these Xiaomi/Kookong response data does not establish a reuse license. The application's MIT license and the GitHub archive's AGPL notices are not assigned to this separate source. Attribution and hashes are retained; no additional vendor-data rights, manufacturer certification or endorsement are asserted.
+
+## TV/AC online retrieval boundary
+
+The inspected APK uses a separate generic client for TV/AC brand, matching-tree and code retrieval. Ordinary unsigned TV/AC brand requests returned HTTP 200 with service status `19` and no data, including comparisons with public version/country/timestamp metadata. The existing public STB keyset endpoint rejected five actual published TV/AC IDs with code `-6`, `invalid req` and no profile.
+
+The managed proxy, TLS and unrestricted network policy were functioning. These service rejections do not establish usable anonymous TV/AC catalogue access or the exact cause of status `19`. No embedded credentials, opaque signing material or private app storage is reused. See the [TV/AC investigation](TV_AC_COMPATIBILITY_INVESTIGATION.md). The complete online catalogue cannot be claimed as recovered from the uploaded APK alone.
 
 ## NJOI, PRISM+ and other brands
 

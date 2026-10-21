@@ -1,0 +1,191 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Non-executable Panasonic216 protocol parameters; source scripts omitted and never executed",
+  "records": [
+    {
+      "model": "137_2587",
+      "brand": "Panasonic",
+      "brandId": 137,
+      "carrierHz": 38000,
+      "parameters": {
+        "1001": "00020D30",
+        "1002": "1B0220E004000000060220E00400312080AF00000660000080000672",
+        "1003": "020E02",
+        "1004": "020D31020D41040D010EE0020D61020D21",
+        "1005": "0210AF02103F02105F02107F",
+        "1008": "0401081A1A",
+        "1015": "0384880F0384880103848802038488030384880403848805",
+        "1506": "0,1,2,3,4,5",
+        "300": "3490,1740",
+        "301": "411,474",
+        "302": "411,1250",
+        "303": "7&411,10010,3490,1740",
+        "305": "237",
+        "306": "1"
+      },
+      "source": {
+        "kind": "mi724-apk-local-database",
+        "apkSha256": "4c20655f2b636d86152202994da2a1b88f4ebf5bddf58b7ef6c2bf8e42fa5c73",
+        "databaseSha256": "727a271f25889d97fc94b021b240f62d1ce559ce8a98cf14b7ac0d3efb657bfa",
+        "table": "kk_remote_ircode",
+        "rowId": "137_2587",
+        "rowVersion": 1005,
+        "parameterTable": "kk_remote_ircode_src",
+        "parameterRowId": "2587",
+        "sourceSha256": "383e07f144cdd5a7fa3d8d868493afa24e7c28d3aafa8972ebe4a76083e9a8a6",
+        "sourceHashEncoding": "SHA256 UTF8 canonical JSON {row: raw SQLite model row, waveformSourceRow: raw SQLite referenced source row}; keys sorted, ensure_ascii=False, compact separators"
+      }
+    },
+    {
+      "model": "kk_3_137_4646",
+      "brand": "Panasonic",
+      "brandId": 137,
+      "carrierHz": 37900,
+      "parameters": {
+        "1001": "00020D30",
+        "1002": "1B0220E004000000060220E00400312080AF00000660000085000072",
+        "1003": "020E02",
+        "1004": "020D31020D41020D0100020D21",
+        "1005": "0210AF02103F02105F02107F",
+        "1008": "0401081A1A",
+        "1015": "0384880F0384880103848802038488030384880403848805",
+        "1506": "0,1,2,3,4,5",
+        "300": "3490,1790",
+        "301": "425,440",
+        "302": "425,1250",
+        "303": "7&425,10000,3490,1790",
+        "305": "237",
+        "306": "1"
+      },
+      "source": {
+        "kind": "mi724-apk-local-database",
+        "apkSha256": "4c20655f2b636d86152202994da2a1b88f4ebf5bddf58b7ef6c2bf8e42fa5c73",
+        "databaseSha256": "727a271f25889d97fc94b021b240f62d1ce559ce8a98cf14b7ac0d3efb657bfa",
+        "table": "kk_remote_ircode",
+        "rowId": "kk_3_137_4646",
+        "rowVersion": 1003,
+        "parameterTable": "kk_remote_ircode_src",
+        "parameterRowId": "4646",
+        "sourceSha256": "27e4f67edb069ddc008d9b569ef2dbd0e7fb967f71f466df1e009bbb8de88c0a",
+        "sourceHashEncoding": "SHA256 UTF8 canonical JSON {row: raw SQLite model row, waveformSourceRow: raw SQLite referenced source row}; keys sorted, ensure_ascii=False, compact separators"
+      }
+    },
+    {
+      "model": "kk_3_137_7406",
+      "brand": "Panasonic",
+      "brandId": 137,
+      "carrierHz": 38000,
+      "parameters": {
+        "1001": "00020D30",
+        "1002": "1B0220E004000000060220E00400312080AF08000660000080000672",
+        "1003": "020E02",
+        "1004": "020D31020D41020D0100020D21",
+        "1005": "0210AF02103F02105F02107F",
+        "1008": "0401081A1A",
+        "1015": "0684880F8C9008068488018C900D068488028C900D068488038C900D068488048C900D068488058C900D",
+        "1506": "0,1,2,3,4,5",
+        "300": "3480,1760",
+        "301": "420,460",
+        "302": "420,1310",
+        "303": "7&420,10000,3480,1760",
+        "305": "237",
+        "306": "1"
+      },
+      "source": {
+        "kind": "mi724-apk-local-database",
+        "apkSha256": "4c20655f2b636d86152202994da2a1b88f4ebf5bddf58b7ef6c2bf8e42fa5c73",
+        "databaseSha256": "727a271f25889d97fc94b021b240f62d1ce559ce8a98cf14b7ac0d3efb657bfa",
+        "table": "kk_remote_ircode",
+        "rowId": "kk_3_137_7406",
+        "rowVersion": 1000,
+        "parameterTable": "kk_remote_ircode_src",
+        "parameterRowId": "7406",
+        "sourceSha256": "150b4507b394255b4cf6ec11cbc7189986815606931d24c364a863b1a9413c80",
+        "sourceHashEncoding": "SHA256 UTF8 canonical JSON {row: raw SQLite model row, waveformSourceRow: raw SQLite referenced source row}; keys sorted, ensure_ascii=False, compact separators"
+      }
+    },
+    {
+      "model": "kk_3_137_7790",
+      "brand": "Panasonic",
+      "brandId": 137,
+      "carrierHz": 38000,
+      "parameters": {
+        "1001": "00020D38",
+        "1002": "1B0220E004000000060220E00400393480AF0D000EE000008600006B",
+        "1003": "020E20020E22020E24020E26020E28020E2A020E2C020E2E020E30020E32020E34020E36020E38020E3A020E3C",
+        "1004": "020D39020D49020D0900020D29",
+        "1008": "0401081A1A",
+        "1015": "0384880F0384880103848802038488030384880403848805",
+        "1506": "0,1,2,3,4,5",
+        "300": "3500,1750",
+        "301": "420,420",
+        "302": "420,1300",
+        "303": "7&420,10000,3500,1750",
+        "305": "237",
+        "306": "1"
+      },
+      "source": {
+        "kind": "mi-github-v2.1",
+        "archiveSha256": "44dcf13d815383c907884f7cdb294afcd085b7063c1de4780589e0626cb61895",
+        "sourceFile": "database_dump/3_AC/models/kk_3_137_7790.json",
+        "sourceSha256": "43c3c4096e7548324e416af4eef1374af3a421244341d50cdc72d2665afc78d5",
+        "sourceUrl": "https://github.com/ysard/mi_remote_database/releases/tag/v2.1"
+      }
+    },
+    {
+      "model": "kk_3_137_7791",
+      "brand": "Panasonic",
+      "brandId": 137,
+      "carrierHz": 38000,
+      "parameters": {
+        "1001": "00020D30",
+        "1002": "1B0220E004000000060220E00400313480AF0000066000008000066B",
+        "1003": "020E20020E22020E24020E26020E28020E2A020E2C020E2E020E30020E32020E34020E36020E38020E3A020E3C",
+        "1004": "020D31020D41020D0100020D21",
+        "1008": "0401081A1A",
+        "1015": "0384880F0384880103848802038488030384880403848805",
+        "1506": "0,1,2,3,4,5",
+        "300": "3500,1750",
+        "301": "420,420",
+        "302": "420,1300",
+        "303": "7&420,10000,3500,1750",
+        "305": "237",
+        "306": "1"
+      },
+      "source": {
+        "kind": "mi-github-v2.1",
+        "archiveSha256": "44dcf13d815383c907884f7cdb294afcd085b7063c1de4780589e0626cb61895",
+        "sourceFile": "database_dump/3_AC/models/kk_3_137_7791.json",
+        "sourceSha256": "a85674109a8c39ddcaa40cbc55958cfe3d2189b24a205d774284c00d12b92adb",
+        "sourceUrl": "https://github.com/ysard/mi_remote_database/releases/tag/v2.1"
+      }
+    },
+    {
+      "model": "kk_3_137_7793",
+      "brand": "Panasonic",
+      "brandId": 137,
+      "carrierHz": 38000,
+      "parameters": {
+        "1002": "1B0220E0080000000A0220E00800393480AF00000EE010000000006B",
+        "1003": "020E20020E22020E24020E26020E28020E2A020E2C020E2E020E30020E32020E34020E36020E38020E3A020E3C",
+        "1004": "020D30020D40020D00020D60020D20",
+        "1008": "0401081A1A",
+        "1015": "0384880F0384880103848802038488030384880403848805",
+        "1506": "0,1,2,3,4,5",
+        "300": "3500,1750",
+        "301": "420,420",
+        "302": "420,1300",
+        "303": "7&420,10000,3500,1750",
+        "305": "237",
+        "306": "1"
+      },
+      "source": {
+        "kind": "mi-github-v2.1",
+        "archiveSha256": "44dcf13d815383c907884f7cdb294afcd085b7063c1de4780589e0626cb61895",
+        "sourceFile": "database_dump/3_AC/models/kk_3_137_7793.json",
+        "sourceSha256": "56e0b4e97393eb10c8c37ff5b018b82bfbd80c6ce2c1f5b79d51f27bc72165fe",
+        "sourceUrl": "https://github.com/ysard/mi_remote_database/releases/tag/v2.1"
+      }
+    }
+  ]
+}

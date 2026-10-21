@@ -1,15 +1,15 @@
 {
   "applicationId": "com.universalremote.app",
-  "versionName": "1.3.0",
-  "versionCode": 6,
+  "versionName": "1.4.0",
+  "versionCode": 7,
   "minSdk": 23,
   "targetSdk": 35,
   "buildType": "debug",
   "signing": "Same development certificate as earlier Palm Remote versions; not Play release signing",
   "signingCertificateSha256": "75e8320e3978d0cc65f0fb98c0bb82354a05dd02e1c34d96823d883cab9e4e64",
-  "apkBytes": 10009046,
-  "sha256": "116392d2f489154bc65924a8d9ff00deddb29a954fb90be82de5e0b6066e3a79",
-  "buildDate": "2026-10-19",
+  "apkBytes": 11914545,
+  "sha256": "40f947fdb31b81b6b2b9b81463d6f218146e1c3b42aac0008277d2556ea82775",
+  "buildDate": "2026-10-21",
   "nativeLibrariesIncluded": false,
   "irSource": {
     "archiveBytes": 7892348,
@@ -20,9 +20,9 @@
     "hardwareTested": false,
     "license": "AGPL-3.0-or-later (upstream repository)",
     "limitations": [
-      "Original GitHub JSON archive plus separately pinned public Astro service JSON; no Xiaomi requests by the Android app.",
+      "Pinned GitHub JSON, separate online Astro JSON, converted uploaded-APK TV/AC records and supported Panasonic parameters; no Xiaomi requests by the Android app.",
       "Original model identifiers are code-set IDs, not verified hardware model numbers.",
-      "AC executable/proprietary definitions are omitted; only decoded raw commands are included.",
+      "Opaque AC programs are not executed. Six Panasonic216 parameter sets have a separate independent Java encoder; other unsupported stateful families remain excluded.",
       "The original GitHub archive has no Astro, NJOI or PRISM+; a separate five-profile Astro supplement is bundled without retail-model verification.",
       "Source coverage does not guarantee compatibility with a particular appliance."
     ],
@@ -32,29 +32,29 @@
     "timingUnit": "microseconds"
   },
   "irCoverage": {
-    "brands": 1290,
-    "profiles": 3711,
-    "commands": 141165,
+    "profiles": 4315,
+    "commands": 165369,
+    "brands": 1291,
     "categories": {
       "tv": {
         "brands": 1021,
-        "commands": 123883,
-        "profiles": 2810
+        "profiles": 3381,
+        "commands": 147768
       },
       "set_top_box": {
         "brands": 182,
-        "commands": 12416,
-        "profiles": 411
+        "profiles": 411,
+        "commands": 12416
       },
       "air_conditioner": {
-        "brands": 38,
-        "commands": 685,
-        "profiles": 68
+        "brands": 40,
+        "profiles": 101,
+        "commands": 1004
       },
       "fan": {
         "brands": 133,
-        "commands": 4181,
-        "profiles": 422
+        "profiles": 422,
+        "commands": 4181
       }
     },
     "requestedBrandsAbsent": [
@@ -62,11 +62,11 @@
       "PRISM+",
       "PrismPlus"
     ],
-    "sourceCoverage": "Separate original GitHub and Astro service indexes retained unchanged"
+    "scope": "Recorded raw command associations; encoded Panasonic states counted separately"
   },
   "offlineSourceTests": 10,
   "offlineRegenerationVerified": true,
-  "sourceOnlyMiJson": true,
+  "sourceOnlyMiJson": false,
   "oldIrCataloguesRemoved": true,
   "oldImportedIrProfilesClearedOnUpgrade": true,
   "networkCredentialsPreserved": true,
@@ -74,6 +74,13 @@
   "apk16kZipAlignment": true,
   "irHardwareProbeTests": 11,
   "automatedTests": [
+    {
+      "name": "com.universalremote.app.ApkCatalogTest",
+      "tests": "7",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
     {
       "name": "com.universalremote.app.AstroCatalogTest",
       "tests": "7",
@@ -105,6 +112,20 @@
     {
       "name": "com.universalremote.app.MiMigrationTest",
       "tests": "4",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.universalremote.app.PanasonicAcEncoderTest",
+      "tests": "13",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.universalremote.app.PanasonicSelectionPersistenceTest",
+      "tests": "1",
       "failures": "0",
       "errors": "0",
       "skipped": "0"
@@ -145,13 +166,13 @@
       "skipped": "0"
     }
   ],
-  "androidCatalogueChecks": 25,
-  "uiChecksPassed": 16,
+  "androidCatalogueChecks": 32,
+  "uiChecksPassed": 13,
   "emulatorApi": 29,
   "emulatorAbi": "x86_64",
   "irTransmissionTests": 10,
   "apkResearchToolTests": 29,
-  "automatedTestCount": 91,
+  "automatedTestCount": 112,
   "miRemote724mAnalysis": {
     "inspectionDate": "2026-10-18",
     "staticOnly": true,
@@ -251,12 +272,15 @@
       "sourceDataProvenance": "tools/mi_stb/provenance.json"
     },
     "palmRemote": {
-      "versionName": "1.3.0",
+      "versionName": "1.4.0",
       "newAstroSupportClaimed": true,
       "irCatalogueChanged": true,
       "proprietaryImplementationOrGraphicsCopied": false,
       "physicalHardwareTested": false,
-      "retailModelCompatibilityClaimed": false
+      "retailModelCompatibilityClaimed": false,
+      "rawApkProfilesAdded": 604,
+      "panasonicParameterProfilesAdded": 6,
+      "userReportsPalmUltraBoxWorks": true
     }
   },
   "uiRedesign": {
@@ -344,11 +368,118 @@
   },
   "lint": {
     "errors": 0,
-    "warnings": 8,
-    "warningScope": "English UI localization warnings"
+    "warnings": 15,
+    "warningScope": "SetTextI18n English UI localization warnings"
   },
-  "packagedAssetsVerifiedAgainstWorkspace": 3718,
-  "emulatorVerificationDate": "2026-10-19",
-  "installedApkSha256": "116392d2f489154bc65924a8d9ff00deddb29a954fb90be82de5e0b6066e3a79",
-  "uiEvidence": "downloads/emulator-verification.json"
+  "packagedAssetsVerifiedAgainstWorkspace": 4325,
+  "uiEvidence": "downloads/emulator-verification.json",
+  "recordedSourceCoverage": {
+    "mi": {
+      "profiles": 3706,
+      "commands": 140949
+    },
+    "mi_stb": {
+      "profiles": 5,
+      "commands": 216
+    },
+    "mi_apk": {
+      "profiles": 604,
+      "commands": 24204
+    }
+  },
+  "sourceOnlyMiRemoteData": true,
+  "apkIrSource": {
+    "archive": "downloads/com.duokan.phone.remotecontroller_7.2.4M-6500_minAPI22(arm64-v8a)(nodpi)_apkmirror.com.7z",
+    "versionName": "7.2.4M",
+    "versionCode": 6500,
+    "apkSha256": "4c20655f2b636d86152202994da2a1b88f4ebf5bddf58b7ef6c2bf8e42fa5c73",
+    "databaseSha256": "727a271f25889d97fc94b021b240f62d1ce559ce8a98cf14b7ac0d3efb657bfa",
+    "profiles": 604,
+    "commands": 24204,
+    "rawSignalsExcluded": 0,
+    "statefulDefinitionsExcludedByRawImporter": 701,
+    "manifest": "tools/mi_apk_catalogue/generated-manifest.json",
+    "importSummary": "tools/mi_apk_catalogue/import-summary.json",
+    "offlineRegenerationVerified": true,
+    "completeOnlineCatalogueClaimed": false
+  },
+  "panasonicAc": {
+    "profileCount": 6,
+    "profilesFromUploadedApk": 3,
+    "additionalGithubProfiles": 3,
+    "models": [
+      "137_2587",
+      "kk_3_137_4646",
+      "kk_3_137_7406",
+      "kk_3_137_7790",
+      "kk_3_137_7791",
+      "kk_3_137_7793"
+    ],
+    "sourceParameterSha256": "9563b41eb2a52e325caa36022fd830d2c76b964690ea87cddfaf122867fc4892",
+    "modes": "Source-supported cool/heat/dry; fan mode only on mapped profiles; Auto mode omitted",
+    "temperatureCelsius": [
+      16,
+      30
+    ],
+    "fanAndSwing": "Per-profile source mappings only",
+    "explicitPowerToggleProfile": "kk_3_137_7793",
+    "scriptsExecuted": false,
+    "nativeLibrariesUsed": false,
+    "sourceVerificationPassed": true,
+    "physicalResponseVerified": false
+  },
+  "totalSelectableProfiles": 4321,
+  "tvSourceOrder": {
+    "baseTvProfiles": 2810,
+    "sourceGroups": 1023,
+    "sourceCountry": "MY",
+    "daewooFirstModels": [
+      "xm_1_3399",
+      "xm_1_3390"
+    ],
+    "profileAssociationsLost": 0,
+    "generator": "tools/mi_matching/generate_order.py"
+  },
+  "pythonTestCount": 68,
+  "miApkConverterTests": 8,
+  "tvMatchingTests": 8,
+  "panasonicParameterTests": 6,
+  "panasonicEncoderTests": 13,
+  "userReportedCompatibility": [
+    {
+      "device": "Astro Ultra Box",
+      "palmVersion": "1.3.0",
+      "result": "works",
+      "sourceKeysetIdKnown": false,
+      "reportedDate": "2026-10-21"
+    },
+    {
+      "brand": "Daewoo",
+      "category": "tv",
+      "palmVersion": "1.3.0",
+      "result": "failed with one/some candidates; Mi Remote works on same phone",
+      "retailModelKnown": false,
+      "reportedDate": "2026-10-21"
+    },
+    {
+      "brand": "Panasonic",
+      "category": "air_conditioner",
+      "palmVersion": "1.3.0",
+      "result": "failed; Mi Remote works on same phone",
+      "retailModelKnown": false,
+      "reportedDate": "2026-10-21"
+    }
+  ],
+  "onlineTvAcQueries": {
+    "unsignedGenericServiceStatus": 19,
+    "knownTvAcIdsThroughPublicStbEndpointCode": -6,
+    "usablePayloads": 0,
+    "networkPolicy": "unrestricted/enforced",
+    "credentialsOrSigningMaterialUsed": false,
+    "fullOnlineCatalogueRecovered": false
+  },
+  "installedApkSha256": "40f947fdb31b81b6b2b9b81463d6f218146e1c3b42aac0008277d2556ea82775",
+  "emulatorVerificationDate": "2026-10-21",
+  "uiOriginalPreferencesRestored": true,
+  "emulatorSystemUiWaitDialogs": 0
 }

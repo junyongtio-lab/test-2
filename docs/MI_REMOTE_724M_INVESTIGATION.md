@@ -1,8 +1,8 @@
 # Mi Remote 7.2.4M investigation
 
-Inspected on 18–19 October 2026. The user uploaded the exact archive to GitHub after the chat attachment failed. The extracted APK reports package `com.duokan.phone.remotecontroller`, version **7.2.4M**, version code **6500**, minimum Android API 22 and target API 34.
+Inspected on 18–21 October 2026. The user uploaded the exact archive to GitHub after the chat attachment failed. The extracted APK reports package `com.duokan.phone.remotecontroller`, version **7.2.4M**, version code **6500**, minimum Android API 22 and target API 34. Later messages call it 7.4.2M; the supplied file and manifest establish 7.2.4M as the source actually used.
 
-**Five actual Astro keysets were retrieved from the regional public service on 19 October and are bundled in Palm Remote 1.3.0.** All 216 command associations decode to valid raw timings. The source identifies Astro, but does not name Ultra Box, Ulti Box or NJOI models. The user reports that Mi Remote controls their Ultra Box; Palm Remote still needs testing on that decoder to select the correct candidate.
+**Five actual Astro keysets were retrieved from the regional public service on 19 October.** All 216 command associations decode to valid raw timings. On 21 October the user confirmed Palm Remote 1.3.0 controls their Ultra Box; the exact selected keyset remains unknown, and no Ulti Box response is established. Version 1.4.0 preserves those profiles and adds 604 raw TV/AC profiles recovered from the supplied APK, plus six independently encoded Panasonic parameter profiles.
 
 ## Provenance and verification
 
@@ -27,7 +27,9 @@ All applicable encrypted JSON columns in the 19 tables decoded with zero errors.
 
 Resource hits for `astro` were Albanian translations containing `Pastro`/`pastrohen`, not the Astro brand. Initial binary-string candidates also included false positives. The native inputs `all_output_dec.dat` and `b64.dat` are opaque IR/AC inputs; neither yields an attributable Astro profile from this analysis.
 
-No bundled SQLite database, proprietary implementation or graphics were copied into the Android app. The existing 3,706-keyset GitHub catalogue remains unchanged, with five separately sourced online Astro keysets added as an offline supplement. The original inspection tools and metadata-only APK evidence can be reviewed under [tools/apk_inspection](../tools/apk_inspection/README.md). Public Astro responses, hashes and independent conversion are under [tools/mi_stb](../tools/mi_stb/README.md).
+The SQLite database file, proprietary implementation and graphics are not shipped in Palm Remote. Its independently written importer converts named raw records into bounded, hashed JSON: **571 TV profiles / 23,885 commands and 33 AC profiles / 319 commands**, with no raw-command exclusions. The raw importer records 701 stateful AC definitions as requiring a separate encoder. Three of the six supported Panasonic216 parameter profiles come from those APK definitions; three additional profiles use the existing pinned GitHub source. Unsupported AC families remain explicit rather than being executed or represented as working remotes.
+
+The existing 3,706-keyset GitHub catalogue and five online Astro keysets remain. Original inspection tools are under [tools/apk_inspection](../tools/apk_inspection/README.md); APK conversion and source exclusions are under [tools/mi_apk_catalogue](../tools/mi_apk_catalogue/README.md), Panasonic parameter conversion under [tools/panasonic_ac](../tools/panasonic_ac/README.md), and public Astro responses under [tools/mi_stb](../tools/mi_stb/README.md). See the [TV/AC diagnosis](TV_AC_COMPATIBILITY_INVESTIGATION.md) for the user's failed appliance tests and corrected source matching order.
 
 ## Code and native findings
 
