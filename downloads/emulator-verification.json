@@ -1,6 +1,6 @@
 {
   "package": "com.universalremote.app",
-  "versionName": "1.5.0",
+  "versionName": "1.6.0",
   "androidCatalogueChecks": 35,
   "hardwareState": "No IR transmitter detected",
   "physicalHardwareTested": false,
@@ -21,21 +21,22 @@
     "All-734 AC inventory searches exact source IDs and clearly labels data-only profiles without control actions",
     "Complete original AC source and referenced data open without importing, sending or saving a device",
     "Complete AC inventory opens the exact supported Panasonic source with no-emitter transmission gates intact",
-    "Complete AC inventory opens exact recorded controls without treating source-data inclusion as a confirmed appliance match"
+    "Complete AC inventory opens exact recorded controls without treating source-data inclusion as a confirmed appliance match",
+    "Daikin160 preview preserves its source ID, discloses experimental status, and disables all sending without IR hardware",
+    "LG28 preview preserves its source ID, discloses experimental status, and disables all sending without IR hardware",
+    "Mitsubishi144 preview preserves its source ID, discloses experimental status, and disables all sending without IR hardware",
+    "SamsungAC preview preserves its source ID, discloses experimental status, and disables all sending without IR hardware"
   ],
   "passed": true,
-  "installed_sha256": "dbabb53cb66b24d17cddd3370cb4ef94f3236cfa7604c650bff7f1fca9b9c9a8",
-  "uiCheckCount": 17,
-  "fixtureCount": 5,
+  "installed_sha256": "3daa9cde501eab56e5c4d4f4df0db2ee2a6c9fed35dd99632e130c3af2e89cc1",
+  "uiCheckCount": 21,
+  "fixtureCount": 9,
   "originalPreferencesRestored": true,
   "systemUiWaitDialogs": 0,
-  "expected_sha256": "dbabb53cb66b24d17cddd3370cb4ef94f3236cfa7604c650bff7f1fca9b9c9a8",
-  "versionCode": 8,
-  "install": "Existing in-place update; installed bytes verified",
-  "emulatorApi": 29,
-  "emulatorAbi": "x86_64",
-  "validationDate": "2026-10-21",
-  "completeAcSourceProfiles": 734,
-  "sourceAcControlsImplemented": 36,
-  "sourceAcControlsUnavailable": 698
+  "expected_sha256": "3daa9cde501eab56e5c4d4f4df0db2ee2a6c9fed35dd99632e130c3af2e89cc1",
+  "versionCode": 9,
+  "validationDate": "2026-10-25",
+  "experimentalProtocolCandidates": 4,
+  "protocolOracleCases": 960,
+  "strictWaveformDecodeCases": 960
 }

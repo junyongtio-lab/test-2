@@ -1,6 +1,8 @@
 # Palm Remote for Android
 
-Version **1.5.0** includes **all 734 AC source profiles across 45 brand labels** from the supplied Mi Remote APK, with no records omitted. Complete source rows, referenced data, decoded definitions and original parameter/hook text are bundled offline. Open **Home → Browse all 734 AC profiles** to search and inspect them. **Controls are implemented for 36 source profiles; 698 are included as data with controls unavailable.** Source hook text is never executed. See [complete AC data and its control limits](docs/COMPLETE_AC_DATABASE.md).
+Version **1.6.0** adds four **experimental AC protocol candidates** using templates and timing from the supplied Mi Remote 7.2.4M archive: LG28 (`22_3577`), Mitsubishi144 (`kk_3_123_12255`), Daikin160 (`kk_3_58_4871`) and SamsungAC (`kk_3_125_4745`). Each exposes Cool/Heat, 16–30 °C, four fan speeds and explicit power. Existing Panasonic216 controls remain. **These are four specific profiles, not support for all 698 remaining AC definitions.** Exact equivalence to Mi's engine and physical appliance response are unverified. See [encoder scope and evidence](docs/AC_PROTOCOL_CANDIDATES.md).
+
+All **734 AC source profiles across 45 brand labels** remain bundled offline. The existing 36 source-mapped controls are retained; four additional records now offer experimental protocol candidates, and 694 other records have no controls. Open **Home → Browse all 734 AC profiles**, search the source ID, and tap **Try protocol candidate**. Or select the matching AC brand and its experimental candidate. Test the signal on your AC before saving a working match; saving a preview sends nothing.
 
 The existing 604 converted TV/AC raw profiles, six Panasonic AC parameter profiles and source-prioritized TV matching remain. On a phone with an IR emitter, selecting a TV candidate opens guided testing before it can be saved as a working match. Existing saved recorded remotes can be tested again with **Find a working remote**.
 
@@ -12,7 +14,7 @@ The user reports that Palm Remote 1.3.0 controls their **Astro Ultra Box**. Thos
 
 Download [PalmRemote.apk](downloads/PalmRemote.apk) on an Android phone running Android 6.0 or later. Open it and allow installation from that source if prompted. The development-signed APK retains the package and signing certificate for an in-place update. APKs do not run on iPhone.
 
-Version 1.5.0 retains saved current Mi remotes and Samsung/LG Wi-Fi devices with their encrypted credentials. Upgrades from before 1.2.0 remove obsolete IR selections and imports after the replacement catalogues validate. The earlier unverified Astro JSON and native AC engine remain removed.
+Version 1.6.0 retains saved current Mi remotes and Samsung/LG Wi-Fi devices with their encrypted credentials. Upgrades from before 1.2.0 remove obsolete IR selections and imports after the replacement catalogues validate. The earlier unverified Astro JSON and native AC engine remain removed.
 
 ## Included controls
 

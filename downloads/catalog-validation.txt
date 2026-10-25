@@ -97,11 +97,23 @@ INSTRUMENTATION_STATUS_CODE: 0
 INSTRUMENTATION_STATUS: stream=PASS UI: Complete AC inventory opens exact recorded controls without treating source-data inclusion as a confirmed appliance match
 
 INSTRUMENTATION_STATUS_CODE: 0
-INSTRUMENTATION_STATUS: stream=UI evidence: /storage/emulated/0/Android/data/com.universalremote.app/files/palm-validation-v150
+INSTRUMENTATION_STATUS: stream=PASS UI: Daikin160 preview preserves its source ID, discloses experimental status, and disables all sending without IR hardware
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=PASS UI: LG28 preview preserves its source ID, discloses experimental status, and disables all sending without IR hardware
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=PASS UI: Mitsubishi144 preview preserves its source ID, discloses experimental status, and disables all sending without IR hardware
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=PASS UI: SamsungAC preview preserves its source ID, discloses experimental status, and disables all sending without IR hardware
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=UI evidence: /storage/emulated/0/Android/data/com.universalremote.app/files/palm-validation-v160
 
 INSTRUMENTATION_STATUS_CODE: 0
 INSTRUMENTATION_RESULT: catalogChecks=35
-INSTRUMENTATION_RESULT: stream=PASS 35 Android Mi catalogue/hardware checks and 17 emulator UI checks
+INSTRUMENTATION_RESULT: stream=PASS 35 Android Mi catalogue/hardware checks and 21 emulator UI checks
 
-INSTRUMENTATION_RESULT: uiChecks=17
+INSTRUMENTATION_RESULT: uiChecks=21
 INSTRUMENTATION_CODE: -1

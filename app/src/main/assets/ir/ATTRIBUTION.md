@@ -48,3 +48,7 @@ The encoder uses verified framing, packet fields and checksums; it does not exec
 The three raw sources total **4,315 profiles and 165,369 command associations**; the six adjustable Panasonic profiles are counted separately. Duplicate waveforms under different source associations remain distinct. All generated per-profile `hardwareTested` flags remain false. The user reports Palm Remote 1.3.0 controls an Astro Ultra Box, without identifying its exact keyset; that report does not mark all five profiles tested. No physical TV/AC testing occurred in the cloud.
 
 The earlier owner-supplied Astro JSON, Flipper-IRDB captures, learned imports and native IRremoteESP8266 engine remain removed. There is no NJOI-labelled or PRISM+ profile. Source presence, hardware detection and a successful Android transmit do not certify appliance compatibility.
+
+## Experimental protocol candidates in 1.6.0
+
+Four independently implemented Java candidates use the pinned Mi APK source templates and timings. Protocol layouts and checksums were cross-checked against IRremoteESP8266 commit `1e2f0f3ef0a93cbf2a8ddb2e95130f8f4c584b3f` (LGPL-2.1-or-later). The upstream C++ library is used only as an external validation reference; it is not bundled or executed in Android. See `docs/AC_PROTOCOL_CANDIDATES.md` and `tools/ac_families/README.md`. This does not assert rights to redistribute vendor implementations or compatibility with all model profiles.

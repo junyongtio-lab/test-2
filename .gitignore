@@ -11,3 +11,5 @@ artifacts/
 native_ir/.cache/
 __pycache__/
 *.py[cod]
+
+work/
