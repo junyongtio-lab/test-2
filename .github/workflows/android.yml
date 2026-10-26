@@ -27,6 +27,8 @@ jobs:
         run: python3 tools/tv_brand_coverage.py --check
       - name: Verify decoder brand coverage
         run: python3 tools/decoder_brand_coverage.py --check
+      - name: Verify fan brand coverage
+        run: python3 tools/fan_brand_coverage.py --check
       - name: Verify Mi database catalogue
         run: |
           python3 -m pip install -r tools/mi_catalogue/requirements.txt

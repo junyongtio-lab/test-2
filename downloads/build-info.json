@@ -1,13 +1,13 @@
 {
   "applicationId": "com.universalremote.app",
-  "versionName": "1.6.3",
-  "versionCode": 12,
+  "versionName": "1.6.4",
+  "versionCode": 13,
   "minSdk": 23,
   "targetSdk": 35,
-  "apkSha256": "88e53b2a9a6243695bdaa613e041876ccada579b8a50357d34177f9070542d74",
-  "apkBytes": 13409615,
+  "apkSha256": "9eb1edbf43c447479bfb2e1304080546c95e0945b6289838ce91d17849fe9d8b",
+  "apkBytes": 13410161,
   "validationDate": "2026-10-27",
-  "baseCommit": "72533bb3490dea9717279e3162362f500ad743ce",
+  "baseCommit": "950d672eb078bf88f3c9f76a4db8aa6262102fa3",
   "sourceArchive": "downloads/com.duokan.phone.remotecontroller_7.2.4M-6500_minAPI22(arm64-v8a)(nodpi)_apkmirror.com.7z",
   "sourceArchiveSha256": "72fc2fc859255e19963370ecd3252889af3f8a2e609d2c74c2d995e03b4267a6",
   "completeAcSourceProfiles": 734,
@@ -16,7 +16,7 @@
   "remainingAcProfilesWithoutControls": 694,
   "panasonicParameterCandidatesRetained": 6,
   "jvm": {
-    "tests": 127,
+    "tests": 129,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -31,7 +31,7 @@
   "exactMiEngineEquivalenceVerified": false,
   "vendorProgramsExecuted": false,
   "signingCertificateSha256": "75e8320e3978d0cc65f0fb98c0bb82354a05dd02e1c34d96823d883cab9e4e64",
-  "androidUiStatus": "Not run for this update: no KVM acceleration available. Instrumentation APK compiled; physical decoder and TV responses unverified.",
+  "androidUiStatus": "Not run for this update. Instrumentation APK compiled; physical fan, decoder and TV responses unverified.",
   "lintWarnings": 25,
   "selectableTvBrands": 1020,
   "tvRemoteCandidates": 3381,
@@ -40,5 +40,10 @@
   "selectableDecoderBrands": 182,
   "decoderRemoteCandidates": 411,
   "decoderCommandAssociations": 12416,
-  "allDecoderBrandsHaveGuidedTesting": true
+  "allDecoderBrandsHaveGuidedTesting": true,
+  "selectableFanBrands": 133,
+  "fanRemoteCandidates": 422,
+  "fanCommandAssociations": 4181,
+  "limitedSingleButtonFanCandidates": 6,
+  "allFanBrandsHaveGuidedTesting": true
 }

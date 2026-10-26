@@ -1,3 +1,7 @@
+# Palm Remote 1.6.4 fan update
+
+All 133 fan brands offer guided testing first, covering 422 candidates and 4,181 command associations. Production-loader tests verify all fan candidates and the six single-button limitations. The shared response state requires two distinct confirmations by default, or only the available button for an explicitly limited fan candidate, and resets fully between candidates. Fan, decoder and TV coverage CSVs are checked from the bundled indexes. Compiled UI checks include six representative fan brands; physical responses and emulator UI results remain unverified. See downloads/validation.json for completed build checks.
+
 # Palm Remote 1.6.3 decoder update
 
 All 182 decoder brands now offer guided testing first. Production-loader tests cover all 411 decoder candidates and 12,416 command associations, preserving the five Astro candidates. Each candidate has at least two recorded buttons. Decoder and TV setup share the two-button response confirmation gate. Decoder and TV coverage CSV checks pass. The decoder UI test source includes six representative brands, and the existing eighteen-brand TV checks remain. Physical responses and emulator UI results are unverified for this update. See downloads/validation.json for completed build checks.

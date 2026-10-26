@@ -498,7 +498,7 @@ public final class MainActivity extends Activity {
         if(category.equals("tv")){brands.add("Samsung");brands.add("LG");}
         List<Choice> options=new ArrayList<>();
         for(String brand:brands)options.add(new Choice(brand,()->{
-            if(category.equals("tv")||category.equals("set_top_box"))chooseMethod(brand,category);
+            if(category.equals("tv")||category.equals("set_top_box")||category.equals("fan"))chooseMethod(brand,category);
             else irSetup(brand,category);
         }));
         if(options.isEmpty()){message("No decoded "+categoryLabel(category).toLowerCase(Locale.ROOT)+" profiles are available in this snapshot.");return;}
@@ -931,12 +931,13 @@ public final class MainActivity extends Activity {
         if(catalogue==null||profiles.isEmpty())return;
         final boolean television="tv".equals(profiles.get(0).optString("category"));
         final boolean decoder="set_top_box".equals(profiles.get(0).optString("category"));
-        final boolean confirmButtons=television||decoder;
-        final String appliance=decoder?"decoder":"TV";
+        final boolean fan="fan".equals(profiles.get(0).optString("category"));
+        final boolean confirmButtons=television||decoder||fan;
+        final String appliance=fan?"fan":decoder?"decoder":"TV";
         final TvTestSession responses=new TvTestSession();
         LinearLayout body=column();body.setPadding(dp(20),dp(8),dp(20),dp(12));
         TextView position=text("",17,TEXT,true);body.addView(position);gap(body,8);
-        TextView explanation=text(decoder?"Turn the decoder and TV on. Aim the phone at the decoder IR sensor, not the TV. Try navigation, OK or channel buttons where available. Confirm two different buttons respond before saving. If nothing happens, try the next remote.":television?"Turn the TV on. Aim the phone at its IR sensor from 1–3 metres. Try Volume, Power, Input or navigation where available. Confirm two different buttons respond before saving. If nothing happens, try the next remote.":"Test one recorded button while aiming at the appliance. A keyset is a source capture, not a verified model match. Save only the remote you choose.",13,MUTED,false);
+        TextView explanation=text(fan?"Aim the phone at the fan IR sensor and observe the fan. Try Power, Speed or Oscillation where recorded. Confirm two different buttons before saving, or the single available button on a limited candidate. If nothing happens, try the next remote.":decoder?"Turn the decoder and TV on. Aim the phone at the decoder IR sensor, not the TV. Try navigation, OK or channel buttons where available. Confirm two different buttons respond before saving. If nothing happens, try the next remote.":television?"Turn the TV on. Aim the phone at its IR sensor from 1–3 metres. Try Volume, Power, Input or navigation where available. Confirm two different buttons respond before saving. If nothing happens, try the next remote.":"Test one recorded button while aiming at the appliance. A keyset is a source capture, not a verified model match. Save only the remote you choose.",13,MUTED,false);
         body.addView(explanation);gap(body,12);
         Spinner command=new Spinner(this);body.addView(command,new LinearLayout.LayoutParams(-1,dp(52)));
         TextView result=text("Loading signals…",13,MUTED,false);result.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
@@ -954,8 +955,8 @@ public final class MainActivity extends Activity {
         final java.util.concurrent.atomic.AtomicBoolean active=new java.util.concurrent.atomic.AtomicBoolean(true);
         Runnable[] load=new Runnable[1];
         load[0]=()->{
-            int token=request.incrementAndGet();JSONObject metadata=profiles.get(current[0]);signalSent[0]=false;responses.reset();responded.setEnabled(false);responded.setText(appliance+" responded to this button");
-            position.setText("Remote "+(current[0]+1)+" of "+profiles.size()+" · "+metadata.optString("model"));
+            int token=request.incrementAndGet();JSONObject metadata=profiles.get(current[0]);signalSent[0]=false;responses.reset(fan?Math.min(2,metadata.optInt("commandCount",2)):2);responded.setEnabled(false);responded.setText(appliance+" responded to this button");
+            position.setText("Remote "+(current[0]+1)+" of "+profiles.size()+" · "+metadata.optString("model")+(fan&&responses.requiredCount()==1?" · One recorded button only":""));
             result.setText("Loading recorded signals…");test.setEnabled(false);command.setEnabled(false);
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
             previous.setEnabled(current[0]>0);next.setEnabled(current[0]<profiles.size()-1);codes.clear();
@@ -974,7 +975,7 @@ public final class MainActivity extends Activity {
                         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);command.setAdapter(adapter);
                         if(!codes.isEmpty())command.setSelection(initial);
                         command.setEnabled(!codes.isEmpty());test.setEnabled(irHardware.hasEmitter&&!codes.isEmpty());
-                        result.setText(irHardware.hasEmitter?(confirmButtons?"Step 1: send the selected recorded button, then confirm only if the "+appliance+" reacts. Choose and test a different button next.":"Choose a recorded button. Tap Send test signal, then check the appliance yourself."):irHardware.title+". You can browse here. To save without testing, choose a remote from the keyset list.");
+                        result.setText(irHardware.hasEmitter?(fan&&responses.requiredCount()==1?"Only one button is recorded for this candidate. Send it and confirm the fan responds. Saving confirms only that function, not a complete remote.":confirmButtons?"Step 1: send the selected recorded button, then confirm only if the "+appliance+" reacts. Choose and test a different button next.":"Choose a recorded button. Tap Send test signal, then check the appliance yourself."):irHardware.title+". You can browse here. To save without testing, choose a remote from the keyset list.");
                     });
                 }catch(Exception error){ui(()->{if(active.get()&&token==request.get())result.setText("Could not load this keyset: "+error.getMessage());});}
             });
@@ -984,7 +985,7 @@ public final class MainActivity extends Activity {
         responded.setOnClickListener(v->{
             if(sending[0]||!responses.awaitingResponse())return;
             responses.confirm();responded.setEnabled(false);
-            result.setText(responses.canSave()?"Two different buttons confirmed. Test more buttons or tap Use this remote.":"One button confirmed. Choose a different button above, send it, and confirm the "+appliance+" responds.");
+            result.setText(responses.canSave()?(responses.requiredCount()==1?"The only recorded button is confirmed. This limited candidate controls only that recorded function. Tap Use this remote to save.":"Two different buttons confirmed. Test more buttons or tap Use this remote."):"One button confirmed. Choose a different button above, send it, and confirm the "+appliance+" responds.");
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(responses.canSave());
         });
         test.setOnClickListener(v->{
@@ -1009,7 +1010,7 @@ public final class MainActivity extends Activity {
                     if(confirmButtons&&transmitted){
                         responses.sent(sourceKey);responded.setEnabled(true);
                         responded.setText(appliance+" responded · "+sourceKey);
-                        result.setText("Sent "+sourceKey+". Did the "+appliance+" react correctly? Confirm below, or try another button / Next remote. Confirmed buttons: "+responses.count()+"/2. Palm cannot detect the "+appliance+" response.");
+                        result.setText("Sent "+sourceKey+". Did the "+appliance+" react correctly? Confirm below, or try another button / Next remote. Confirmed buttons: "+responses.count()+"/"+responses.requiredCount()+". Palm cannot detect the "+appliance+" response.");
                     }
                     if(confirmButtons&&current[0]==profiles.size()-1)
                         result.append(" Last candidate. If none responds, check the phone emitter, aim and "+appliance+" model; this catalogue may not cover your "+appliance+".");
@@ -1030,7 +1031,7 @@ public final class MainActivity extends Activity {
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v->{
                 if(sending[0]||!(confirmButtons?responses.canSave():signalSent[0]))return;JSONObject chosen=profiles.get(current[0]);String name="Remote "+(current[0]+1);
                 new AlertDialog.Builder(this).setTitle("Did your appliance respond?")
-                    .setMessage("Save this keyset only if the appliance responded correctly to your test. Palm cannot detect that response. Other buttons may still need testing.")
+                    .setMessage(fan&&chosen.optInt("commandCount")==1?"This candidate has only one recorded button. Save only if that function worked. This does not provide missing power, speed or oscillation controls. Palm cannot detect the response.":"Save this keyset only if the appliance responded correctly to your test. Palm cannot detect that response. Other buttons may still need testing.")
                     .setNegativeButton("Keep testing",null).setPositiveButton("Yes, save remote",(confirm,which)->{dialog.dismiss();saveIr(brand,chosen,name,true,replacement);}).show();
             });load[0].run();
         });dialog.show();

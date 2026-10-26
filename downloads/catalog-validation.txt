@@ -1,8 +1,9 @@
-Palm Remote 1.6.3 decoder guided testing validation
-127 JVM tests passed; zero failures, errors or skipped tests.
-All 182 decoder brands, 411 candidates and 12,416 command associations validated.
-Every decoder candidate has at least two recorded buttons. Five Astro candidates retained.
-TV coverage: 1,020 brands and 3,381 candidates retained.
-Decoder and TV CSV regeneration checks passed.
+Palm Remote 1.6.4 fan guided testing validation
+129 JVM tests passed; zero failures, errors or skipped tests.
+All 133 fan brands, 422 candidates and 4,181 command associations validated.
+Six fan candidates contain one button; explicit limited confirmation is supported.
+Multi-button fan, decoder and TV candidates require two distinct confirmations.
+Five Astro candidates and all existing recorded signals retained.
+Fan, decoder and TV CSV regeneration checks passed.
 All 5,060 packaged asset files match source bytes.
-No physical decoder response or emulator UI result is claimed.
+No physical fan response or emulator UI result is claimed.
