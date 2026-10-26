@@ -498,7 +498,7 @@ public final class MainActivity extends Activity {
         if(category.equals("tv")){brands.add("Samsung");brands.add("LG");}
         List<Choice> options=new ArrayList<>();
         for(String brand:brands)options.add(new Choice(brand,()->{
-            if(category.equals("tv")&&(brand.equalsIgnoreCase("Samsung")||brand.equalsIgnoreCase("LG")))chooseMethod(brand);
+            if(category.equals("tv")&&isGuidedTvBrand(brand))chooseMethod(brand);
             else irSetup(brand,category);
         }));
         if(options.isEmpty()){message("No decoded "+categoryLabel(category).toLowerCase(Locale.ROOT)+" profiles are available in this snapshot.");return;}
@@ -875,15 +875,20 @@ public final class MainActivity extends Activity {
         JSONObject signal=commands==null?null:commands.optJSONObject(command);
         return signal==null?labelFor(command):signal.optString("label",command);
     }
+    private static boolean isGuidedTvBrand(String brand) {
+        for(String supported:new String[]{"Samsung","LG","Hisense","Panasonic","Sharp","Xiaomi"})
+            if(supported.equalsIgnoreCase(brand))return true;
+        return false;
+    }
     private void chooseMethod(String brand) {
-        List<String> options=new ArrayList<>();
-        if(brand.equalsIgnoreCase("Samsung"))options.add("SmartThings · published Samsung API");
-        if(brand.equalsIgnoreCase("LG"))options.add("webOS · local Wi-Fi pairing");
-        if(infrared!=null&&!infrared.forBrand(brand,"tv").isEmpty())options.add("Mi Remote infrared · requires phone IR transmitter");
-        new AlertDialog.Builder(this).setTitle(brand+" connection").setItems(options.toArray(new String[0]),(dialog,index)->{
-            if(options.get(index).startsWith("SmartThings"))smartThingsSetup();
-            else if(options.get(index).startsWith("webOS"))lgSetup();else irSetup(brand,"tv");
-        }).setNegativeButton("Cancel",null).show();
+        List<Choice> options=new ArrayList<>();
+        if(infrared!=null&&!infrared.forBrand(brand,"tv").isEmpty()) {
+            options.add(new Choice("Find a working remote · Guided testing",()->matchIrProfiles(brand,infrared.forBrand(brand,"tv"))));
+            options.add(new Choice("Browse recorded remotes",()->irSetup(brand,"tv")));
+        }
+        if(brand.equalsIgnoreCase("Samsung"))options.add(new Choice("SmartThings · published Samsung API",this::smartThingsSetup));
+        if(brand.equalsIgnoreCase("LG"))options.add(new Choice("webOS · local Wi-Fi pairing",this::lgSetup));
+        choices(brand+" connection",options);
     }
     private void irSetup(String brand,String category) {
         if(infrared==null){message("IR catalogue is unavailable.");return;}
@@ -928,14 +933,18 @@ public final class MainActivity extends Activity {
     private void matchIrProfiles(String brand,List<JSONObject> profiles,int startIndex,JSONObject replacement) {
         final IrCatalog catalogue=infrared;
         if(catalogue==null||profiles.isEmpty())return;
+        final boolean television="tv".equals(profiles.get(0).optString("category"));
+        final TvTestSession responses=new TvTestSession();
         LinearLayout body=column();body.setPadding(dp(20),dp(8),dp(20),dp(12));
         TextView position=text("",17,TEXT,true);body.addView(position);gap(body,8);
-        TextView explanation=text("Test one recorded button while aiming at the appliance. A keyset is a source capture, not a verified model match. Save only the remote you choose.",13,MUTED,false);
+        TextView explanation=text(television?"Turn the TV on. Aim the phone at its IR sensor from 1–3 metres. Test Volume first, then Power, Input or navigation. Confirm two different buttons respond before saving. If nothing happens, try the next remote.":"Test one recorded button while aiming at the appliance. A keyset is a source capture, not a verified model match. Save only the remote you choose.",13,MUTED,false);
         body.addView(explanation);gap(body,12);
         Spinner command=new Spinner(this);body.addView(command,new LinearLayout.LayoutParams(-1,dp(52)));
         TextView result=text("Loading signals…",13,MUTED,false);result.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
         gap(body,8);body.addView(result);gap(body,12);
         Button test=action("Send test signal",()->{},true);full(body,test,54);gap(body,12);
+        Button responded=action("TV responded to this button",()->{},false);
+        responded.setEnabled(false);if(television){full(body,responded,48);gap(body,8);}
         LinearLayout paging=row();Button previous=action("Previous",()->{},false),next=action("Next remote",()->{},false);
         weighted(paging,previous,48);weighted(paging,next,48);body.addView(paging);
         AlertDialog dialog=new AlertDialog.Builder(this).setTitle(brand+" · Find your remote").setView(body)
@@ -946,7 +955,7 @@ public final class MainActivity extends Activity {
         final java.util.concurrent.atomic.AtomicBoolean active=new java.util.concurrent.atomic.AtomicBoolean(true);
         Runnable[] load=new Runnable[1];
         load[0]=()->{
-            int token=request.incrementAndGet();JSONObject metadata=profiles.get(current[0]);signalSent[0]=false;
+            int token=request.incrementAndGet();JSONObject metadata=profiles.get(current[0]);signalSent[0]=false;responses.reset();responded.setEnabled(false);responded.setText("TV responded to this button");
             position.setText("Remote "+(current[0]+1)+" of "+profiles.size()+" · "+metadata.optString("model"));
             result.setText("Loading recorded signals…");test.setEnabled(false);command.setEnabled(false);
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
@@ -957,8 +966,8 @@ public final class MainActivity extends Activity {
                     JSONObject loaded=catalogue.loadProfile(metadata.optString("id"));
                     JSONObject signals=loaded.getJSONObject("commands");
                     List<String> found=new ArrayList<>();Iterator<String> keys=signals.keys();while(keys.hasNext())found.add(keys.next());Collections.sort(found);
-                    List<String> labels=new ArrayList<>();for(String code:found)labels.add(signals.getJSONObject(code).optString("label",code));
-                    RecordedControls controls=new RecordedControls(found);String preferred=controls.key("power");if(preferred==null)preferred=controls.key("mute");
+                    List<String> labels=new ArrayList<>();for(String code:found)labels.add(signals.getJSONObject(code).optString("label",code)+" · "+code);
+                    RecordedControls controls=new RecordedControls(found);String preferred=controls.key(television?"volume_up":"power");if(preferred==null)preferred=controls.key("power");if(preferred==null)preferred=controls.key("mute");
                     final int initial=preferred==null?0:found.indexOf(preferred);
                     ui(()->{
                         if(!active.get()||token!=request.get())return;
@@ -966,17 +975,24 @@ public final class MainActivity extends Activity {
                         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);command.setAdapter(adapter);
                         if(!codes.isEmpty())command.setSelection(initial);
                         command.setEnabled(!codes.isEmpty());test.setEnabled(irHardware.hasEmitter&&!codes.isEmpty());
-                        result.setText(irHardware.hasEmitter?"Choose a recorded button. Tap Send test signal, then check the appliance yourself.":irHardware.title+". You can browse here. To save without testing, choose a remote from the keyset list.");
+                        result.setText(irHardware.hasEmitter?(television?"Step 1: send Volume, then tap TV responded only if the TV reacts. Test a different button next.":"Choose a recorded button. Tap Send test signal, then check the appliance yourself."):irHardware.title+". You can browse here. To save without testing, choose a remote from the keyset list.");
                     });
                 }catch(Exception error){ui(()->{if(active.get()&&token==request.get())result.setText("Could not load this keyset: "+error.getMessage());});}
             });
         };
         previous.setOnClickListener(v->{if(!sending[0]&&current[0]>0){current[0]--;load[0].run();}});
         next.setOnClickListener(v->{if(!sending[0]&&current[0]<profiles.size()-1){current[0]++;load[0].run();}});
+        responded.setOnClickListener(v->{
+            if(sending[0]||!responses.awaitingResponse())return;
+            responses.confirm();responded.setEnabled(false);
+            result.setText(responses.canSave()?"Two different buttons confirmed. Test more buttons or tap Use this remote.":"One button confirmed. Choose a different button above, send it, and confirm the TV responds.");
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(responses.canSave());
+        });
         test.setOnClickListener(v->{
             if(sending[0]||!irHardware.hasEmitter||codes.isEmpty())return;
             int selection=command.getSelectedItemPosition();if(selection<0||selection>=codes.size())return;
             String sourceKey=codes.get(selection);JSONObject metadata=profiles.get(current[0]);int token=request.get();
+            responses.sending();responded.setEnabled(false);
             sending[0]=true;test.setEnabled(false);previous.setEnabled(false);next.setEnabled(false);command.setEnabled(false);
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);result.setText("Sending one recorded signal…");
             worker.execute(()->{
@@ -991,7 +1007,14 @@ public final class MainActivity extends Activity {
                     if(!active.get()||token!=request.get())return;
                     sending[0]=false;signalSent[0]|=transmitted;result.setText(text);test.setEnabled(irHardware.hasEmitter);command.setEnabled(true);
                     previous.setEnabled(current[0]>0);next.setEnabled(current[0]<profiles.size()-1);
-                    dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(signalSent[0]);
+                    if(television&&transmitted){
+                        responses.sent(sourceKey);responded.setEnabled(true);
+                        responded.setText("TV responded · "+sourceKey);
+                        result.setText("Sent "+sourceKey+". Did the TV react correctly? Confirm below, or try another button / Next remote. Confirmed buttons: "+responses.count()+"/2. Palm cannot detect the TV response.");
+                    }
+                    if(television&&current[0]==profiles.size()-1)
+                        result.append(" Last candidate. If none responds, check the phone emitter, aim and TV model; this catalogue may not cover your TV.");
+                    dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(television?responses.canSave():signalSent[0]);
                 });
             });
         });
@@ -1006,7 +1029,7 @@ public final class MainActivity extends Activity {
         });
         dialog.setOnShowListener(d->{
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v->{
-                if(sending[0]||!signalSent[0])return;JSONObject chosen=profiles.get(current[0]);String name="Remote "+(current[0]+1);
+                if(sending[0]||!(television?responses.canSave():signalSent[0]))return;JSONObject chosen=profiles.get(current[0]);String name="Remote "+(current[0]+1);
                 new AlertDialog.Builder(this).setTitle("Did your appliance respond?")
                     .setMessage("Save this keyset only if the appliance responded correctly to your test. Palm cannot detect that response. Other buttons may still need testing.")
                     .setNegativeButton("Keep testing",null).setPositiveButton("Yes, save remote",(confirm,which)->{dialog.dismiss();saveIr(brand,chosen,name,true,replacement);}).show();
@@ -1146,3 +1169,4 @@ public final class MainActivity extends Activity {
     private void ui(Runnable task) {if(!destroyed)runOnUiThread(()->{if(!destroyed)task.run();});}
     @Override protected void onDestroy(){destroyed=true;connectionGeneration++;if(network!=null)network.dispose();worker.shutdownNow();hardwareWorker.shutdownNow();acSourceWorker.shutdownNow();super.onDestroy();}
 }
+

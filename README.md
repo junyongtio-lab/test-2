@@ -1,5 +1,7 @@
 # Palm Remote for Android
 
+Version **1.6.1** improves Samsung, LG, Hisense, Panasonic, Sharp and Xiaomi TV setup. Each brand offers **Find a working remote · Guided testing** first. Confirm responses to two different recorded buttons before saving a working TV match; changing candidates clears those confirmations. See [TV testing instructions](docs/TV_GUIDED_TESTING.md). Physical TV compatibility still requires testing on your TV.
+
 Version **1.6.0** adds four **experimental AC protocol candidates** using templates and timing from the supplied Mi Remote 7.2.4M archive: LG28 (`22_3577`), Mitsubishi144 (`kk_3_123_12255`), Daikin160 (`kk_3_58_4871`) and SamsungAC (`kk_3_125_4745`). Each exposes Cool/Heat, 16–30 °C, four fan speeds and explicit power. Existing Panasonic216 controls remain. **These are four specific profiles, not support for all 698 remaining AC definitions.** Exact equivalence to Mi's engine and physical appliance response are unverified. See [encoder scope and evidence](docs/AC_PROTOCOL_CANDIDATES.md).
 
 All **734 AC source profiles across 45 brand labels** remain bundled offline. The existing 36 source-mapped controls are retained; four additional records now offer experimental protocol candidates, and 694 other records have no controls. Open **Home → Browse all 734 AC profiles**, search the source ID, and tap **Try protocol candidate**. Or select the matching AC brand and its experimental candidate. Test the signal on your AC before saving a working match; saving a preview sends nothing.

@@ -1,13 +1,13 @@
 {
   "applicationId": "com.universalremote.app",
-  "versionName": "1.6.0",
-  "versionCode": 9,
+  "versionName": "1.6.1",
+  "versionCode": 10,
   "minSdk": 23,
   "targetSdk": 35,
-  "apkSha256": "3daa9cde501eab56e5c4d4f4df0db2ee2a6c9fed35dd99632e130c3af2e89cc1",
-  "apkBytes": 13969542,
-  "validationDate": "2026-10-25",
-  "baseCommit": "8b947a0fc753ebdcf3e9f948b87e09356cebdb66",
+  "apkSha256": "1baaed63f3b75e51350e1835e201c5d466c7eb7cd0b0b05ecae4792f4c625e21",
+  "apkBytes": 13783276,
+  "validationDate": "2026-10-26",
+  "baseCommit": "3f74ab58b802afea9cd4723863577c457a831756",
   "sourceArchive": "downloads/com.duokan.phone.remotecontroller_7.2.4M-6500_minAPI22(arm64-v8a)(nodpi)_apkmirror.com.7z",
   "sourceArchiveSha256": "72fc2fc859255e19963370ecd3252889af3f8a2e609d2c74c2d995e03b4267a6",
   "completeAcSourceProfiles": 734,
@@ -16,7 +16,7 @@
   "remainingAcProfilesWithoutControls": 694,
   "panasonicParameterCandidatesRetained": 6,
   "jvm": {
-    "tests": 123,
+    "tests": 125,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -24,11 +24,13 @@
   "referencePacketsMatched": 960,
   "strictWaveformDecodes": 960,
   "irremoteEsp8266ReferenceCommit": "1e2f0f3ef0a93cbf2a8ddb2e95130f8f4c584b3f",
-  "androidCatalogueChecks": 35,
-  "androidUiChecks": 21,
+  "androidCatalogueChecks": 0,
+  "androidUiChecks": 0,
   "lintErrors": 0,
   "physicalHardwareTested": false,
   "exactMiEngineEquivalenceVerified": false,
   "vendorProgramsExecuted": false,
-  "signingCertificateSha256": "75e8320e3978d0cc65f0fb98c0bb82354a05dd02e1c34d96823d883cab9e4e64"
+  "signingCertificateSha256": "75e8320e3978d0cc65f0fb98c0bb82354a05dd02e1c34d96823d883cab9e4e64",
+  "androidUiStatus": "Not completed: software emulator booted slowly and APK installation failed in Android PackageManager; test APK compiled",
+  "lintWarnings": 22
 }

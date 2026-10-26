@@ -1,0 +1,44 @@
+name: Publish prepared Palm Remote APK
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'downloads/PalmRemote-1.6.1.apk.xz'
+      - '.github/workflows/publish-prepared-apk.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore the validated, signed APK
+        run: |
+          xz --decompress --stdout downloads/PalmRemote-1.6.1.apk.xz > downloads/PalmRemote.apk
+          echo '1baaed63f3b75e51350e1835e201c5d466c7eb7cd0b0b05ecae4792f4c625e21  downloads/PalmRemote.apk' | sha256sum --check
+          printf '1baaed63f3b75e51350e1835e201c5d466c7eb7cd0b0b05ecae4792f4c625e21  PalmRemote.apk\n' > downloads/SHA256SUMS
+      - name: Package source files
+        shell: python
+        run: |
+          import pathlib, subprocess, zipfile
+          paths = subprocess.check_output(['git', 'ls-files', '-z']).decode().split('\0')
+          with zipfile.ZipFile('downloads/PalmRemote-1.6.1-source.zip', 'w', zipfile.ZIP_DEFLATED, compresslevel=6) as archive:
+              for name in paths:
+                  if not name:
+                      continue
+                  path = pathlib.Path(name)
+                  if any(part in ('downloads', 'screenshots', '__pycache__') for part in path.parts):
+                      continue
+                  archive.write(path, 'PalmRemote-1.6.1/' + name)
+      - name: Save downloadable files
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add downloads/PalmRemote.apk downloads/PalmRemote-1.6.1-source.zip downloads/SHA256SUMS
+          if ! git diff --cached --quiet; then
+            git commit -m 'Publish validated Palm Remote 1.6.1 APK and source archive'
+            git push origin HEAD:main
+          fi
