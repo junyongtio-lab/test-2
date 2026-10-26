@@ -37,7 +37,7 @@ final class UiDeviceChecks {
         this.progress=progress;this.automation=instrumentation.getUiAutomation();
         File external=context.getExternalFilesDir(null);
         if(external==null)throw new AssertionError("External app-specific validation directory unavailable");
-        output=new File(external,"palm-validation-v161");
+        output=new File(external,"palm-validation-v162");
         if(!output.isDirectory()&&!output.mkdirs())throw new AssertionError("Could not create UI evidence directory");
         for(String owned:new String[]{"ui-failure.png","ui-failure-tree.txt","ui-verification.json"}) {
             File previous=new File(output,owned);
@@ -54,7 +54,7 @@ final class UiDeviceChecks {
     private int exercise(int coreChecks) throws Exception {
         SharedPreferences preferences=context.getSharedPreferences("devices",Context.MODE_PRIVATE);
         String original=preferences.getString("profiles",null);
-        JSONObject report=new JSONObject().put("package",context.getPackageName()).put("versionName","1.6.1")
+        JSONObject report=new JSONObject().put("package",context.getPackageName()).put("versionName","1.6.2")
             .put("androidCatalogueChecks",coreChecks).put("hardwareState","No IR transmitter detected")
             .put("physicalHardwareTested",false).put("uiChecks",checks).put("passed",false);
         try {
@@ -80,7 +80,7 @@ final class UiDeviceChecks {
             waitFor("No IR transmitter detected",false,false);banner();shot("ui-home.png");
             pass("Home shows the actual absent-emitter hardware banner");
             click("Check IR",false,false,false);
-            waitFor("Palm Remote 1.6.1",true,false);waitFor("Source keyset: "+astro.getString("model"),true,false);
+            waitFor("Palm Remote 1.6.2",true,false);waitFor("Source keyset: "+astro.getString("model"),true,false);
             shot("ui-ir-check.png");click("Done",false,false,false);
             pass("Check IR reports installed version and selected source keyset without transmitting");
 
@@ -215,7 +215,7 @@ final class UiDeviceChecks {
                 clickVisibleOrScroll("Experimental protocol candidate");shot("ui-"+candidate.getString("family").toLowerCase(java.util.Locale.ROOT)+"-candidate.png");
                 pass(candidate.getString("family")+" preview preserves its source ID, discloses experimental status, and disables all sending without IR hardware");
             }
-            for(String brand:new String[]{"Samsung","LG","Hisense","Panasonic","Sharp","Xiaomi"}) {
+            for(String brand:new String[]{"Samsung","LG","Hisense","Panasonic","Sharp","Xiaomi","Sony","Philips","TCL","Toshiba","Daewoo","JVC","Haier","Hitachi","Skyworth","Akai","Sanyo","Grundig"}) {
                 int savedBefore=profileCount(preferences);
                 instrumentation.runOnMainSync(()->{
                     try {

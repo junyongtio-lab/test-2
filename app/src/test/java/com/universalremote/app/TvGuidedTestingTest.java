@@ -22,6 +22,25 @@ public final class TvGuidedTestingTest {
             return new JSONObject(IrCatalog.readBounded(in,16*1024*1024));
         }
     }
+    @Test public void everySelectableTvBrandHasCandidatesThatSupportTwoButtonGuidedTesting() throws Exception {
+        IrCatalog catalog=new IrCatalog(index("ir/mi/index.json"),index("ir/mi_stb/index.json"),
+            index("ir/mi_apk/index.json"),index("ir/matching_order.json"),
+            path->new FileInputStream("src/main/assets/"+path));
+        int candidatesChecked=0;
+        java.util.Set<String> ids=new java.util.HashSet<>();
+        assertEquals(1020,catalog.brands("tv").size());
+        for(String brand:catalog.brands("tv")) {
+            List<JSONObject> candidates=catalog.forBrand(brand,"tv");
+            assertFalse(brand,candidates.isEmpty());
+            for(JSONObject metadata:candidates) {
+                assertTrue("Duplicate selectable candidate: "+metadata,ids.add(metadata.getString("id")));
+                JSONObject commands=catalog.loadProfile(metadata.getString("id")).getJSONObject("commands");
+                assertTrue(brand+" / "+metadata.getString("model"),commands.length()>=2);
+                candidatesChecked++;
+            }
+        }
+        assertEquals(3381,candidatesChecked);
+    }
     @Test public void allSixBrandsHaveLoadableGuidedCandidatesAndUsefulTestButtons() throws Exception {
         IrCatalog catalog=new IrCatalog(index("ir/mi/index.json"),index("ir/mi_stb/index.json"),
             index("ir/mi_apk/index.json"),index("ir/matching_order.json"),

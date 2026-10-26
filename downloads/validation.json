@@ -1,24 +1,22 @@
 {
-  "baseSourceCommit": "3f74ab58b802afea9cd4723863577c457a831756",
-  "version": "1.6.1",
-  "versionCode": 10,
+  "baseSourceCommit": "7d151e81dad9c5efc331c782997725e567397c5c",
+  "version": "1.6.2",
+  "versionCode": 11,
   "unitTests": {
-    "tests": 125,
+    "tests": 126,
     "failures": 0,
     "errors": 0,
     "skipped": 0
   },
   "build": "passed: testDebugUnitTest lintDebug assembleDebug assembleDebugAndroidTest",
-  "candidates": {
-    "Samsung": 69,
-    "LG": 35,
-    "Hisense": 60,
-    "Panasonic": 30,
-    "Sharp": 36,
-    "Xiaomi": 1
-  },
-  "physicalTvTests": "not performed; requires user TVs and an IR-equipped handset",
-  "emulatorUiTests": "not completed: software emulator has not finished booting; test package compiled",
-  "apkSha256": "1baaed63f3b75e51350e1835e201c5d466c7eb7cd0b0b05ecae4792f4c625e21",
-  "signerCertificateSha256": "75e8320e3978d0cc65f0fb98c0bb82354a05dd02e1c34d96823d883cab9e4e64"
+  "selectableTvBrands": 1020,
+  "candidateRemotes": 3381,
+  "guidedTesting": "first connection option for every selectable TV brand",
+  "twoDifferentConfirmedButtonsRequired": true,
+  "coverageCsv": "downloads/TV-brand-coverage.csv",
+  "physicalTvTests": "not performed; confirm real responses on each TV with an IR-equipped handset",
+  "emulatorUiTests": "not run for this update; instrumentation APK compiled; no KVM available",
+  "apkSha256": "8f640fef1ea47f6dd6b4d9b93e82dc6383e50480c4b0602e58482cc71c4b3ec4",
+  "signerCertificateSha256": "75e8320e3978d0cc65f0fb98c0bb82354a05dd02e1c34d96823d883cab9e4e64",
+  "packagedAssetsVerified": 5060
 }

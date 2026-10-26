@@ -498,7 +498,7 @@ public final class MainActivity extends Activity {
         if(category.equals("tv")){brands.add("Samsung");brands.add("LG");}
         List<Choice> options=new ArrayList<>();
         for(String brand:brands)options.add(new Choice(brand,()->{
-            if(category.equals("tv")&&isGuidedTvBrand(brand))chooseMethod(brand);
+            if(category.equals("tv"))chooseMethod(brand);
             else irSetup(brand,category);
         }));
         if(options.isEmpty()){message("No decoded "+categoryLabel(category).toLowerCase(Locale.ROOT)+" profiles are available in this snapshot.");return;}
@@ -875,11 +875,6 @@ public final class MainActivity extends Activity {
         JSONObject signal=commands==null?null:commands.optJSONObject(command);
         return signal==null?labelFor(command):signal.optString("label",command);
     }
-    private static boolean isGuidedTvBrand(String brand) {
-        for(String supported:new String[]{"Samsung","LG","Hisense","Panasonic","Sharp","Xiaomi"})
-            if(supported.equalsIgnoreCase(brand))return true;
-        return false;
-    }
     private void chooseMethod(String brand) {
         List<Choice> options=new ArrayList<>();
         if(infrared!=null&&!infrared.forBrand(brand,"tv").isEmpty()) {
@@ -937,7 +932,7 @@ public final class MainActivity extends Activity {
         final TvTestSession responses=new TvTestSession();
         LinearLayout body=column();body.setPadding(dp(20),dp(8),dp(20),dp(12));
         TextView position=text("",17,TEXT,true);body.addView(position);gap(body,8);
-        TextView explanation=text(television?"Turn the TV on. Aim the phone at its IR sensor from 1–3 metres. Test Volume first, then Power, Input or navigation. Confirm two different buttons respond before saving. If nothing happens, try the next remote.":"Test one recorded button while aiming at the appliance. A keyset is a source capture, not a verified model match. Save only the remote you choose.",13,MUTED,false);
+        TextView explanation=text(television?"Turn the TV on. Aim the phone at its IR sensor from 1–3 metres. Try Volume, Power, Input or navigation where available. Confirm two different buttons respond before saving. If nothing happens, try the next remote.":"Test one recorded button while aiming at the appliance. A keyset is a source capture, not a verified model match. Save only the remote you choose.",13,MUTED,false);
         body.addView(explanation);gap(body,12);
         Spinner command=new Spinner(this);body.addView(command,new LinearLayout.LayoutParams(-1,dp(52)));
         TextView result=text("Loading signals…",13,MUTED,false);result.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
@@ -975,7 +970,7 @@ public final class MainActivity extends Activity {
                         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);command.setAdapter(adapter);
                         if(!codes.isEmpty())command.setSelection(initial);
                         command.setEnabled(!codes.isEmpty());test.setEnabled(irHardware.hasEmitter&&!codes.isEmpty());
-                        result.setText(irHardware.hasEmitter?(television?"Step 1: send Volume, then tap TV responded only if the TV reacts. Test a different button next.":"Choose a recorded button. Tap Send test signal, then check the appliance yourself."):irHardware.title+". You can browse here. To save without testing, choose a remote from the keyset list.");
+                        result.setText(irHardware.hasEmitter?(television?"Step 1: send the selected recorded button, then tap TV responded only if the TV reacts. Choose and test a different button next.":"Choose a recorded button. Tap Send test signal, then check the appliance yourself."):irHardware.title+". You can browse here. To save without testing, choose a remote from the keyset list.");
                     });
                 }catch(Exception error){ui(()->{if(active.get()&&token==request.get())result.setText("Could not load this keyset: "+error.getMessage());});}
             });

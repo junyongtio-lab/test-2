@@ -1,3 +1,9 @@
+# Palm Remote 1.6.2 TV update
+
+The current update passes 126 JVM tests, lint (zero errors), app assembly and instrumentation APK assembly. Every selectable TV brand now opens the same first guided-testing option. Tests load all 3,381 candidates across all 1,020 selectable brands and verify at least two recorded buttons per candidate. The coverage CSV is regenerated and checked from the bundled indexes. All packaged assets match their source bytes.
+
+Physical TV responses and emulator UI tests have not been verified for 1.6.2; no KVM acceleration is available in this environment. The instrumentation source includes eighteen representative TV brands for later device checks. Earlier release evidence below applies to its stated version.
+
 # Palm Remote validation
 
 ## Version 1.6.0 — 25 October 2026

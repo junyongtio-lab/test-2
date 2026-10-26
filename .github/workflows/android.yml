@@ -21,6 +21,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Build, test and lint
         run: ./gradlew --no-daemon testDebugUnitTest lintDebug assembleDebug assembleDebugAndroidTest
+      - name: Verify TV brand coverage
+        run: python3 tools/tv_brand_coverage.py --check
       - name: Verify Mi database catalogue
         run: |
           python3 -m pip install -r tools/mi_catalogue/requirements.txt

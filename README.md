@@ -1,5 +1,7 @@
 # Palm Remote for Android
 
+Version **1.6.2** extends the first **Find a working remote · Guided testing** option to every bundled TV brand: **1,020 selectable brands and 3,381 remote candidates**. This includes Sony, Philips, TCL, Toshiba, Daewoo, JVC and the other catalogue brands. Confirm two different button responses before saving a working match. See the [complete TV brand list](downloads/TV-brand-coverage.csv) and [testing instructions](docs/TV_GUIDED_TESTING.md). Physical compatibility requires testing on the TV.
+
 Version **1.6.1** improves Samsung, LG, Hisense, Panasonic, Sharp and Xiaomi TV setup. Each brand offers **Find a working remote · Guided testing** first. Confirm responses to two different recorded buttons before saving a working TV match; changing candidates clears those confirmations. See [TV testing instructions](docs/TV_GUIDED_TESTING.md). Physical TV compatibility still requires testing on your TV.
 
 Version **1.6.0** adds four **experimental AC protocol candidates** using templates and timing from the supplied Mi Remote 7.2.4M archive: LG28 (`22_3577`), Mitsubishi144 (`kk_3_123_12255`), Daikin160 (`kk_3_58_4871`) and SamsungAC (`kk_3_125_4745`). Each exposes Cool/Heat, 16–30 °C, four fan speeds and explicit power. Existing Panasonic216 controls remain. **These are four specific profiles, not support for all 698 remaining AC definitions.** Exact equivalence to Mi's engine and physical appliance response are unverified. See [encoder scope and evidence](docs/AC_PROTOCOL_CANDIDATES.md).
