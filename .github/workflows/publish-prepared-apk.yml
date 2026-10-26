@@ -5,6 +5,7 @@ on:
     paths:
       - 'downloads/PalmRemote-1.6.2.apk.xz'
       - '.github/workflows/publish-prepared-apk.yml'
+      - '.github/workflows/android.yml'
   workflow_dispatch:
 permissions:
   contents: read
