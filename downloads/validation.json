@@ -1,22 +1,25 @@
 {
-  "baseSourceCommit": "7d151e81dad9c5efc331c782997725e567397c5c",
-  "version": "1.6.2",
-  "versionCode": 11,
+  "baseSourceCommit": "72533bb3490dea9717279e3162362f500ad743ce",
+  "version": "1.6.3",
+  "versionCode": 12,
   "unitTests": {
-    "tests": 126,
+    "tests": 127,
     "failures": 0,
     "errors": 0,
     "skipped": 0
   },
   "build": "passed: testDebugUnitTest lintDebug assembleDebug assembleDebugAndroidTest",
-  "selectableTvBrands": 1020,
-  "candidateRemotes": 3381,
-  "guidedTesting": "first connection option for every selectable TV brand",
+  "selectableDecoderBrands": 182,
+  "decoderCandidateRemotes": 411,
+  "decoderCommandAssociations": 12416,
+  "guidedTesting": "first connection option for every bundled decoder brand and TV brand",
   "twoDifferentConfirmedButtonsRequired": true,
-  "coverageCsv": "downloads/TV-brand-coverage.csv",
-  "physicalTvTests": "not performed; confirm real responses on each TV with an IR-equipped handset",
+  "decoderCoverageCsv": "downloads/Decoder-brand-coverage.csv",
+  "selectableTvBrands": 1020,
+  "tvCandidateRemotes": 3381,
+  "physicalDecoderTests": "not performed; confirm actual responses on each box with an IR-equipped handset",
   "emulatorUiTests": "not run for this update; instrumentation APK compiled; no KVM available",
-  "apkSha256": "8f640fef1ea47f6dd6b4d9b93e82dc6383e50480c4b0602e58482cc71c4b3ec4",
-  "signerCertificateSha256": "75e8320e3978d0cc65f0fb98c0bb82354a05dd02e1c34d96823d883cab9e4e64",
-  "packagedAssetsVerified": 5060
+  "packagedAssetsVerified": 5060,
+  "apkSha256": "88e53b2a9a6243695bdaa613e041876ccada579b8a50357d34177f9070542d74",
+  "signerCertificateSha256": "75e8320e3978d0cc65f0fb98c0bb82354a05dd02e1c34d96823d883cab9e4e64"
 }

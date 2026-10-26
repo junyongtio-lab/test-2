@@ -1,5 +1,7 @@
 # Palm Remote for Android
 
+Version **1.6.3** gives all **182 decoder brands** a first **Find a working remote · Guided testing** option, covering **411 candidate remotes**. Aim at the decoder and confirm two different recorded button responses before saving a working match. The five Astro candidates and existing TV, AC and fan signals are retained. See the [decoder testing guide](docs/DECODER_GUIDED_TESTING.md) and [complete decoder brand list](downloads/Decoder-brand-coverage.csv). Physical decoder compatibility requires testing on your box.
+
 Version **1.6.2** extends the first **Find a working remote · Guided testing** option to every bundled TV brand: **1,020 selectable brands and 3,381 remote candidates**. This includes Sony, Philips, TCL, Toshiba, Daewoo, JVC and the other catalogue brands. Confirm two different button responses before saving a working match. See the [complete TV brand list](downloads/TV-brand-coverage.csv) and [testing instructions](docs/TV_GUIDED_TESTING.md). Physical compatibility requires testing on the TV.
 
 Version **1.6.1** improves Samsung, LG, Hisense, Panasonic, Sharp and Xiaomi TV setup. Each brand offers **Find a working remote · Guided testing** first. Confirm responses to two different recorded buttons before saving a working TV match; changing candidates clears those confirmations. See [TV testing instructions](docs/TV_GUIDED_TESTING.md). Physical TV compatibility still requires testing on your TV.

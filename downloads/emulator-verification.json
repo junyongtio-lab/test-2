@@ -1,8 +1,9 @@
 {
-  "versionName": "1.6.2",
+  "versionName": "1.6.3",
   "executed": false,
-  "reason": "No KVM acceleration available; no emulator UI results are claimed for this update.",
+  "reason": "No KVM acceleration available; no emulator UI results claimed for this update.",
   "instrumentationApkCompiled": true,
-  "representativeBrandsInCompiledUiChecks": 18,
+  "decoderBrandsInCompiledUiChecks": 6,
+  "tvBrandsInCompiledUiChecks": 18,
   "physicalHardwareTested": false
 }

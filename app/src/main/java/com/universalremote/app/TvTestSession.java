@@ -3,7 +3,7 @@ package com.universalremote.app;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-/** User-observed responses belong only to the current candidate and sent button. */
+/** Shared TV/decoder confirmation: user-observed responses belong only to the current candidate and sent button. */
 final class TvTestSession {
     private final Set<String> confirmed = new LinkedHashSet<>();
     private String pending;

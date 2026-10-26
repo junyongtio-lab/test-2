@@ -37,7 +37,7 @@ final class UiDeviceChecks {
         this.progress=progress;this.automation=instrumentation.getUiAutomation();
         File external=context.getExternalFilesDir(null);
         if(external==null)throw new AssertionError("External app-specific validation directory unavailable");
-        output=new File(external,"palm-validation-v162");
+        output=new File(external,"palm-validation-v163");
         if(!output.isDirectory()&&!output.mkdirs())throw new AssertionError("Could not create UI evidence directory");
         for(String owned:new String[]{"ui-failure.png","ui-failure-tree.txt","ui-verification.json"}) {
             File previous=new File(output,owned);
@@ -54,7 +54,7 @@ final class UiDeviceChecks {
     private int exercise(int coreChecks) throws Exception {
         SharedPreferences preferences=context.getSharedPreferences("devices",Context.MODE_PRIVATE);
         String original=preferences.getString("profiles",null);
-        JSONObject report=new JSONObject().put("package",context.getPackageName()).put("versionName","1.6.2")
+        JSONObject report=new JSONObject().put("package",context.getPackageName()).put("versionName","1.6.3")
             .put("androidCatalogueChecks",coreChecks).put("hardwareState","No IR transmitter detected")
             .put("physicalHardwareTested",false).put("uiChecks",checks).put("passed",false);
         try {
@@ -80,7 +80,7 @@ final class UiDeviceChecks {
             waitFor("No IR transmitter detected",false,false);banner();shot("ui-home.png");
             pass("Home shows the actual absent-emitter hardware banner");
             click("Check IR",false,false,false);
-            waitFor("Palm Remote 1.6.2",true,false);waitFor("Source keyset: "+astro.getString("model"),true,false);
+            waitFor("Palm Remote 1.6.3",true,false);waitFor("Source keyset: "+astro.getString("model"),true,false);
             shot("ui-ir-check.png");click("Done",false,false,false);
             pass("Check IR reports installed version and selected source keyset without transmitting");
 
@@ -214,6 +214,32 @@ final class UiDeviceChecks {
                 clickVisibleOrScroll("Power on");disabled("Power on");clickVisibleOrScroll("Power off");disabled("Power off");
                 clickVisibleOrScroll("Experimental protocol candidate");shot("ui-"+candidate.getString("family").toLowerCase(java.util.Locale.ROOT)+"-candidate.png");
                 pass(candidate.getString("family")+" preview preserves its source ID, discloses experimental status, and disables all sending without IR hardware");
+            }
+            for(String brand:new String[]{"Astro","Airtel","ACT Digital","DD Free Dish","Apple","10moons"}) {
+                int savedBefore=profileCount(preferences);
+                instrumentation.runOnMainSync(()->{
+                    try {
+                        java.lang.reflect.Method setup=MainActivity.class.getDeclaredMethod("chooseMethod",String.class,String.class);
+                        setup.setAccessible(true);setup.invoke(activity,brand,"set_top_box");
+                    }catch(Exception error){throw new RuntimeException(error);}
+                });
+                waitFor(brand+" connection",false,false);
+                click("Find a working remote · Guided testing",false,false,false);
+                List<JSONObject> candidates=catalog.forBrand(brand,"set_top_box");
+                waitFor("Remote 1 of "+candidates.size()+" · "+candidates.get(0).getString("model"),false,false);
+                waitFor("You can browse here",true,false);
+                disabled("Send test signal");disabled("Use this remote");disabled("decoder responded to this button");
+                shot("ui-decoder-"+brand.toLowerCase(java.util.Locale.ROOT).replace(' ','-')+"-guided.png");
+                if(candidates.size()>1) {
+                    click("Next remote",false,false,false);
+                    waitFor("Remote 2 of "+candidates.size()+" · "+candidates.get(1).getString("model"),false,false);
+                    disabled("Use this remote");
+                    click("Previous",false,false,false);
+                    waitFor("Remote 1 of "+candidates.size()+" · "+candidates.get(0).getString("model"),false,false);
+                }else disabled("Next remote");
+                click("Close",false,false,false);
+                require(savedBefore==profileCount(preferences),"Decoder browsing saved an untested remote");
+                pass(brand+" decoder guided entry, candidate identity, navigation and no-emitter gates verified");
             }
             for(String brand:new String[]{"Samsung","LG","Hisense","Panasonic","Sharp","Xiaomi","Sony","Philips","TCL","Toshiba","Daewoo","JVC","Haier","Hitachi","Skyworth","Akai","Sanyo","Grundig"}) {
                 int savedBefore=profileCount(preferences);

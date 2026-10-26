@@ -1,3 +1,7 @@
+# Palm Remote 1.6.3 decoder update
+
+All 182 decoder brands now offer guided testing first. Production-loader tests cover all 411 decoder candidates and 12,416 command associations, preserving the five Astro candidates. Each candidate has at least two recorded buttons. Decoder and TV setup share the two-button response confirmation gate. Decoder and TV coverage CSV checks pass. The decoder UI test source includes six representative brands, and the existing eighteen-brand TV checks remain. Physical responses and emulator UI results are unverified for this update. See downloads/validation.json for completed build checks.
+
 # Palm Remote 1.6.2 TV update
 
 The current update passes 126 JVM tests, lint (zero errors), app assembly and instrumentation APK assembly. Every selectable TV brand now opens the same first guided-testing option. Tests load all 3,381 candidates across all 1,020 selectable brands and verify at least two recorded buttons per candidate. The coverage CSV is regenerated and checked from the bundled indexes. All packaged assets match their source bytes.

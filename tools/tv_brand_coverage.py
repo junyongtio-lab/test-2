@@ -6,12 +6,12 @@ import json
 from pathlib import Path
 
 
-def coverage(root):
+def coverage(root, category="tv"):
     brands = {}
-    for source in ("mi", "mi_apk"):
+    for source in ("mi", "mi_stb", "mi_apk"):
         index = json.loads((root / f"app/src/main/assets/ir/{source}/index.json").read_text())
         for profile in index["profiles"]:
-            if profile["category"] != "tv":
+            if profile["category"] != category:
                 continue
             name = profile["brand"]
             row = brands.setdefault(name.casefold(), {"brand": name, "profiles": []})

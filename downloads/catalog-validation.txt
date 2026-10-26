@@ -1,6 +1,8 @@
-Palm Remote 1.6.2 TV guided testing validation
-126 JVM tests passed; zero failures, errors or skipped tests.
-All 1,020 selectable TV brands have candidates.
-All 3,381 TV candidate profiles load and have at least two recorded buttons.
-TV coverage CSV regeneration check passed.
-No physical TV response or emulator UI result is claimed.
+Palm Remote 1.6.3 decoder guided testing validation
+127 JVM tests passed; zero failures, errors or skipped tests.
+All 182 decoder brands, 411 candidates and 12,416 command associations validated.
+Every decoder candidate has at least two recorded buttons. Five Astro candidates retained.
+TV coverage: 1,020 brands and 3,381 candidates retained.
+Decoder and TV CSV regeneration checks passed.
+All 5,060 packaged asset files match source bytes.
+No physical decoder response or emulator UI result is claimed.
