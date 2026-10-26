@@ -37,7 +37,7 @@ final class UiDeviceChecks {
         this.progress=progress;this.automation=instrumentation.getUiAutomation();
         File external=context.getExternalFilesDir(null);
         if(external==null)throw new AssertionError("External app-specific validation directory unavailable");
-        output=new File(external,"palm-validation-v165");
+        output=new File(external,"palm-validation-v166");
         if(!output.isDirectory()&&!output.mkdirs())throw new AssertionError("Could not create UI evidence directory");
         for(String owned:new String[]{"ui-failure.png","ui-failure-tree.txt","ui-verification.json"}) {
             File previous=new File(output,owned);
@@ -54,7 +54,7 @@ final class UiDeviceChecks {
     private int exercise(int coreChecks) throws Exception {
         SharedPreferences preferences=context.getSharedPreferences("devices",Context.MODE_PRIVATE);
         String original=preferences.getString("profiles",null);
-        JSONObject report=new JSONObject().put("package",context.getPackageName()).put("versionName","1.6.5")
+        JSONObject report=new JSONObject().put("package",context.getPackageName()).put("versionName","1.6.6")
             .put("androidCatalogueChecks",coreChecks).put("hardwareState","No IR transmitter detected")
             .put("physicalHardwareTested",false).put("uiChecks",checks).put("passed",false);
         try {
@@ -80,7 +80,7 @@ final class UiDeviceChecks {
             waitFor("No IR transmitter detected",false,false);banner();shot("ui-home.png");
             pass("Home shows the actual absent-emitter hardware banner");
             click("Check IR",false,false,false);
-            waitFor("Palm Remote 1.6.5",true,false);waitFor("Source keyset: "+astro.getString("model"),true,false);
+            waitFor("Palm Remote 1.6.6",true,false);waitFor("Source keyset: "+astro.getString("model"),true,false);
             shot("ui-ir-check.png");click("Done",false,false,false);
             pass("Check IR reports installed version and selected source keyset without transmitting");
 
@@ -198,9 +198,9 @@ final class UiDeviceChecks {
             require(java.util.Objects.equals(beforeSourceBrowsing,preferences.getString("profiles",null)),"Opening AC controls saved a source record");
             pass("Complete AC inventory opens exact recorded controls without treating source-data inclusion as a confirmed appliance match");
             FamilyAcEncoder families=new FamilyAcEncoder(completeAc);
-            int expandedUiSamples=0;
+            
             for(JSONObject candidate:families.profiles()) {
-                if(candidate.optBoolean("expanded")&&(candidate.optInt("variant")!=0||expandedUiSamples++>0))continue;
+                if(candidate.optBoolean("expanded")&&(candidate.optInt("variant")!=0||!(candidate.optString("model").equals("7_2807")||candidate.optString("model").equals("kk_3_2894_3200")||candidate.optString("model").equals("kk_3_28_4971"))))continue;
                 JSONObject source=null;
                 for(JSONObject metadata:completeAc.profiles(null))if(metadata.getString("model").equals(candidate.getString("model")))source=metadata;
                 require(source!=null,"Experimental candidate source missing");
@@ -214,6 +214,14 @@ final class UiDeviceChecks {
                 require(preview.getString("sourceModelId").equals(candidate.getString("model")),"Wrong source candidate saved");
                 clickVisibleOrScroll("Send requested settings");disabled("Send requested settings");
                 clickVisibleOrScroll("Power on");disabled("Power on");clickVisibleOrScroll("Power off");disabled("Power off");
+                if(candidate.optBoolean("expanded")){
+                    clickVisibleOrScroll("Send fan speed");disabled("Send fan speed");clickVisibleOrScroll("Send swing");disabled("Send swing");
+                    JSONObject controls=candidate.getJSONObject("additionalControls");
+                    if(controls.getInt("timerHook")>0){clickVisibleOrScroll("Set power-on timer");disabled("Set power-on timer");clickVisibleOrScroll("Set power-off timer");disabled("Set power-off timer");clickVisibleOrScroll("Cancel AC timers");disabled("Cancel AC timers");}
+                    else{clickVisibleOrScroll("Timers unavailable");disabled("Timers unavailable");}
+                    String special=controls.getJSONObject("extras").length()>0?"Send special functions":"Special functions unavailable";
+                    clickVisibleOrScroll(special);disabled(special);
+                }
                 clickVisibleOrScroll("Experimental protocol candidate");shot("ui-"+candidate.getString("family").toLowerCase(java.util.Locale.ROOT)+"-candidate.png");
                 pass(candidate.getString("family")+" preview preserves its source ID, discloses experimental status, and disables all sending without IR hardware");
             }

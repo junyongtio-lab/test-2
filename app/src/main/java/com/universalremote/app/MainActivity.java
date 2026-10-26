@@ -51,6 +51,7 @@ public final class MainActivity extends Activity {
     private final List<View> panasonicEditors = new ArrayList<>();
     private PanasonicAcEncoder.State panasonicDraft;
     private String panasonicDraftDeviceId="";
+    private final int[] acTimerMinutes={60,60};
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -517,7 +518,7 @@ public final class MainActivity extends Activity {
     }
     private void showAcSourceDetails(JSONObject profile) {
         String kind=profile.optJSONObject("control").optString("kind");boolean available=!kind.equals("unavailable");
-        String details=(FamilyAcEncoder.supports(profile.optString("model"))?"An experimental protocol candidate is available for this source template. These controls use a public protocol mapping and have not been tested on your appliance. Only the implemented controls shown for the selected candidate are offered. Expanded AC112 candidates expose power, Cool/Heat and 16–30 °C; their fan, swing, timers and custom hooks remain unavailable.\n\n":"")+"Complete source data included offline.\n\n"+(FamilyAcEncoder.supports(profile.optString("model"))?"Exact source-engine equivalence remains unverified; use Try protocol candidate to test the independent encoder.":available?"Controls available: "+(kind.equals("recorded")?"recorded signals":"Panasonic temperature and mode controls")+".":"Data included; controls unavailable. This stateful profile needs an encoder. No signal can be sent from this source-data view.")
+        String details=(FamilyAcEncoder.supports(profile.optString("model"))?"An experimental protocol candidate is available for this source template. These controls use a public protocol mapping and have not been tested on your appliance. Only the implemented controls shown for the selected candidate are offered. Expanded AC112 candidates expose power, Cool/Heat and 16–30 °C; fan and swing use reviewed source tables, and timer and special functions are offered only where mapped. Source hooks are never executed.\n\n":"")+"Complete source data included offline.\n\n"+(FamilyAcEncoder.supports(profile.optString("model"))?"Exact source-engine equivalence remains unverified; use Try protocol candidate to test the independent encoder.":available?"Controls available: "+(kind.equals("recorded")?"recorded signals":"Panasonic temperature and mode controls")+".":"Data included; controls unavailable. This stateful profile needs an encoder. No signal can be sent from this source-data view.")
             +"\n\nSource profile: "+profile.optString("model")+"\nBrand: "+profile.optString("brand")
             +"\nCarrier: "+profile.optInt("carrierHz")+" Hz\nDefinition fields: "+profile.optInt("definitionFieldCount")
             +"\nIR hardware: "+irHardware.title+"\n\nSource IDs are not retail model numbers. Included data does not establish an appliance match.";
@@ -596,7 +597,7 @@ public final class MainActivity extends Activity {
     private boolean ensurePanasonicDraft(JSONObject profile) {
         String identity=selected.optString("id")+"|"+selected.optString("profile");
         if(identity.equals(panasonicDraftDeviceId)&&panasonicDraft!=null)return true;
-        panasonicDraftDeviceId=identity;
+        panasonicDraftDeviceId=identity;acTimerMinutes[0]=60;acTimerMinutes[1]=60;
         try{panasonicDraft=PanasonicAcEncoder.defaults(profile);}catch(Exception error){panasonicDraft=null;return false;}
         try {
             JSONObject saved=selected.optJSONObject("requestedState");
@@ -649,8 +650,9 @@ public final class MainActivity extends Activity {
         List<String> modes=new ArrayList<>();JSONArray sourceModes=profile.optJSONArray("modes");
         if(sourceModes!=null)for(int i=0;i<sourceModes.length();i++)modes.add(sourceModes.optString(i));
         if(!modes.isEmpty())acSelector(controls,"Mode",modes,modes.indexOf(panasonicDraft.mode),index->panasonicDraft.mode=modes.get(index));
-        if(profile.optBoolean("supportsFan"))acSelector(controls,"Fan speed",Arrays.asList("Auto","Low","Medium","High"),panasonicDraft.fan,index->panasonicDraft.fan=index);
-        if(profile.optBoolean("supportsSwing"))acSelector(controls,"Vertical swing",Arrays.asList("Auto swing","Position 1","Position 2","Position 3","Position 4","Position 5"),panasonicDraft.swing,index->panasonicDraft.swing=index);
+        if(!profile.optBoolean("expanded")&&profile.optBoolean("supportsFan"))acSelector(controls,"Fan speed",Arrays.asList("Auto","Low","Medium","High"),panasonicDraft.fan,index->panasonicDraft.fan=index);
+        if(!profile.optBoolean("expanded")&&profile.optBoolean("supportsSwing"))acSelector(controls,"Vertical swing",Arrays.asList("Auto swing","Position 1","Position 2","Position 3","Position 4","Position 5"),panasonicDraft.swing,index->panasonicDraft.swing=index);
+        if(profile.optBoolean("expanded"))expandedFanAndSwing(controls,profile);
         full(controls,acSendButton("Send requested settings",()->sendPanasonic(panasonicDraft.copy(),false,"requested settings"),true),54);gap(controls,10);
         if(toggle) {
             full(controls,acSendButton("Send power toggle",()->sendPanasonic(panasonicDraft.copy(),true,"power toggle"),false),52);
@@ -661,18 +663,71 @@ public final class MainActivity extends Activity {
             controls.addView(power);
         }
         if(!profile.optBoolean("supportsFan")) {gap(controls,12);controls.addView(text("This source profile has no verified fan-speed mapping; its captured default is preserved.",12,MUTED,false));}
-        if(profile.optBoolean("expanded"))card("Basic AC112 controls only","Power, Cool/Heat and 16–30 °C are implemented. Fan, swing and timers are not offered. Other packet fields retain source-template values rather than your appliance’s live state. Try both timing variants and confirm actual behavior before saving.");
-        if(profile.has("family"))card("Experimental protocol candidate", "Physical appliance response and exact equivalence to Mi Remote are unverified. Test power and each setting. Timers, swing and other custom features are unavailable.");
+        if(profile.optBoolean("expanded"))expandedAdditionalControls(profile);
+        if(profile.has("family"))card("Experimental protocol candidate", "Physical appliance response and exact equivalence to Mi Remote are unverified. Test power and each offered setting. Additional functions depend on the selected definition.");
         gap(content,8);full(content,action(profile.has("family")?"Find a different AC remote":"Find a different Panasonic remote",()->panasonicSetup(selected),false),48);
         gap(content,12);content.addView(text("Source keyset: "+profile.optString("model")+". Protocol and source keyset IDs are candidates; confirm the appliance responds before treating them as a match.",12,MUTED,false));
         refreshButtons();
+    }
+    private void setAcExtra(String fid,Integer value) {
+        try{if(value==null)panasonicDraft.extras.remove(fid);else panasonicDraft.extras.put(fid,value);}
+        catch(Exception error){message("Could not prepare that AC function.");}
+    }
+    private void expandedFanAndSwing(LinearLayout controls,JSONObject profile) {
+        JSONObject mappings=profile.optJSONObject("additionalControls");if(mappings==null)return;
+        acSelector(controls,"Fan speed",Arrays.asList("Keep captured fan setting","Auto","Low","Medium","High"),panasonicDraft.fan+1,index->panasonicDraft.fan=index-1);
+        full(controls,acSendButton("Send fan speed",()->sendPanasonic(panasonicDraft.copy(),false,"fan speed"),false),50);gap(controls,12);
+        List<String> swings=new ArrayList<>();swings.add("Keep captured swing setting");
+        JSONArray labels=mappings.optJSONArray("swingLabels");if(labels!=null)for(int i=0;i<labels.length();i++)swings.add(labels.optString(i));
+        acSelector(controls,"Vertical swing",swings,panasonicDraft.swing+1,index->panasonicDraft.swing=index-1);
+        full(controls,acSendButton("Send swing",()->sendPanasonic(panasonicDraft.copy(),false,"vertical swing"),false),50);gap(controls,12);
+    }
+    private void sendAcTimer(int fid,int minutes) {
+        try{
+            PanasonicAcEncoder.State request=panasonicDraft.copy();request.extras.remove("9");request.extras.remove("10");request.extras.put(Integer.toString(fid),minutes);
+            sendPanasonic(request,false,minutes==0?"cancel timers":(fid==9?"power-on":"power-off")+" timer · "+minutes+" min");
+        }catch(Exception error){message("Could not prepare the AC timer.");}
+    }
+    private void expandedAdditionalControls(JSONObject profile) {
+        JSONObject mappings=profile.optJSONObject("additionalControls");if(mappings==null)return;
+        LinearLayout timers=card("AC timers","Countdowns run on the appliance. Sending a timer can also change the requested settings. Timer commands are sent once and are not repeated by ordinary settings or power buttons.");
+        if(mappings.optInt("timerHook")==0){
+            timers.addView(text("This definition has no reviewed timer encoding. Timer buttons are unavailable for this candidate.",13,MUTED,false));
+            Button unavailable=action("Timers unavailable",()->{},false);unavailable.setEnabled(false);full(timers,unavailable,48);
+        }else{
+            int min=mappings.optInt("timerMin"),max=mappings.optInt("timerMax"),step=mappings.optInt("timerStep");
+            List<String> labels=new ArrayList<>();final List<Integer> values=new ArrayList<>();
+            for(int value=Math.max(min,step);value<=max;value+=step){values.add(value);labels.add(value+" min"+(value%60==0?" · "+value/60+" h":""));}
+            for(int i=0;i<2;i++){
+                final int timer=i;int current=values.indexOf(acTimerMinutes[i]);if(current<0){current=0;acTimerMinutes[i]=values.get(0);}
+                acSelector(timers,i==0?"Power-on countdown":"Power-off countdown",labels,current,index->acTimerMinutes[timer]=values.get(index));
+                full(timers,acSendButton(i==0?"Set power-on timer":"Set power-off timer",()->sendAcTimer(timer==0?9:10,acTimerMinutes[timer]),false),50);gap(timers,10);
+            }
+            full(timers,acSendButton("Cancel AC timers",()->sendAcTimer(9,0),false),50);
+            gap(timers,8);timers.addView(text("Only one countdown is encoded at a time; setting one clears the other in the requested packet. Check the AC's timer indicator and actual behavior.",12,MUTED,false));
+        }
+        LinearLayout special=card("Special functions","Only functions with reviewed mappings in this source definition are offered. Labels describe source functions; appliance support is experimental. Sleep / night fan overrides fan speed when enabled. Auxiliary heat requires Heat mode.");
+        JSONObject features=mappings.optJSONObject("extras");List<String> keys=new ArrayList<>();if(features!=null){Iterator<String> it=features.keys();while(it.hasNext())keys.add(it.next());}
+        Collections.sort(keys,(a,b)->Integer.compare(Integer.parseInt(a),Integer.parseInt(b)));
+        for(String fid:keys){
+            JSONObject feature=features.optJSONObject(fid);JSONArray options=feature.optJSONArray("options");
+            List<String> labels=new ArrayList<>();labels.add("Keep captured setting");List<Integer> values=new ArrayList<>();values.add(null);
+            for(int i=0;i<options.length();i++){JSONObject option=options.optJSONObject(i);labels.add(option.optString("label"));values.add(option.optInt("value"));}
+            int current=panasonicDraft.extras.has(fid)?values.indexOf(panasonicDraft.extras.optInt(fid)):0;
+            acSelector(special,feature.optString("label"),labels,current,index->setAcExtra(fid,values.get(index)));
+        }
+        if(keys.isEmpty()){
+            special.addView(text("No special-function mapping is available for this definition.",13,MUTED,false));Button unavailable=action("Special functions unavailable",()->{},false);unavailable.setEnabled(false);full(special,unavailable,48);
+        }else full(special,acSendButton("Send special functions",()->sendPanasonic(panasonicDraft.copy(),false,"special functions"),false),50);
+        card("Experimental AC112 controls","Fan and swing use this definition’s tables. Timer and special buttons appear only where reviewed mappings exist. Keep captured setting preserves the source template, not the AC’s live state. Test each function and both timing variants.");
     }
     private void sendPanasonic(PanasonicAcEncoder.State requested,boolean powerButtonPress,String label) {
         if(!selectedUsesStatefulAc()||currentAcProfile()==null||infrared==null||!irHardware.hasEmitter||busy){message("A detected built-in IR transmitter and a loaded AC profile are required.");return;}
         final JSONObject device=selected,profile=currentAcProfile();
         if(profile==null){message("Choose a supported AC profile first.");return;}
         final IrCatalog transmitter=infrared;final long generation=connectionGeneration;
-        final PanasonicAcEncoder.State snapshot=requested.copy();busy=true;refreshButtons();
+        final PanasonicAcEncoder.State snapshot=requested.copy(),persisted=Ac112Controls.persistentRequest(snapshot,panasonicDraft);
+        busy=true;refreshButtons();
         worker.execute(()->{
             try {
                 if(destroyed||generation!=connectionGeneration||selected!=device)return;
@@ -681,7 +736,7 @@ public final class MainActivity extends Activity {
                 transmitter.transmitSignal(signal.carrierHz,signal.pattern);
                 ui(()->{
                     if(generation!=connectionGeneration||selected!=device)return;
-                    try {device.put("requestedState",snapshot.toJson());store.save(devices);panasonicDraft=snapshot.copy();}
+                    try {device.put("requestedState",persisted.toJson());store.save(devices);panasonicDraft=persisted.copy();}
                     catch(Exception ignored){message("IR was sent, but the requested settings could not be saved.");}
                     updateStatus("IR sent · "+label+". Confirm the AC responds.",true);render();
                 });

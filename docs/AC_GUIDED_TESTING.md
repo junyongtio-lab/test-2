@@ -1,73 +1,107 @@
-# AC guided testing — Palm Remote 1.6.5
+# AC guided testing — Palm Remote 1.6.6
 
-All **64 included AC brand labels** have **Find a working remote · Guided testing**
-as their first setup option. **This does not mean all 64 brands work.**
+All **64 included AC brand labels** offer **Find a working remote · Guided testing**.
+The catalogue contains 251 candidates: 101 recorded remotes, six existing Panasonic
+parameter candidates, four original experimental candidates and 140 AC112 timing
+candidates from 70 source definitions. A candidate is not a confirmed model match.
+**624 of the original 694 unsupported source definitions still lack controls.**
 
-The update adds experimental basic controls for **70 of the previously unsupported
-694 source definitions (10.1%)**. **624 definitions remain unsupported.**
+## Additional controls for the 70 AC112 definitions
 
-- These 70 definitions span 45 source brand labels. Each offers two timing
-  variants: 140 experimental candidates, not 140 definitions.
-- Implemented controls: power on/off, Cool/Heat, and 16–30 °C.
-- Fan speed, swing, timers and special functions are not implemented for these
-  new candidates. Unexposed fields retain source template values.
-- All 64 selectable AC brand labels now have at least one recorded or experimental
-  candidate: 101 recorded, six Panasonic, four existing experimental and 140 new
-  experimental candidates, **251 total**. This does not establish compatibility
-  with every model or confirm any new candidate on physical hardware.
+| Control | Definitions with a reviewed mapping |
+| --- | ---: |
+| Power, Cool/Heat, 16–30 °C | 70 |
+| Fan: Auto, Low, Medium, High | 70 |
+| Vertical swing: source-specific positions / on / off | 70 |
+| Appliance power-on/off countdown and cancellation | 56 |
+| At least one special function | 56 |
 
-See the [exact 70 definitions](../downloads/AC-expanded-covered-profiles.csv),
-[brand coverage](../downloads/AC-brand-coverage.csv), and
-[encoder validation details](../tools/ac_expanded/README.md).
+See [the exact per-profile controls](../downloads/AC-additional-controls.csv) and
+[the 70 source IDs](../downloads/AC-expanded-covered-profiles.csv). Each definition
+has two timing candidates; capabilities are identical between those two candidates.
+These counts are **not whole-brand support or physical compatibility evidence**.
 
-## Testing available candidates
+Special functions vary. Most mapped profiles provide Sleep / night fan. Some
+provide Turbo, Eco / Energy saver, health/filter, display light, auxiliary heat,
+horizontal swing or I Feel / body sensor. A label alone in source data does not
+provide an encoder: declared but unmapped functions remain unavailable. The 14
+profiles without timer mappings and 14 without special mappings show unavailable
+buttons. No generic timer/special command is substituted for a missing mapping.
+
+## Find and test a candidate
 
 1. Use an Android phone with a built-in IR emitter and confirm **IR ready**.
-2. Choose **Home → Air conditioner → brand → Find a working remote · Guided testing**.
-3. The overview lists only sendable controls and reports how many additional
-   source definitions lack an encoder. Choose a settings candidate or the
-   recorded-remotes group. Experimental settings candidates are labelled.
-4. Aim at the AC. Settings tests request power on (or the stated toggle), Cool
-   24 °C. A recorded AC signal can change several settings at once; its label
-   describes the source capture, not the appliance's current settings.
-5. Send a test and confirm the AC's actual intended response. In recorded testing,
-   tap **AC responded** after observing it. Then **Use this remote** and the final
-   confirmation save the selected candidate. Test other important settings too.
-6. Previous/Next clears test confirmations. Settings candidates in the new brand
-   guide remain within that brand; they do not cycle through other brands.
-7. If no candidate responds, check the emitter, aim and AC model. The catalogue
-   may not support that model. Source data browsing never sends a signal or saves
-   a working match. No IR transmitter means no test transmission or confirmed save.
+2. Open **Home → Air conditioner → brand → Find a working remote · Guided testing**.
+3. Choose a settings candidate or recorded-remotes group. Try the settings test
+   **power on · Cool 24 °C**, aim at the AC, and observe the actual requested response.
+4. Use Previous/Next to try other candidates within the selected brand. Each new
+   candidate clears test confirmation. AC112 timing candidates are explicitly named.
+5. Confirm the AC responded correctly before saving **Use this remote**. A saved
+   preview is untested. Recorded AC tests require a send plus explicit **AC responded**.
+6. Open the saved remote and separately test every important function. A power-test
+   match does not prove fan, swing, timers or special functions also work.
 
-The app cannot read or synchronize AC state. A beep alone may not prove all
-requested settings took effect. Verify the actual temperature/mode/fan behavior.
-Untested previews remain explicitly labelled and are separate from working matches.
+The app cannot read the AC's state. A beep alone does not establish correct mode,
+temperature, fan, vane movement or countdown behavior. No emitter means no sending
+or confirmed match; browsing source data never sends IR or saves a working match.
 
-## Why most remaining profiles need encoders
+## Fan, swing and special buttons
 
-An AC command commonly contains a whole state packet: power, operating mode,
-temperature, fan speed, swing, checksums and sometimes multiple frames. A profile
-template alone does not implement those rules. One brand can require several
-protocols, and multiple brands can share a protocol family. A reliable encoder
-needs documented packet layouts or verified captures plus packet and waveform
-validation. Physical compatibility still needs testing on the appliance.
+Choose a fan speed or vertical-swing option, then tap **Send fan speed** or
+**Send swing**. The source-specific swing menu may offer fewer positions than
+another definition. **Keep captured setting** preserves the source-template field;
+it does not retain or read the appliance's live setting.
 
-The [encoder grouping report](../downloads/AC-encoder-groups.csv) groups the 624
-unsupported definitions by template payload length and their first three payload
-bytes. **These are investigation leads, not verified protocol identifications or
-supported matches.** Shared signatures do not establish identical fields,
-checksums, framing or timing. Source hooks remain inert and are never executed.
-This report helps prioritize encoder research; it does not add signal generation.
+Under **Special functions**, select the mapped options and tap **Send special
+functions**. The message includes the current power/mode/temperature/fan/swing
+request. Sleep mappings on many profiles force night fan; turn Sleep off before
+expecting another fan speed. Some features are limited to Cool or Heat; incompatible
+requests are rejected. Auxiliary heat can be requested only in Heat mode. Source
+options for horizontal swing keep their source option numbers where the exact
+physical direction is unknown. Health and I Feel labels are mapped flags, not
+phone sensing or filter-status readings.
 
-Version 1.6.5 (code 14) updates 1.6.4 (code 13) using the same signing certificate.
-Inventory tests load or encode all 251 offered candidates. Public reference
-checks compare 4,200 new packets and strictly decode 8,400 Java waveforms. Physical AC responses and emulator UI tests are unverified for this
-update. See the validation report for completed build and test results.
+Controls prepare a full packet and send only after a send or power button. Special
+settings persist as requested state. **Keep captured setting** restores that field's
+source-template value on the next send; it does not send a separate cancel command.
 
-## Panasonic source profile 137_2587
+## Appliance timers
 
-This profile already has a Panasonic216 encoder; no new encoder is needed for
-that source candidate. In the AC guided overview, select **Settings candidate ·
-137_2587**, then test **power on · Cool 24 °C** while aiming at the AC.
-The ID is a source keyset, not a retail appliance model. Confirm the real AC
-response before saving; successful packet generation does not prove a model match.
+The **AC timers** section offers mapped power-on/off countdowns. Most profiles
+allow 10–1,440 minutes in 10-minute steps. Three allow 0–1,440 in 30-minute steps,
+and one allows 60–480 in 60-minute steps; cancellation is a separate button.
+The app sends the source's native 10-minute count, not the public TCL API's
+20-minute count. The ranges shown in each profile are enforced.
+
+Select a countdown and press **Set power-on timer** or **Set power-off timer**.
+**Cancel AC timers** clears both encoded countdowns and enable flags. The requested
+packet supports one countdown at a time; setting one clears the other. Timer packets
+can change the power/settings fields as specified by the source mapping. Check the
+AC timer indicator and actual countdown behavior on your appliance.
+
+Timer commands are **one-shot IR requests**: they run on the AC, not as phone
+background schedules, and are removed from saved requested state. Ordinary settings
+or power sends do not automatically repeat a previous timer request. The app cannot
+read whether a timer was accepted, expired or remains active on the AC. Explicitly
+cancel it on the AC if needed; closing the app does not cancel appliance timers.
+
+## Evidence and remaining gaps
+
+The basic packets match pinned public Mitsubishi112/TCL112 encoders. An independent
+source-bit-table generator supplies 14,832 additional control packet fixtures;
+7,120 fan/swing combinations also match the public TCL encoder. Both timing variants
+are checked with strict upstream decoding. Timer and special-function mappings can
+differ from public TCL fields, so strict decoding proves framing/checksum/payload,
+not the physical meaning or correct operation on an appliance. Source hooks are
+translated only for three exact reviewed hashes and are never executed.
+
+See [encoder validation and reproduction](../tools/ac_expanded/README.md),
+[build results](../downloads/validation.json), [brand coverage](../downloads/AC-brand-coverage.csv)
+and [remaining unverified groups](../downloads/AC-encoder-groups.csv). Grouping the
+624 unsupported definitions by packet length/prefix is an investigation aid, not
+verified protocol identification or a sendable match.
+
+Version 1.6.6 (code 15) updates 1.6.5 (code 14) with the same signing certificate.
+The previously user-confirmed Panasonic source profile **137_2587** keeps its
+existing Panasonic216 encoder. That source ID is not a retail model number, and
+its confirmed power-on/Cool-24 test does not validate the 70 AC112 definitions.

@@ -7,7 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Source-pinned 112-bit protocol candidates. Only power, Cool/Heat and whole-degree temperature are implemented. */
+/** Source-pinned 112-bit protocol candidates. Basic state plus bounded, source-mapped additional controls. */
 final class ExpandedAcEncoder {
     private static final Map<String,String> APPROVED=new LinkedHashMap<>();
     static {
@@ -97,7 +97,7 @@ final class ExpandedAcEncoder {
                 p.put("id","family_"+model+(variant==0?"":"_tcl112")).put("family",variant==0?"AC112_MITSUBISHI":"AC112_TCL")
                     .put("expanded",true).put("variant",variant).put("carrierHz",38000).put("sourceCarrierHz",metadata.getInt("carrierHz"))
                     .put("definition",definition).put("definitionDigest",IrCatalog.sha256(definition.toString()))
-                    .put("powerToggle",false).put("supportsFan",false).put("supportsSwing",false)
+                    .put("powerToggle",false).put("supportsFan",true).put("supportsSwing",true).put("additionalControls",Ac112Controls.describe(definition))
                     .put("modes",new JSONArray().put("cool").put("heat"));
                 result.add(p);
             }
@@ -108,7 +108,7 @@ final class ExpandedAcEncoder {
     static PanasonicAcEncoder.Signal encode(JSONObject p,PanasonicAcEncoder.State state) throws Exception {
         String model=p.getString("model");
         if(!supports(model)||!APPROVED.get(model).equals(p.getString("assetSha256"))||state==null||state.mode==null
-            ||!(state.mode.equals("cool")||state.mode.equals("heat"))||state.temperature<16||state.temperature>30||state.fan!=-1||state.swing!=-1)
+            ||!(state.mode.equals("cool")||state.mode.equals("heat"))||state.temperature<16||state.temperature>30)
             throw new IllegalArgumentException("Unsupported AC112 candidate or requested control.");
         JSONObject d=p.getJSONObject("definition");
         if(!IrCatalog.sha256(d.toString()).equals(p.getString("definitionDigest")))throw new IllegalArgumentException("AC112 definition changed.");
@@ -120,6 +120,7 @@ final class ExpandedAcEncoder {
         packet[6]=(byte)((packet[6]&0xf0)|(state.mode.equals("heat")?1:3));
         packet[7]=(byte)((packet[7]&0xf0)|(31-state.temperature));
         packet[12]=(byte)(packet[12]&~0x20);
+        Ac112Controls.apply(d,state,packet);
         int sum=0;for(int i=0;i<13;i++)sum+=packet[i]&255;packet[13]=(byte)sum;
         int variant=p.getInt("variant");
         String family=p.getString("family");

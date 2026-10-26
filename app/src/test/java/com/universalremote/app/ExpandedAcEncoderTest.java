@@ -40,10 +40,10 @@ public final class ExpandedAcEncoderTest {
     @Test public void unverifiedDefinitionsAndUnsupportedControlsAreNeverEnabled() throws Exception {
         FamilyAcEncoder encoder=new FamilyAcEncoder(database());int count=0;
         for(JSONObject p:encoder.profiles())if(p.optBoolean("expanded")) {
-            assertFalse(p.getBoolean("supportsFan"));assertFalse(p.getBoolean("supportsSwing"));
+            assertTrue(p.getBoolean("supportsFan"));assertTrue(p.getBoolean("supportsSwing"));
             assertFalse(p.getBoolean("hardwareTested"));assertEquals(2,p.getJSONArray("modes").length());
-            PanasonicAcEncoder.State invalid=PanasonicAcEncoder.defaults(p);invalid.fan=0;
-            try{FamilyAcEncoder.encode(p,invalid,true);fail("Unimplemented fan control accepted");}catch(IllegalArgumentException expected){}
+            PanasonicAcEncoder.State invalid=PanasonicAcEncoder.defaults(p);invalid.fan=4;
+            try{FamilyAcEncoder.encode(p,invalid,true);fail("Invalid fan control accepted");}catch(IllegalArgumentException expected){}
             JSONObject tampered=new JSONObject(p.toString());tampered.getJSONObject("definition").put("300","1,1");
             try{FamilyAcEncoder.encode(tampered,PanasonicAcEncoder.defaults(p),true);fail("Changed definition accepted");}catch(IllegalArgumentException expected){}
             count++;

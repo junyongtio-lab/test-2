@@ -27,7 +27,7 @@ def check():
     writer=csv.writer(output,lineterminator='\n')
     writer.writerow(['brand','source_profile_id','controls_implemented','timing_variants','not_implemented','hardware_tested','source_asset_sha256'])
     for row in sorted(rows,key=lambda r:(r['brand'].lower(),r['model'])):
-        writer.writerow([row['brand'],row['model'],'Power on/off; Cool/Heat; 16–30 °C',2,'Fan speed; swing; timers; special functions','false',row['assetSha256']])
+        writer.writerow([row['brand'],row['model'],'Power on/off; Cool/Heat; 16–30 °C; fan speed; vertical swing; mapped extras listed in AC-additional-controls.csv',2,'Functions without reviewed source mappings; see AC-additional-controls.csv','false',row['assetSha256']])
     report=ROOT/'downloads/AC-expanded-covered-profiles.csv'
     report.write_text(output.getvalue())
     print('Checked 70 explicitly approved, unchanged source definitions. No hook executed.')

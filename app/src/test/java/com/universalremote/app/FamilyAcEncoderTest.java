@@ -44,7 +44,7 @@ public final class FamilyAcEncoderTest {
             for(PanasonicAcEncoder.State invalid:new PanasonicAcEncoder.State[]{
                 new PanasonicAcEncoder.State(true,"auto",24,0,-1),new PanasonicAcEncoder.State(true,"cool",15,0,-1),
                 new PanasonicAcEncoder.State(true,"heat",31,0,-1),new PanasonicAcEncoder.State(true,"cool",24,4,-1),
-                new PanasonicAcEncoder.State(true,"cool",24,0,0)}) {
+                new PanasonicAcEncoder.State(true,"cool",24,0,99)}) {
                 try{FamilyAcEncoder.encode(profile,invalid,false);fail("Unsupported request accepted");}catch(IllegalArgumentException expected){}
             }
             JSONObject altered=new JSONObject(profile.toString());altered.getJSONObject("definition").put("1002","0100");

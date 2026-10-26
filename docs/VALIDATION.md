@@ -1,3 +1,11 @@
+# Additional AC112 controls — 1.6.6
+
+Fan and vertical-swing tables are enabled for all 70 hash-pinned experimental source definitions. Timer mappings are available on 56 definitions; at least one special function is available on 56. The remaining 14 in each category report unavailable controls. These are profile-specific capabilities, not proof that every appliance of the 45 brand labels responds.
+
+The additional encoder tests compare 14,832 independently generated source-table packet fixtures across both transports (29,664 Java waveforms). The pinned public TCL encoder independently matches 7,120 fan/swing combinations. The original 4,200 basic packets and 8,400 waveforms remain checked. Source timers and special-function fields can differ from public TCL semantics, so their evidence is reviewed source mapping plus packet/checksum/transport validation, not public timer or auxiliary-function equivalence. No source hook is executed. Timer requests are removed from persisted state so ordinary sends cannot automatically repeat them. Saved fan, swing and special settings round-trip and copied states remain independent.
+
+Current build and validation results are in downloads/validation.json. Physical responses and emulator UI execution are not claimed. The expanded instrumentation checks compile but require a device for execution. Notes below apply to their stated earlier versions.
+
 # Expanded AC112 encoder validation — 1.6.5
 
 133 JVM tests cover the current app. Seventy explicitly reviewed, source-hash-pinned definitions add 140 experimental candidates (two timing variants each). All 4,200 core power/mode/temperature packets match both pinned public reference encoders; 8,400 Java-generated waveforms pass strict upstream decoding with exact payload checks. Supported controls are power, Cool/Heat and 16–30 °C; fan, swing and timers are unavailable on these new candidates. Packet proof does not establish hardware compatibility or exact Mi engine equivalence.

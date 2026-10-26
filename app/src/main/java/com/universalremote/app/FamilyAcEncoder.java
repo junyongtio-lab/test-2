@@ -37,7 +37,7 @@ final class FamilyAcEncoder {
     static PanasonicAcEncoder.Signal encode(JSONObject p,PanasonicAcEncoder.State s,boolean powerPress) throws Exception {
         if(p.optBoolean("expanded"))return ExpandedAcEncoder.encode(p,s);
         int family=family(p.getString("model"));
-        if(family<0||s==null||s.mode==null||!(s.mode.equals("cool")||s.mode.equals("heat"))||s.temperature<16||s.temperature>30||s.fan<0||s.fan>3||s.swing!=-1)
+        if(family<0||s==null||s.extras.length()!=0||s.mode==null||!(s.mode.equals("cool")||s.mode.equals("heat"))||s.temperature<16||s.temperature>30||s.fan<0||s.fan>3||s.swing!=-1)
             throw new IllegalArgumentException("Unsupported AC protocol candidate or setting.");
         JSONObject d=p.getJSONObject("definition");
         if(!d.getString("1002").equals(TEMPLATES[family]))throw new IllegalArgumentException("AC template differs.");

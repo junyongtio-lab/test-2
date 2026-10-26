@@ -38,21 +38,34 @@ final class PanasonicAcEncoder {
 
     static final class State {
         boolean power; String mode; int temperature,fan,swing;
+        JSONObject extras=new JSONObject();
         State(boolean power,String mode,int temperature,int fan,int swing) {
             this.power=power;this.mode=mode;this.temperature=temperature;this.fan=fan;this.swing=swing;
         }
-        State copy(){return new State(power,mode,temperature,fan,swing);}
+        State copy(){
+            State result=new State(power,mode,temperature,fan,swing);
+            try{result.extras=new JSONObject(extras.toString());}catch(Exception error){throw new IllegalArgumentException("Invalid AC extras.",error);}
+            return result;
+        }
         JSONObject toJson() throws Exception {
-            return new JSONObject().put("power",power).put("mode",mode).put("temperature",temperature).put("fan",fan).put("swing",swing);
+            JSONObject result=new JSONObject().put("power",power).put("mode",mode).put("temperature",temperature).put("fan",fan).put("swing",swing);
+            if(extras.length()>0)result.put("extras",new JSONObject(extras.toString()));
+            return result;
         }
         static State fromJson(JSONObject value) throws Exception {
             if(!(value.get("power") instanceof Boolean))throw new IllegalArgumentException("Invalid AC power state.");
             State state=new State(value.getBoolean("power"),value.getString("mode"),integer(value,"temperature"),integer(value,"fan"),integer(value,"swing"));
-            checkState(state);return state;
+            if(value.has("extras"))state.extras=new JSONObject(value.getJSONObject("extras").toString());
+            if(state.mode==null||!(state.mode.equals("cool")||state.mode.equals("heat")||state.mode.equals("dry")||state.mode.equals("fan"))
+                ||state.temperature<16||state.temperature>30||state.fan< -1||state.fan>3||state.swing< -1||state.swing>6||state.extras.length()>16)
+                throw new IllegalArgumentException("Invalid saved AC request.");
+            java.util.Iterator<String> keys=state.extras.keys();
+            while(keys.hasNext()){String key=keys.next();if(!key.matches("[0-9]{1,2}")||integer(state.extras,key)<0||integer(state.extras,key)>1440)throw new IllegalArgumentException("Invalid saved AC extra.");}
+            return state;
         }
     }
     static State defaults(JSONObject profile) {
-        return new State(true,"cool",24,profile.optBoolean("supportsFan")?0:-1,profile.optBoolean("supportsSwing")?0:-1);
+        return new State(true,"cool",24,profile.optBoolean("supportsFan")&&!profile.optBoolean("expanded")?0:-1,profile.optBoolean("supportsSwing")&&!profile.optBoolean("expanded")?0:-1);
     }
     static final class Signal {
         final int carrierHz; final int[] pattern; final byte[] packet;
@@ -77,7 +90,7 @@ final class PanasonicAcEncoder {
         return new Signal(carrier,pattern,packet);
     }
     private static void checkState(State state) {
-        if(state==null || state.mode==null || !(state.mode.equals("cool")||state.mode.equals("heat")||state.mode.equals("dry")||state.mode.equals("fan"))
+        if(state==null || state.extras.length()!=0 || state.mode==null || !(state.mode.equals("cool")||state.mode.equals("heat")||state.mode.equals("dry")||state.mode.equals("fan"))
             || state.temperature<16 || state.temperature>30 || state.fan< -1 || state.fan>3 || state.swing< -1 || state.swing>5)
             throw new IllegalArgumentException("Unsupported Panasonic AC setting.");
     }

@@ -1,0 +1,71 @@
+brand,source_profile_id,fan_speed,vertical_swing_options,timer_minutes,special_functions,declared_but_unmapped,hardware_tested
+Aux,7_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+Aux,7_3022,Auto; Low; Medium; High,6,10–1440 in steps of 10; cancel,Sleep,Energy saver,false
+Blue Star,kk_3_2275_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+Blueway,kk_3_2894_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+Blueway,kk_3_2894_3200,Auto; Low; Medium; High,7,Unavailable,Unavailable,,false
+Carrier,579_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+Changhong,169_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+Chigo,171_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+Chigo,171_3022,Auto; Low; Medium; High,6,10–1440 in steps of 10; cancel,Sleep,Energy saver,false
+Chunlan,590_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+Daewoo,195_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+Daewoo,195_3022,Auto; Low; Medium; High,6,10–1440 in steps of 10; cancel,Sleep,Energy saver,false
+DaiKin,58_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+Delonghi,kk_3_3226_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+Delonghi,kk_3_3226_3200,Auto; Low; Medium; High,7,Unavailable,Unavailable,,false
+Electra,1949_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+Electra,kk_3_1949_3200,Auto; Low; Medium; High,7,Unavailable,Unavailable,,false
+Electrolux,563_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+Electrolux,kk_3_563_4971,Auto; Low; Medium; High,2,0–1440 in steps of 30; cancel,Turbo; Auxiliary heat; Health / filter; Horizontal swing; Sleep; I Feel / body sensor; Eco; Display light,,false
+Fujitsu,70_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+Galanz,71_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+Galanz,71_3022,Auto; Low; Medium; High,6,10–1440 in steps of 10; cancel,Sleep,Energy saver,false
+Galanz,kk_3_71_4370,Auto; Low; Medium; High,6,60–480 in steps of 60; cancel,Sleep,,false
+Goldstar,kk_3_1813_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+Gree,72_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+Haier,74_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+Hisense,75_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+Hitachi,117_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+Hyundai,kk_3_238_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+Hyundai,kk_3_238_3022,Auto; Low; Medium; High,6,10–1440 in steps of 10; cancel,Sleep,Energy saver,false
+Kelon,92_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+LG,22_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+Lloyd,kk_3_2624_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+Lloyd,kk_3_2624_3200,Auto; Low; Medium; High,7,Unavailable,Unavailable,,false
+McQuay,kk_3_574_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+Midea,110_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+Mistral,kk_3_3223_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+Mistral,kk_3_3223_3200,Auto; Low; Medium; High,7,Unavailable,Unavailable,,false
+Mitsubishi Electric,kk_3_123_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+Mitsubishi Electric,kk_3_123_4971,Auto; Low; Medium; High,2,0–1440 in steps of 30; cancel,Turbo; Auxiliary heat; Health / filter; Horizontal swing; Sleep; I Feel / body sensor; Eco; Display light,,false
+Mitsubishi Electric,kk_3_123_5681,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Turbo; Horizontal swing; Sleep,,false
+Mitsubishi Heavy Industries,kk_3_124_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+Mitsubishi Heavy Industries,kk_3_124_3022,Auto; Low; Medium; High,6,10–1440 in steps of 10; cancel,Sleep,Energy saver,false
+Mitsubishi Heavy Industries,kk_3_124_3266,Auto; Low; Medium; High,5,Unavailable,Unavailable,,false
+NEC,1876_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+Ogeneral,kk_3_2664_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+Panasonic,137_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+Samsung,125_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+Sanyo,126_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+Sharp,149_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+Shinco,178_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+Shinco,178_3022,Auto; Low; Medium; High,6,10–1440 in steps of 10; cancel,Sleep,Energy saver,false
+TCL,28_3022,Auto; Low; Medium; High,6,10–1440 in steps of 10; cancel,Sleep,Energy saver,false
+TCL,28_6012,Auto; Low; Medium; High,5,Unavailable,Unavailable,,false
+TCL,28_6022,Auto; Low; Medium; High,2,Unavailable,Unavailable,,false
+TCL,kk_3_28_3200,Auto; Low; Medium; High,7,Unavailable,Unavailable,,false
+TCL,kk_3_28_4971,Auto; Low; Medium; High,2,0–1440 in steps of 30; cancel,Turbo; Auxiliary heat; Health / filter; Horizontal swing; Sleep; I Feel / body sensor; Eco; Display light,,false
+TCL,kk_3_28_5124,Auto; Low; Medium; High,2,10–1440 in steps of 10; cancel,Turbo; Energy saver; Sleep,,false
+TECO,1760_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+Toshiba,64_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+Trane,1956_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+Uni-Air,kk_3_2567_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+Uni-Air,kk_3_2567_3200,Auto; Low; Medium; High,7,Unavailable,Unavailable,,false
+Videocon,kk_3_2258_3200,Auto; Low; Medium; High,7,Unavailable,Unavailable,,false
+Voltas,kk_3_2276_3200,Auto; Low; Medium; High,7,Unavailable,Unavailable,,false
+Whirlpool,580_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+Yair,161_4727,Auto; Low; Medium; High,2,10–1440 in steps of 10; cancel,Sleep,,false
+Yair,161_6702,Auto; Low; Medium; High,5,Unavailable,Unavailable,,false
+York,560_2807,Auto; Low; Medium; High,7,10–1440 in steps of 10; cancel,Sleep,,false
+York,kk_3_560_3200,Auto; Low; Medium; High,7,Unavailable,Unavailable,,false

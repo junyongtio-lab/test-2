@@ -1,12 +1,13 @@
-Palm Remote 1.6.5 expanded AC validation
-133 JVM tests passed; zero failures, errors or skipped tests.
-64 AC brand labels have the guided-testing entry and candidates to try.
-251 candidates: 101 recorded, six Panasonic, four existing experimental and 140 new experimental timing candidates.
-70 previously unsupported definitions enabled, two timing variants each; 624 of the original 694 remain unsupported.
-New controls: power on/off, Cool/Heat, 16–30 °C. No new fan, swing, timers or special functions.
-4,200 packets match both pinned public reference encoders; 8,400 Java waveforms pass strict public-reference decoding.
-Original four experimental encoder packet checks retained (960 cases).
-All offered candidates load or encode and remain within the selected brand.
-AC coverage and unverified grouping CSV regeneration checks passed.
-All packaged asset files match source bytes; original signal data retained.
-No physical appliance response or emulator UI result claimed for this release.
+Palm Remote 1.6.6 additional AC controls validation
+136 JVM tests passed; zero failures, errors or skips.
+70 AC112 definitions retain power, Cool/Heat, 16–30 C and now expose mapped fan and vertical swing.
+56 definitions have timer mappings; 56 have at least one special-function mapping.
+14,832 additional independent source-table packets checked across two transports.
+7,120 fan/swing combinations match the pinned public TCL encoder.
+Strict public decoder verifies 29,664 additional Java waveforms plus 8,400 basic waveforms.
+Existing basic 4,200-packet public-encoder checks and original four-family 960-case tests retained.
+Timer ranges/cancellation, mode restrictions, unsupported controls and state round-trip/isolation checked.
+One-shot timer requests are removed from persisted ordinary settings.
+All 64 AC brand labels retain guided testing; 251 candidates total; 624 source definitions remain unsupported.
+All packaged assets match current source bytes; original signal data retained.
+No physical AC compatibility or emulator UI execution is claimed for this release.

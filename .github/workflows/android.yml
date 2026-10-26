@@ -24,14 +24,14 @@ jobs:
       - name: Build, test and lint
         run: |
           mkdir -p work
-          PALM_EXPANDED_WAVEFORMS="$PWD/work/ac112-waveforms.csv" ./gradlew --no-daemon testDebugUnitTest lintDebug assembleDebug assembleDebugAndroidTest
+          PALM_EXPANDED_WAVEFORMS="$PWD/work/ac112-waveforms.csv" PALM_AC112_CONTROLS_WAVEFORMS="$PWD/work/ac112-control-waveforms.csv" ./gradlew --no-daemon testDebugUnitTest lintDebug assembleDebug assembleDebugAndroidTest
       - name: Verify expanded AC packets and strict waveform decodes
         run: |
           git init work/ac-reference
           git -C work/ac-reference remote add origin https://github.com/crankyoldgit/IRremoteESP8266.git
           git -C work/ac-reference fetch --depth 1 origin 1e2f0f3ef0a93cbf2a8ddb2e95130f8f4c584b3f
           git -C work/ac-reference checkout --detach FETCH_HEAD
-          python3 tools/ac_expanded/verify_reference.py --reference work/ac-reference --waveforms work/ac112-waveforms.csv
+          python3 tools/ac_expanded/verify_reference.py --reference work/ac-reference --waveforms work/ac112-waveforms.csv --control-waveforms work/ac112-control-waveforms.csv
       - name: Verify TV brand coverage
         run: python3 tools/tv_brand_coverage.py --check
       - name: Verify decoder brand coverage
@@ -39,7 +39,9 @@ jobs:
       - name: Verify fan brand coverage
         run: python3 tools/fan_brand_coverage.py --check
       - name: Verify AC guided coverage and encoder gaps
-        run: python3 tools/ac_guided_coverage.py --check
+        run: |
+          python3 tools/ac_guided_coverage.py --check
+          python3 tools/ac_expanded/control_vectors.py --check
       - name: Verify Mi database catalogue
         run: |
           python3 -m pip install -r tools/mi_catalogue/requirements.txt
