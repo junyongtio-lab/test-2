@@ -1,0 +1,44 @@
+name: Palm Remote Demo
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/demo/**'
+      - '.github/workflows/demo.yml'
+  pull_request:
+    paths:
+      - 'tools/demo/**'
+      - '.github/workflows/demo.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+      - name: Install Android platform
+        run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Generate restricted demo project
+        run: python3 tools/demo/create_demo.py --output "$RUNNER_TEMP/palmremote-demo"
+      - name: Test, lint and build demo
+        run: |
+          cd "$RUNNER_TEMP/palmremote-demo"
+          ./gradlew --no-daemon testDebugUnitTest lintDebug assembleDebug
+          cp app/build/outputs/apk/debug/app-debug.apk 'palmremote demo.apk'
+      - name: Verify actual APK brand scope and retained baseline signals
+        run: |
+          python3 tools/demo/verify_demo.py --project "$RUNNER_TEMP/palmremote-demo" --apk "$RUNNER_TEMP/palmremote-demo/palmremote demo.apk" --baseline-apk downloads/PalmRemote-1.6.6.apk
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify "$RUNNER_TEMP/palmremote-demo/palmremote demo.apk"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: palmremote-demo
+          path: ${{ runner.temp }}/palmremote-demo/palmremote demo.apk

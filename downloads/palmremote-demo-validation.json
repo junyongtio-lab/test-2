@@ -1,0 +1,58 @@
+{
+  "apkSha256": "78a374784fa28125c81cb24366bd532235bbbd14bd1f0500a298f8b656c8d58a",
+  "apkBytes": 766035,
+  "packagedAssetFiles": 141,
+  "packagedProfileAssets": 130,
+  "recordedProfiles": {
+    "tv": 69,
+    "air_conditioner": 4,
+    "fan": 6,
+    "set_top_box": 5
+  },
+  "recordedCommands": 2811,
+  "acSourceRecords": 46,
+  "acSettingsCandidates": 10,
+  "totalSendableCandidates": 94,
+  "allowedBrands": {
+    "tv": [
+      "Samsung"
+    ],
+    "air_conditioner": [
+      "Midea",
+      "Panasonic"
+    ],
+    "fan": [
+      "KDK",
+      "Panasonic"
+    ],
+    "set_top_box": [
+      "Astro"
+    ]
+  },
+  "excludedBrandProfileAssets": 0,
+  "baselineApkSha256": "fef11c68d420ef4658884b3babe646802bb247618573b8b4d30f86ca7201bd08",
+  "retainedSignalBytesMatchBaseline": true,
+  "physicalHardwareTested": false,
+  "fileName": "palmremote demo.apk",
+  "applicationId": "com.universalremote.app.demo",
+  "applicationLabel": "Palm Remote Demo",
+  "versionName": "1.6.6-demo",
+  "versionCode": 15,
+  "validationDate": "2026-10-27",
+  "baselineSourceCommit": "52208e60d89070891bea3231fe484dc0aab71488",
+  "unitTests": {
+    "tests": 3,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "retainedAc112ControlPacketCases": 752,
+  "lintErrors": 0,
+  "lintWarnings": 25,
+  "networkPermissions": [],
+  "signatureVerified": true,
+  "signingCertificateSha256": "75e8320e3978d0cc65f0fb98c0bb82354a05dd02e1c34d96823d883cab9e4e64",
+  "sourceReproductionFilesVerified": 181,
+  "emulatorUiTests": "not executed",
+  "separateInstallationFromFullApp": true
+}
