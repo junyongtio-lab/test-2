@@ -1,0 +1,222 @@
+template_payload_bytes,first_three_payload_bytes,profiles_without_encoder,brand_count,brands,source_models,status
+6,4db2fd,43,17,Aux|Blue Star|Blueway|Carrier|Changhong|Daewoo|Delonghi|Electra|Lloyd|Midea|Mistral|TECO|Toshiba|Uni-Air|Voltas|Yair|York,7_3387|kk_3_7_11272|kk_3_2275_2556|kk_3_2894_11272|kk_3_2894_3203|579_3387|kk_3_579_11272|169_3387|kk_3_169_11272|kk_3_195_11272|kk_3_195_4658|kk_3_3226_11272|kk_3_3226_3203|kk_3_1949_11272|kk_3_1949_3203|kk_3_2624_11272|kk_3_2624_3203|110_10737|110_3387|kk_3_110_11272|kk_3_110_11837|kk_3_110_11937|kk_3_110_2616|kk_3_110_2618|kk_3_110_4658|kk_3_110_7579|kk_3_110_7730|kk_3_3223_11272|kk_3_3223_3203|kk_3_1760_11272|64_3387|64_7157|64_7162|kk_3_64_11272|kk_3_64_3203|kk_3_2567_11272|kk_3_2567_3203|kk_3_2276_11272|kk_3_2276_3203|161_3387|kk_3_161_11272|kk_3_560_11272|kk_3_560_3203,Unverified grouping only; shared prefix is not proof of protocol compatibility
+17,400014,31,5,Changhong|Haier|Hisense|NEC|Sanyo,169_4512|169_5162|169_5207|169_5217|kk_3_169_4332|74_337|75_337|75_4332|75_4512|75_5192|75_5217|75_5897|75_5922|75_5927|75_5932|kk_3_75_4841|kk_3_75_5194|kk_3_75_6302|1876_4512|1876_5192|1876_5222|1876_5237|126_4332|126_5207|126_5217|126_5222|126_5237|126_5837|126_5842|126_5847|126_6302,Unverified grouping only; shared prefix is not proof of protocol compatibility
+14,23cb26,26,8,Electrolux|Galanz|Mistral|Mitsubishi Heavy Industries|Samsung|TCL|Voltas|Yair,563_1562|563_1697|kk_3_563_11842|kk_3_563_5694|71_1562|71_1702|71_1752|71_1887|71_2467|71_2522|71_2562|71_2567|71_2572|71_2697|kk_3_71_4190|kk_3_3223_1752|kk_3_124_1217|kk_3_124_3637|kk_3_124_3647|kk_3_125_11842|kk_3_28_11842|kk_3_2276_1752|kk_3_2276_2579|161_2857|kk_3_161_11842|kk_3_161_4790,Unverified grouping only; shared prefix is not proof of protocol compatibility
+22,11da17,20,2,DaiKin|Panasonic,kk_3_58_11772|kk_3_58_7270|kk_3_58_7271|kk_3_58_7273|kk_3_58_7274|kk_3_58_7275|kk_3_58_7276|kk_3_58_7278|kk_3_58_7279|kk_3_58_7280|kk_3_58_7281|kk_3_58_7283|kk_3_58_7284|kk_3_58_7285|kk_3_58_7286|kk_3_58_7288|kk_3_58_7289|kk_3_58_7290|kk_3_58_7291|kk_3_137_5698,Unverified grouping only; shared prefix is not proof of protocol compatibility
+7,0ef14b,17,12,Blueway|Delonghi|Electra|Haier|Lloyd|Midea|Mistral|Mitsubishi Electric|Mitsubishi Heavy Industries|Uni-Air|Voltas|York,kk_3_2894_77|kk_3_3226_77|kk_3_1949_77|74_182|74_262|74_292|74_422|74_657|74_77|kk_3_2624_77|kk_3_110_77|kk_3_3223_77|kk_3_123_657|kk_3_124_657|kk_3_2567_77|kk_3_2276_77|kk_3_560_77,Unverified grouping only; shared prefix is not proof of protocol compatibility
+9,490020,17,11,Blue Star|Carrier|Delonghi|Electrolux|Gree|McQuay|Midea|Sharp|Trane|Voltas|York,kk_3_2275_2132|kk_3_2275_2607|kk_3_579_2132|kk_3_579_2607|kk_3_3226_2607|kk_3_563_2132|kk_3_563_2607|72_2132|72_2607|kk_3_574_2132|kk_3_110_2607|kk_3_149_2607|kk_3_1956_2132|kk_3_1956_2607|kk_3_2276_2607|kk_3_560_2132|kk_3_560_2607,Unverified grouping only; shared prefix is not proof of protocol compatibility
+6,830600,16,13,Blueway|Delonghi|Electra|Hisense|Kelon|Lloyd|Mistral|Sanyo|Toshiba|Uni-Air|Voltas|Whirlpool|York,kk_3_2894_11797|kk_3_3226_11797|kk_3_1949_11797|75_10712|kk_3_75_11797|92_4217|kk_3_92_11797|kk_3_2624_11797|kk_3_3223_11797|kk_3_126_11797|kk_3_64_11797|kk_3_2567_11797|kk_3_2276_11797|580_10712|kk_3_580_11797|kk_3_560_11797,Unverified grouping only; shared prefix is not proof of protocol compatibility
+6,ef1085,13,4,Chigo|Midea|Mitsubishi Electric|Mitsubishi Heavy Industries,171_4627|110_4627|kk_3_123_4627|kk_3_123_5362|kk_3_123_5607|kk_3_123_5612|kk_3_123_5617|kk_3_123_5622|kk_3_123_5637|kk_3_123_5817|kk_3_123_7396|kk_3_124_5817|kk_3_124_7396,Unverified grouping only; shared prefix is not proof of protocol compatibility
+6,f70806,13,12,Chigo|Daewoo|DaiKin|Electra|Galanz|Gree|Hyundai|Midea|Mitsubishi Electric|Mitsubishi Heavy Industries|TCL|Yair,171_3327|195_3327|58_3327|1949_3327|71_3327|kk_3_72_3327|kk_3_238_3327|kk_3_110_3327|kk_3_123_3327|kk_3_124_3327|kk_3_124_7656|28_3327|161_3327,Unverified grouping only; shared prefix is not proof of protocol compatibility
+12,ff00ff,13,7,Blueway|Chigo|Hyundai|Lloyd|Mitsubishi Heavy Industries|Trane|Whirlpool,kk_3_2894_3232|171_2987|171_3027|171_3232|171_3427|kk_3_171_5673|kk_3_238_3232|kk_3_2624_3232|kk_3_124_3232|kk_3_124_5673|kk_3_124_7635|kk_3_1956_3232|kk_3_580_3232,Unverified grouping only; shared prefix is not proof of protocol compatibility
+8,ff0085,10,2,Mitsubishi Electric|Mitsubishi Heavy Industries,kk_3_123_5737|kk_3_123_5772|kk_3_123_5787|kk_3_123_5792|kk_3_123_5822|kk_3_124_5737|kk_3_124_5772|kk_3_124_5787|kk_3_124_5792|kk_3_124_5822,Unverified grouping only; shared prefix is not proof of protocol compatibility
+14,a68200,10,2,Haier|York,74_2|74_72|kk_3_74_217|kk_3_74_4878|kk_3_74_5125|kk_3_74_5676|kk_3_74_5679|kk_3_74_5684|kk_3_74_5696|kk_3_560_5676,Unverified grouping only; shared prefix is not proof of protocol compatibility
+8,14eb98,9,2,Fujitsu|Ogeneral,70_5602|70_5627|70_7147|kk_3_70_4918|kk_3_70_5536|kk_3_2664_4918|kk_3_2664_5602|kk_3_2664_5627|kk_3_2664_7147,Unverified grouping only; shared prefix is not proof of protocol compatibility
+13,c340e0,9,5,Aux|Lloyd|Mitsubishi Heavy Industries|Whirlpool|York,7_9377|kk_3_7_2573|kk_3_7_5680|kk_3_2624_9377|kk_3_124_5680|kk_3_124_9377|580_9377|kk_3_580_5680|560_9377,Unverified grouping only; shared prefix is not proof of protocol compatibility
+15,146300,9,2,Fujitsu|Ogeneral,70_7107|kk_3_70_11692|kk_3_70_4905|kk_3_70_5499|kk_3_70_5588|kk_3_70_6622|kk_3_2664_11692|kk_3_2664_4905|kk_3_2664_7107,Unverified grouping only; shared prefix is not proof of protocol compatibility
+21,830600,9,4,Electrolux|Hisense|Kelon|York,kk_3_563_11717|kk_3_75_11672|kk_3_75_11717|kk_3_75_12250|kk_3_75_4838|kk_3_75_7596|kk_3_92_12250|kk_3_92_7596|kk_3_560_11717,Unverified grouping only; shared prefix is not proof of protocol compatibility
+18,490020,8,6,Blue Star|Carrier|Electrolux|Gree|Trane|York,kk_3_2275_10727|kk_3_579_10727|kk_3_563_10727|72_10727|72_2582|kk_3_72_2970|kk_3_1956_10727|kk_3_560_10727,Unverified grouping only; shared prefix is not proof of protocol compatibility
+13,4d75b2,7,2,Fujitsu|Hitachi,kk_3_70_5546|117_2992|117_3002|117_3007|117_3012|kk_3_117_11767|kk_3_117_5546,Unverified grouping only; shared prefix is not proof of protocol compatibility
+13,c34000,7,4,Aux|Blueway|Electrolux|Mitsubishi Heavy Industries,7_4957|kk_3_7_11832|kk_3_7_5675|kk_3_7_7404|kk_3_2894_4957|kk_3_563_11802|kk_3_124_11832,Unverified grouping only; shared prefix is not proof of protocol compatibility
+15,566c00,7,4,Changhong|Electrolux|Whirlpool|York,169_10707|169_5277|kk_3_563_5277|580_10707|kk_3_580_5277|560_10707|kk_3_560_5277,Unverified grouping only; shared prefix is not proof of protocol compatibility
+6,f70886,6,5,Galanz|Mitsubishi Electric|Shinco|TCL|Videocon,71_5717|kk_3_123_3657|178_3657|28_3657|28_5717|kk_3_2258_2555,Unverified grouping only; shared prefix is not proof of protocol compatibility
+14,111111,6,2,Chigo|Mitsubishi Heavy Industries,171_3037|171_3042|171_3052|kk_3_171_4809|kk_3_124_3037|kk_3_124_3042,Unverified grouping only; shared prefix is not proof of protocol compatibility
+17,011000,6,2,Hisense|Hitachi,kk_3_75_7724|kk_3_75_7725|kk_3_117_4903|kk_3_117_7421|kk_3_117_7724|kk_3_117_7725,Unverified grouping only; shared prefix is not proof of protocol compatibility
+6,ef1086,5,3,Chigo|Mitsubishi Electric|York,171_4247|kk_3_123_4247|kk_3_123_5642|kk_3_123_5652|560_4247,Unverified grouping only; shared prefix is not proof of protocol compatibility
+9,6a745d,5,2,Changhong|Sanyo,169_4967|169_5227|169_5257|126_5227|126_5257,Unverified grouping only; shared prefix is not proof of protocol compatibility
+9,6a7473,5,3,Changhong|Hisense|Sanyo,169_5127|169_5252|75_5127|75_5252|126_5252,Unverified grouping only; shared prefix is not proof of protocol compatibility
+9,f20d03,5,2,Carrier|Toshiba,kk_3_579_7409|kk_3_579_7411|kk_3_579_7711|kk_3_64_7409|kk_3_64_7411,Unverified grouping only; shared prefix is not proof of protocol compatibility
+33,011000,5,2,DaiKin|Hitachi,kk_3_58_5366|117_2947|117_2952|kk_3_117_11232|kk_3_117_5870,Unverified grouping only; shared prefix is not proof of protocol compatibility
+4,8800b0,4,1,LG,22_2722|22_2827|22_2832|22_2847,Unverified grouping only; shared prefix is not proof of protocol compatibility
+4,c00110,4,2,Aux|TECO,7_4852|kk_3_7_3275|kk_3_7_4673|kk_3_1760_4852,Unverified grouping only; shared prefix is not proof of protocol compatibility
+5,490000,4,3,Delonghi|Gree|TECO,kk_3_3226_777|72_777|kk_3_72_2969|kk_3_1760_777,Unverified grouping only; shared prefix is not proof of protocol compatibility
+5,490840,4,2,Gree|York,72_2032|72_2302|560_2032|560_7242,Unverified grouping only; shared prefix is not proof of protocol compatibility
+6,0f0070,4,2,Mitsubishi Electric|Mitsubishi Heavy Industries,kk_3_123_5857|kk_3_123_5887|kk_3_124_5857|kk_3_124_5887,Unverified grouping only; shared prefix is not proof of protocol compatibility
+7,938378,4,2,Mitsubishi Electric|Mitsubishi Heavy Industries,kk_3_123_5352|kk_3_123_5357|kk_3_124_5352|kk_3_124_5357,Unverified grouping only; shared prefix is not proof of protocol compatibility
+8,161200,4,3,DaiKin|Goldstar|York,kk_3_58_5561|kk_3_1813_4919|kk_3_560_4665|kk_3_560_5561,Unverified grouping only; shared prefix is not proof of protocol compatibility
+16,146300,4,2,Fujitsu|Ogeneral,kk_3_70_4666|kk_3_70_7145|kk_3_2664_4666|kk_3_2664_7145,Unverified grouping only; shared prefix is not proof of protocol compatibility
+5,08110b,3,2,Chunlan|Hyundai,590_1257|kk_3_590_11737|kk_3_238_11737,Unverified grouping only; shared prefix is not proof of protocol compatibility
+6,6a747d,3,2,Changhong|Sanyo,169_5137|169_5267|126_5267,Unverified grouping only; shared prefix is not proof of protocol compatibility
+6,976866,3,2,Chigo|Mitsubishi Electric,171_3212|kk_3_123_3562|kk_3_123_3687,Unverified grouping only; shared prefix is not proof of protocol compatibility
+7,480001,3,1,Gree,72_1262|72_1937|72_2067,Unverified grouping only; shared prefix is not proof of protocol compatibility
+7,830000,3,2,Haier|Uni-Air,74_82|kk_3_2567_5063|kk_3_2567_7382,Unverified grouping only; shared prefix is not proof of protocol compatibility
+8,14eb99,3,3,Electra|Fujitsu|Ogeneral,kk_3_1949_7142|70_7142|kk_3_2664_7142,Unverified grouping only; shared prefix is not proof of protocol compatibility
+8,622500,3,3,Gree|Haier|LG,kk_3_72_5139|kk_3_74_5139|kk_3_22_5139,Unverified grouping only; shared prefix is not proof of protocol compatibility
+9,5f6008,3,3,Kelon|Voltas|York,kk_3_92_4704|kk_3_2276_4704|kk_3_560_4704,Unverified grouping only; shared prefix is not proof of protocol compatibility
+9,fae601,3,3,Hyundai|Kelon|Sharp,kk_3_238_2842|92_2842|149_2842,Unverified grouping only; shared prefix is not proof of protocol compatibility
+14,830604,3,3,Hisense|Kelon|Whirlpool,kk_3_75_11677|kk_3_92_11677|kk_3_580_11677,Unverified grouping only; shared prefix is not proof of protocol compatibility
+15,567400,3,3,Changhong|Mitsubishi Electric|Mitsubishi Heavy Industries,169_5197|kk_3_123_5827|kk_3_124_5827,Unverified grouping only; shared prefix is not proof of protocol compatibility
+16,21210a,3,3,DaiKin|Gree|Panasonic,kk_3_58_5189|kk_3_72_5189|137_6007,Unverified grouping only; shared prefix is not proof of protocol compatibility
+16,f9f90a,3,2,Panasonic|Whirlpool,137_3067|137_5977|580_3067,Unverified grouping only; shared prefix is not proof of protocol compatibility
+16,fbfb0a,3,2,DaiKin|Panasonic,kk_3_58_5997|137_5987|137_5997,Unverified grouping only; shared prefix is not proof of protocol compatibility
+18,000000,3,3,Blue Star|McQuay|York,kk_3_2275_6032|kk_3_574_6032|kk_3_560_7499,Unverified grouping only; shared prefix is not proof of protocol compatibility
+21,28613d,3,1,Galanz,kk_3_71_3236|kk_3_71_3268|kk_3_71_5412,Unverified grouping only; shared prefix is not proof of protocol compatibility
+36,0011da,3,1,DaiKin,58_10502|58_5962|kk_3_58_7266,Unverified grouping only; shared prefix is not proof of protocol compatibility
+4,4e400f,2,2,Haier|TECO,74_562|1760_562,Unverified grouping only; shared prefix is not proof of protocol compatibility
+4,690f00,2,2,Carrier|Trane,579_3457|kk_3_1956_3457,Unverified grouping only; shared prefix is not proof of protocol compatibility
+4,880815,2,2,Goldstar|LG,kk_3_1813_3482|22_3482,Unverified grouping only; shared prefix is not proof of protocol compatibility
+5,081908,2,1,Chunlan,590_5392|590_5437,Unverified grouping only; shared prefix is not proof of protocol compatibility
+5,1827f0,2,2,Samsung|Shinco,kk_3_125_7202|178_7202,Unverified grouping only; shared prefix is not proof of protocol compatibility
+5,8c080c,2,1,Chunlan,590_5382|590_5402,Unverified grouping only; shared prefix is not proof of protocol compatibility
+6,0f1073,2,2,Mitsubishi Electric|Mitsubishi Heavy Industries,kk_3_123_5832|kk_3_124_5832,Unverified grouping only; shared prefix is not proof of protocol compatibility
+6,108000,2,2,Carrier|Trane,kk_3_579_12265|kk_3_1956_12265,Unverified grouping only; shared prefix is not proof of protocol compatibility
+7,830600,2,2,Hisense|Kelon,kk_3_75_4888|kk_3_92_4888,Unverified grouping only; shared prefix is not proof of protocol compatibility
+7,880012,2,1,Gree,72_2297|72_2552,Unverified grouping only; shared prefix is not proof of protocol compatibility
+8,14eb91,2,2,Fujitsu|Ogeneral,70_5632|kk_3_2664_5632,Unverified grouping only; shared prefix is not proof of protocol compatibility
+8,15ea80,2,2,Midea|Samsung,110_3237|125_3237,Unverified grouping only; shared prefix is not proof of protocol compatibility
+9,191200,2,2,Carrier|Trane,579_3472|kk_3_1956_3472,Unverified grouping only; shared prefix is not proof of protocol compatibility
+9,558200,2,2,Shinco|Whirlpool,178_11092|kk_3_580_11092,Unverified grouping only; shared prefix is not proof of protocol compatibility
+9,6a6c73,2,2,DaiKin|Sanyo,kk_3_58_7268|126_6377,Unverified grouping only; shared prefix is not proof of protocol compatibility
+9,6ad4b9,2,2,Changhong|Sanyo,169_5132|126_6067,Unverified grouping only; shared prefix is not proof of protocol compatibility
+9,881908,2,1,Chunlan,590_1242|590_9502,Unverified grouping only; shared prefix is not proof of protocol compatibility
+9,a50300,2,1,Haier,74_437|74_452,Unverified grouping only; shared prefix is not proof of protocol compatibility
+10,830904,2,2,Midea|Panasonic,110_4837|137_4837,Unverified grouping only; shared prefix is not proof of protocol compatibility
+11,23cb06,2,2,Mitsubishi Electric|Mitsubishi Heavy Industries,kk_3_123_3702|kk_3_124_3702,Unverified grouping only; shared prefix is not proof of protocol compatibility
+11,52aec3,2,2,Mitsubishi Electric|Mitsubishi Heavy Industries,kk_3_123_2561|kk_3_124_2561,Unverified grouping only; shared prefix is not proof of protocol compatibility
+11,8c0802,2,1,Midea,110_4647|110_4787,Unverified grouping only; shared prefix is not proof of protocol compatibility
+11,8c0838,2,1,Changhong,169_5167|169_5177,Unverified grouping only; shared prefix is not proof of protocol compatibility
+12,0f8dff,2,1,Sharp,149_2817|149_2927,Unverified grouping only; shared prefix is not proof of protocol compatibility
+12,1827aa,2,2,Shinco|Whirlpool,kk_3_178_5716|kk_3_580_5716,Unverified grouping only; shared prefix is not proof of protocol compatibility
+12,6a5479,2,1,Sanyo,126_6037|126_6042,Unverified grouping only; shared prefix is not proof of protocol compatibility
+14,a60000,2,2,Haier|Sanyo,74_11217|kk_3_126_11217,Unverified grouping only; shared prefix is not proof of protocol compatibility
+14,a60c00,2,1,Haier,74_432|74_507,Unverified grouping only; shared prefix is not proof of protocol compatibility
+14,a60c01,2,1,Haier,74_407|74_467,Unverified grouping only; shared prefix is not proof of protocol compatibility
+14,a60ce0,2,1,Haier,74_462|74_487,Unverified grouping only; shared prefix is not proof of protocol compatibility
+14,a682e0,2,1,Haier,74_207|74_212,Unverified grouping only; shared prefix is not proof of protocol compatibility
+16,5f1f00,2,2,Carrier|Gree,kk_3_579_5163|kk_3_72_5163,Unverified grouping only; shared prefix is not proof of protocol compatibility
+16,f0f00a,2,2,DaiKin|Whirlpool,58_10517|kk_3_580_10517,Unverified grouping only; shared prefix is not proof of protocol compatibility
+16,f9f902,2,2,Panasonic|Whirlpool,137_3167|580_3167,Unverified grouping only; shared prefix is not proof of protocol compatibility
+18,4db2fd,2,1,Midea,kk_3_110_4754|kk_3_110_7623,Unverified grouping only; shared prefix is not proof of protocol compatibility
+20,11da27,2,1,DaiKin,58_5937|58_5957,Unverified grouping only; shared prefix is not proof of protocol compatibility
+2,340f,1,1,Mitsubishi Electric,kk_3_123_7320,Unverified grouping only; shared prefix is not proof of protocol compatibility
+3,fd8842,1,1,Shinco,178_5662,Unverified grouping only; shared prefix is not proof of protocol compatibility
+4,82401a,1,1,Gree,kk_3_72_5641,Unverified grouping only; shared prefix is not proof of protocol compatibility
+4,880895,1,1,LG,22_3532,Unverified grouping only; shared prefix is not proof of protocol compatibility
+4,88c005,1,1,LG,22_2837,Unverified grouping only; shared prefix is not proof of protocol compatibility
+4,c00118,1,1,Midea,110_3172,Unverified grouping only; shared prefix is not proof of protocol compatibility
+4,c0011a,1,1,Gree,kk_3_72_2717,Unverified grouping only; shared prefix is not proof of protocol compatibility
+4,cdac89,1,1,Carrier,579_3392,Unverified grouping only; shared prefix is not proof of protocol compatibility
+4,cdec89,1,1,Carrier,579_3402,Unverified grouping only; shared prefix is not proof of protocol compatibility
+5,00160a,1,1,Gree,kk_3_72_5393,Unverified grouping only; shared prefix is not proof of protocol compatibility
+5,081108,1,1,Chunlan,590_10547,Unverified grouping only; shared prefix is not proof of protocol compatibility
+5,090800,1,1,Gree,72_1997,Unverified grouping only; shared prefix is not proof of protocol compatibility
+5,490020,1,1,Gree,72_2622,Unverified grouping only; shared prefix is not proof of protocol compatibility
+5,490040,1,1,Gree,kk_3_72_11747,Unverified grouping only; shared prefix is not proof of protocol compatibility
+5,490800,1,1,Gree,72_2342,Unverified grouping only; shared prefix is not proof of protocol compatibility
+5,490a00,1,1,Gree,72_2617,Unverified grouping only; shared prefix is not proof of protocol compatibility
+5,590a00,1,1,Gree,72_2612,Unverified grouping only; shared prefix is not proof of protocol compatibility
+5,6802fd,1,1,Midea,kk_3_110_4789,Unverified grouping only; shared prefix is not proof of protocol compatibility
+5,6812ed,1,1,Midea,110_4667,Unverified grouping only; shared prefix is not proof of protocol compatibility
+5,68c23d,1,1,Midea,110_4712,Unverified grouping only; shared prefix is not proof of protocol compatibility
+5,830600,1,1,Kelon,92_4297,Unverified grouping only; shared prefix is not proof of protocol compatibility
+5,833804,1,1,Gree,72_1252,Unverified grouping only; shared prefix is not proof of protocol compatibility
+5,833904,1,1,Gree,72_2407,Unverified grouping only; shared prefix is not proof of protocol compatibility
+5,8c088c,1,1,Haier,74_577,Unverified grouping only; shared prefix is not proof of protocol compatibility
+5,aa1011,1,1,Electrolux,563_4187,Unverified grouping only; shared prefix is not proof of protocol compatibility
+5,aa1071,1,1,Electrolux,563_1682,Unverified grouping only; shared prefix is not proof of protocol compatibility
+5,c05811,1,1,Carrier,kk_3_579_6823,Unverified grouping only; shared prefix is not proof of protocol compatibility
+5,c05e11,1,1,Carrier,kk_3_579_6798,Unverified grouping only; shared prefix is not proof of protocol compatibility
+5,c05e19,1,1,Carrier,kk_3_579_6821,Unverified grouping only; shared prefix is not proof of protocol compatibility
+5,cdac59,1,1,Carrier,kk_3_579_6824,Unverified grouping only; shared prefix is not proof of protocol compatibility
+6,00170c,1,1,Mitsubishi Electric,kk_3_123_7304,Unverified grouping only; shared prefix is not proof of protocol compatibility
+6,002602,1,1,Gree,kk_3_72_5138,Unverified grouping only; shared prefix is not proof of protocol compatibility
+6,090000,1,1,Gree,kk_3_72_4795,Unverified grouping only; shared prefix is not proof of protocol compatibility
+6,0e3540,1,1,Sanyo,kk_3_126_4873,Unverified grouping only; shared prefix is not proof of protocol compatibility
+6,0e3577,1,1,Carrier,kk_3_579_5215,Unverified grouping only; shared prefix is not proof of protocol compatibility
+6,105420,1,1,Goldstar,kk_3_1813_4920,Unverified grouping only; shared prefix is not proof of protocol compatibility
+6,15fc01,1,1,Samsung,kk_3_125_7020,Unverified grouping only; shared prefix is not proof of protocol compatibility
+6,15fc08,1,1,Samsung,kk_3_125_3227,Unverified grouping only; shared prefix is not proof of protocol compatibility
+6,190a00,1,1,Gree,72_2632,Unverified grouping only; shared prefix is not proof of protocol compatibility
+6,285400,1,1,Carrier,579_3412,Unverified grouping only; shared prefix is not proof of protocol compatibility
+6,43bcfd,1,1,Toshiba,kk_3_64_4869,Unverified grouping only; shared prefix is not proof of protocol compatibility
+6,6a347d,1,1,Sanyo,126_6237,Unverified grouping only; shared prefix is not proof of protocol compatibility
+6,6a747e,1,1,Sanyo,126_6262,Unverified grouping only; shared prefix is not proof of protocol compatibility
+6,830603,1,1,Kelon,92_7192,Unverified grouping only; shared prefix is not proof of protocol compatibility
+6,8f7066,1,1,Mitsubishi Electric,kk_3_123_3682,Unverified grouping only; shared prefix is not proof of protocol compatibility
+6,9f6066,1,1,Mitsubishi Electric,kk_3_123_3652,Unverified grouping only; shared prefix is not proof of protocol compatibility
+6,c040ff,1,1,Carrier,kk_3_579_7249,Unverified grouping only; shared prefix is not proof of protocol compatibility
+6,cf3066,1,1,Chigo,171_3032,Unverified grouping only; shared prefix is not proof of protocol compatibility
+6,e01f75,1,1,Gree,72_2497,Unverified grouping only; shared prefix is not proof of protocol compatibility
+6,ef1006,1,1,Galanz,kk_3_71_3216,Unverified grouping only; shared prefix is not proof of protocol compatibility
+6,f70866,1,1,Chigo,171_10577,Unverified grouping only; shared prefix is not proof of protocol compatibility
+6,f708e6,1,1,Mitsubishi Electric,kk_3_123_5647,Unverified grouping only; shared prefix is not proof of protocol compatibility
+6,ff0086,1,1,Midea,110_4807,Unverified grouping only; shared prefix is not proof of protocol compatibility
+6,ff0706,1,1,Mitsubishi Heavy Industries,kk_3_124_7659,Unverified grouping only; shared prefix is not proof of protocol compatibility
+7,00c000,1,1,DaiKin,kk_3_58_7269,Unverified grouping only; shared prefix is not proof of protocol compatibility
+7,0112af,1,1,Shinco,178_7247,Unverified grouping only; shared prefix is not proof of protocol compatibility
+7,0142af,1,1,Samsung,kk_3_125_4736,Unverified grouping only; shared prefix is not proof of protocol compatibility
+7,01f2ae,1,1,Samsung,kk_3_125_4850,Unverified grouping only; shared prefix is not proof of protocol compatibility
+7,5ca002,1,1,Hyundai,kk_3_238_5046,Unverified grouping only; shared prefix is not proof of protocol compatibility
+7,880010,1,1,Gree,72_2287,Unverified grouping only; shared prefix is not proof of protocol compatibility
+7,bb8120,1,1,Gree,kk_3_72_5385,Unverified grouping only; shared prefix is not proof of protocol compatibility
+7,d31109,1,1,Daewoo,kk_3_195_4585,Unverified grouping only; shared prefix is not proof of protocol compatibility
+8,004130,1,1,Midea,110_4757,Unverified grouping only; shared prefix is not proof of protocol compatibility
+8,024130,1,1,Midea,110_4782,Unverified grouping only; shared prefix is not proof of protocol compatibility
+8,0a00a8,1,1,Haier,kk_3_74_7038,Unverified grouping only; shared prefix is not proof of protocol compatibility
+8,0ef20f,1,1,Haier,kk_3_74_11847,Unverified grouping only; shared prefix is not proof of protocol compatibility
+8,4d1211,1,1,Hitachi,kk_3_117_5871,Unverified grouping only; shared prefix is not proof of protocol compatibility
+8,4d1216,1,1,Fujitsu,kk_3_70_5320,Unverified grouping only; shared prefix is not proof of protocol compatibility
+8,5a4130,1,1,Haier,74_107,Unverified grouping only; shared prefix is not proof of protocol compatibility
+8,ff00f7,1,1,Mitsubishi Heavy Industries,kk_3_124_4801,Unverified grouping only; shared prefix is not proof of protocol compatibility
+9,0cfdfc,1,1,Goldstar,kk_3_1813_4921,Unverified grouping only; shared prefix is not proof of protocol compatibility
+9,190020,1,1,Gree,72_2667,Unverified grouping only; shared prefix is not proof of protocol compatibility
+9,1c2054,1,1,Hyundai,kk_3_238_4895,Unverified grouping only; shared prefix is not proof of protocol compatibility
+9,4fb0c0,1,1,Toshiba,kk_3_64_11867,Unverified grouping only; shared prefix is not proof of protocol compatibility
+9,6a545d,1,1,Sanyo,126_6167,Unverified grouping only; shared prefix is not proof of protocol compatibility
+9,6ad4df,1,1,Sanyo,126_6192,Unverified grouping only; shared prefix is not proof of protocol compatibility
+9,72e601,1,1,Sharp,149_2862,Unverified grouping only; shared prefix is not proof of protocol compatibility
+9,7ae601,1,1,Sharp,149_2852,Unverified grouping only; shared prefix is not proof of protocol compatibility
+9,881900,1,1,Chunlan,kk_3_590_11257,Unverified grouping only; shared prefix is not proof of protocol compatibility
+9,884100,1,1,York,kk_3_560_4628,Unverified grouping only; shared prefix is not proof of protocol compatibility
+9,a50100,1,1,Haier,74_7807,Unverified grouping only; shared prefix is not proof of protocol compatibility
+9,a503f3,1,1,Haier,74_447,Unverified grouping only; shared prefix is not proof of protocol compatibility
+9,a58100,1,1,Haier,74_112,Unverified grouping only; shared prefix is not proof of protocol compatibility
+9,a58200,1,1,Haier,74_222,Unverified grouping only; shared prefix is not proof of protocol compatibility
+9,a58220,1,1,Haier,74_667,Unverified grouping only; shared prefix is not proof of protocol compatibility
+11,080000,1,1,Midea,kk_3_110_12260,Unverified grouping only; shared prefix is not proof of protocol compatibility
+11,0c0838,1,1,Midea,110_4802,Unverified grouping only; shared prefix is not proof of protocol compatibility
+11,830814,1,1,Midea,110_4847,Unverified grouping only; shared prefix is not proof of protocol compatibility
+11,8c0800,1,1,Midea,110_4722,Unverified grouping only; shared prefix is not proof of protocol compatibility
+11,a60120,1,1,Haier,74_477,Unverified grouping only; shared prefix is not proof of protocol compatibility
+11,a68100,1,1,Haier,74_237,Unverified grouping only; shared prefix is not proof of protocol compatibility
+12,000000,1,1,Chigo,kk_3_171_4808,Unverified grouping only; shared prefix is not proof of protocol compatibility
+12,0f6dff,1,1,Sharp,149_3437,Unverified grouping only; shared prefix is not proof of protocol compatibility
+12,0f75ff,1,1,Sharp,149_2937,Unverified grouping only; shared prefix is not proof of protocol compatibility
+12,0f7dff,1,1,Sharp,149_2942,Unverified grouping only; shared prefix is not proof of protocol compatibility
+12,0f85ff,1,1,Sharp,149_2822,Unverified grouping only; shared prefix is not proof of protocol compatibility
+12,0fedff,1,1,Sharp,149_2877,Unverified grouping only; shared prefix is not proof of protocol compatibility
+12,101200,1,1,Aux,7_4862,Unverified grouping only; shared prefix is not proof of protocol compatibility
+12,18278a,1,1,Shinco,178_7227,Unverified grouping only; shared prefix is not proof of protocol compatibility
+12,6af479,1,1,Sanyo,126_6052,Unverified grouping only; shared prefix is not proof of protocol compatibility
+12,aa09f0,1,1,Electrolux,563_7422,Unverified grouping only; shared prefix is not proof of protocol compatibility
+12,aaf100,1,1,Electrolux,563_1502,Unverified grouping only; shared prefix is not proof of protocol compatibility
+12,cdac89,1,1,Carrier,kk_3_579_11707,Unverified grouping only; shared prefix is not proof of protocol compatibility
+12,cdac99,1,1,Carrier,kk_3_579_5214,Unverified grouping only; shared prefix is not proof of protocol compatibility
+13,52aec3,1,1,Mitsubishi Heavy Industries,kk_3_124_11002,Unverified grouping only; shared prefix is not proof of protocol compatibility
+13,aa5acf,1,1,Sharp,kk_3_149_11862,Unverified grouping only; shared prefix is not proof of protocol compatibility
+13,c39700,1,1,Aux,7_4932,Unverified grouping only; shared prefix is not proof of protocol compatibility
+14,02920f,1,1,Samsung,kk_3_125_4766,Unverified grouping only; shared prefix is not proof of protocol compatibility
+14,a60100,1,1,Haier,74_532,Unverified grouping only; shared prefix is not proof of protocol compatibility
+14,a60c04,1,1,Haier,74_537,Unverified grouping only; shared prefix is not proof of protocol compatibility
+14,a68000,1,1,Haier,kk_3_74_7369,Unverified grouping only; shared prefix is not proof of protocol compatibility
+14,a68ce0,1,1,Haier,74_97,Unverified grouping only; shared prefix is not proof of protocol compatibility
+15,23cb26,1,1,Galanz,71_10567,Unverified grouping only; shared prefix is not proof of protocol compatibility
+15,52aec3,1,1,Mitsubishi Heavy Industries,kk_3_124_11047,Unverified grouping only; shared prefix is not proof of protocol compatibility
+15,567600,1,1,Changhong,169_5282,Unverified grouping only; shared prefix is not proof of protocol compatibility
+16,161200,1,1,McQuay,kk_3_574_4763,Unverified grouping only; shared prefix is not proof of protocol compatibility
+16,191200,1,1,Carrier,579_3442,Unverified grouping only; shared prefix is not proof of protocol compatibility
+16,f9f94a,1,1,Panasonic,137_5982,Unverified grouping only; shared prefix is not proof of protocol compatibility
+17,022000,1,1,Hisense,kk_3_75_7084,Unverified grouping only; shared prefix is not proof of protocol compatibility
+17,23cb26,1,1,Mitsubishi Electric,kk_3_123_5729,Unverified grouping only; shared prefix is not proof of protocol compatibility
+17,a68200,1,1,Haier,kk_3_74_5678,Unverified grouping only; shared prefix is not proof of protocol compatibility
+18,23cb26,1,1,Mitsubishi Electric,kk_3_123_2997,Unverified grouping only; shared prefix is not proof of protocol compatibility
+18,690020,1,1,Gree,kk_3_72_2732,Unverified grouping only; shared prefix is not proof of protocol compatibility
+18,cdac94,1,1,Daewoo,kk_3_195_5685,Unverified grouping only; shared prefix is not proof of protocol compatibility
+18,cdacb5,1,1,Goldstar,kk_3_1813_5010,Unverified grouping only; shared prefix is not proof of protocol compatibility
+19,400014,1,1,Sanyo,126_6502,Unverified grouping only; shared prefix is not proof of protocol compatibility
+20,0011da,1,1,DaiKin,kk_3_58_4803,Unverified grouping only; shared prefix is not proof of protocol compatibility
+20,a6ace0,1,1,Haier,kk_3_74_7364,Unverified grouping only; shared prefix is not proof of protocol compatibility
+27,0220e0,1,1,Gree,72_2587,Unverified grouping only; shared prefix is not proof of protocol compatibility
+27,11da27,1,1,DaiKin,58_9357,Unverified grouping only; shared prefix is not proof of protocol compatibility
+37,011000,1,1,Hitachi,kk_3_117_5714,Unverified grouping only; shared prefix is not proof of protocol compatibility
+40,0011da,1,1,DaiKin,kk_3_58_7265,Unverified grouping only; shared prefix is not proof of protocol compatibility

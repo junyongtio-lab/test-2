@@ -1,9 +1,12 @@
-Palm Remote 1.6.4 fan guided testing validation
-129 JVM tests passed; zero failures, errors or skipped tests.
-All 133 fan brands, 422 candidates and 4,181 command associations validated.
-Six fan candidates contain one button; explicit limited confirmation is supported.
-Multi-button fan, decoder and TV candidates require two distinct confirmations.
-Five Astro candidates and all existing recorded signals retained.
-Fan, decoder and TV CSV regeneration checks passed.
-All 5,060 packaged asset files match source bytes.
-No physical fan response or emulator UI result is claimed.
+Palm Remote 1.6.5 expanded AC validation
+133 JVM tests passed; zero failures, errors or skipped tests.
+64 AC brand labels have the guided-testing entry and candidates to try.
+251 candidates: 101 recorded, six Panasonic, four existing experimental and 140 new experimental timing candidates.
+70 previously unsupported definitions enabled, two timing variants each; 624 of the original 694 remain unsupported.
+New controls: power on/off, Cool/Heat, 16–30 °C. No new fan, swing, timers or special functions.
+4,200 packets match both pinned public reference encoders; 8,400 Java waveforms pass strict public-reference decoding.
+Original four experimental encoder packet checks retained (960 cases).
+All offered candidates load or encode and remain within the selected brand.
+AC coverage and unverified grouping CSV regeneration checks passed.
+All packaged asset files match source bytes; original signal data retained.
+No physical appliance response or emulator UI result claimed for this release.

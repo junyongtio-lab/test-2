@@ -38,7 +38,7 @@ public final class FamilyAcEncoderTest {
         if(destination!=null)Files.write(Paths.get(destination),waveforms);
     }
     @Test public void unsupportedAndTamperedRequestsNeverGenerateSignals() throws Exception {
-        FamilyAcEncoder encoder=encoder();assertEquals(4,encoder.profiles().size());
+        FamilyAcEncoder encoder=encoder();assertEquals(144,encoder.profiles().size());
         assertNull(encoder.find("unknown"));assertFalse(FamilyAcEncoder.supports("137_2587"));
         for(JSONObject profile:encoder.profiles()) {
             for(PanasonicAcEncoder.State invalid:new PanasonicAcEncoder.State[]{

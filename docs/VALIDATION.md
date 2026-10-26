@@ -1,3 +1,13 @@
+# Expanded AC112 encoder validation — 1.6.5
+
+133 JVM tests cover the current app. Seventy explicitly reviewed, source-hash-pinned definitions add 140 experimental candidates (two timing variants each). All 4,200 core power/mode/temperature packets match both pinned public reference encoders; 8,400 Java-generated waveforms pass strict upstream decoding with exact payload checks. Supported controls are power, Cool/Heat and 16–30 °C; fan, swing and timers are unavailable on these new candidates. Packet proof does not establish hardware compatibility or exact Mi engine equivalence.
+
+All 64 AC brand labels have candidates to try: 101 recorded remotes, six original Panasonic parameter candidates, four original experimental candidates and 140 new timing-variant candidates, 251 total. Seventy of the requested 694 definitions are now experimental candidates; 624 remain unsupported. The earlier setup-only notes below describe the intermediate implementation before these encoders were added.
+
+# Palm Remote 1.6.5 AC setup update
+
+All 64 AC brand labels have the guided-testing entry. Inventory tests distinguish 41 brands with 111 sendable candidates from 23 without an implemented encoder. The 111 candidates comprise 101 recorded remotes, six Panasonic parameter candidates and four experimental protocol candidates. Tests load or encode each offered candidate, check per-brand routing, and exclude all 694 source definitions that still lack controls. No new encoder, physical AC response or emulator UI result is claimed. The compiled UI checks include available and unavailable AC brands. Coverage and unverified protocol grouping reports are reproducible from the bundled source. See downloads/validation.json for completed build checks.
+
 # Palm Remote 1.6.4 fan update
 
 All 133 fan brands offer guided testing first, covering 422 candidates and 4,181 command associations. Production-loader tests verify all fan candidates and the six single-button limitations. The shared response state requires two distinct confirmations by default, or only the available button for an explicitly limited fan candidate, and resets fully between candidates. Fan, decoder and TV coverage CSVs are checked from the bundled indexes. Compiled UI checks include six representative fan brands; physical responses and emulator UI results remain unverified. See downloads/validation.json for completed build checks.

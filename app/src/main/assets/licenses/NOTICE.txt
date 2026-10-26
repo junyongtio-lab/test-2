@@ -78,3 +78,5 @@ IRremoteESP8266 protocol reference
 https://github.com/crankyoldgit/IRremoteESP8266
 Reference commit 1e2f0f3ef0a93cbf2a8ddb2e95130f8f4c584b3f, LGPL-2.1-or-later.
 Used outside Android for differential validation of four independently written Java protocol candidates. No upstream C++ library is shipped. Mi source data retains its separate notices above.
+
+Expanded AC112 candidates independently implement documented basic packet fields and canonical timing from IRremoteESP8266, pinned at 1e2f0f3ef0a93cbf2a8ddb2e95130f8f4c584b3f. The upstream LGPL-2.1-or-later library is used as an external validation reference only; it is not linked or shipped in this APK. See tools/ac_expanded/README.md for source scope and verification.

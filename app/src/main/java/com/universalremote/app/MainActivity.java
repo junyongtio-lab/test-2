@@ -265,7 +265,7 @@ public final class MainActivity extends Activity {
         categoryTile(first,"set_top_box","Decoder","Recorded IR controls",LILAC);content.addView(first);
         LinearLayout second=row();categoryTile(second,"air_conditioner","Air conditioner","Recorded IR settings",0xffffcc97);
         categoryTile(second,"fan","Fan","Speed, swing & more",0xff9ccfff);content.addView(second);gap(content,14);
-        LinearLayout ac=card("All 734 Mi AC profiles","Complete AC source data from the supplied Mi Remote 7.2.4M APK is included offline. 36 source-mapped controls remain available. Four additional experimental candidates add LG, Mitsubishi Electric, DaiKin and Samsung settings; 694 other source records have no controls.");
+        LinearLayout ac=card("All 734 Mi AC profiles","Complete AC source data from the supplied Mi Remote 7.2.4M APK is included offline. 36 source-mapped controls remain available. Experimental candidates include the original four protocols and 70 additional source profiles using independently validated 112-bit packets. The remaining 624 source records still have no controls. New candidates are not hardware-verified.");
         gap(ac,12);full(ac,action("Browse all 734 AC profiles",()->browseAcSource(null),false),52);
         if(!devices.isEmpty()) {
             section("Ready when you are","Tap a saved device to open its remote.");
@@ -458,7 +458,7 @@ public final class MainActivity extends Activity {
         full(content,action("+ Add a remote",this::addBrand,true),54);gap(content,12);
     }
     private void helpPage() {
-        LinearLayout ac=card("Complete Mi APK AC database","All 734 source AC profiles across 45 brand labels are included: 33 recorded profiles and 701 stateful definitions. Complete source fields and referenced data are retained. 36 profiles have source-mapped controls. Four further profiles offer experimental protocol candidates; the other 694 have no controls. Source script text is stored as data and is never executed.");
+        LinearLayout ac=card("Complete Mi APK AC database","All 734 source AC profiles across 45 brand labels are included: 33 recorded profiles and 701 stateful definitions. Complete source fields and referenced data are retained. 36 profiles have original source-mapped controls. The original four and 70 additional definitions have experimental protocol candidates; 624 source definitions still have no controls. Source script text is stored as data and is never executed.");
         gap(ac,12);full(ac,action("Browse all 734 AC profiles",()->browseAcSource(null),false),52);
         card("Mi Remote infrared catalogue", "Bundled IR signals include the published Mi GitHub catalogue, 604 additional TV/AC profiles recovered from the uploaded Mi Remote 7.2.4M database and five Astro keysets from its regional service. They work offline without a profile-import step. No Palm account, subscriptions, advertisements or analytics.");
         if(infrared!=null)card("Available remote keysets",infrared.profileCount()+" keysets across televisions, set-top boxes, air conditioners and fans. Search by the database brand, then try a recorded remote on your appliance. Source keyset IDs are not retail model numbers; a brand match alone does not establish compatibility.");
@@ -493,13 +493,15 @@ public final class MainActivity extends Activity {
         if(infrared==null){message(irCatalogFailed?"The IR catalogue could not load. Restart the app to retry.":"The IR catalogue is loading. Try again in a moment.");return;}
         Set<String> brands=new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         brands.addAll(infrared.brands(category));
-        if(category.equals("air_conditioner")&&acSourceDatabase!=null)brands.addAll(acSourceDatabase.brands());
+        if(category.equals("air_conditioner")) {
+            if(acSourceDatabase==null&&!acSourceFailed){message("The AC source catalogue is loading. Try again shortly.");return;}
+            brands.addAll(new AcGuidedCatalog(infrared,acSourceDatabase,panasonic,familyAc).brands());
+        }
         // These two connection options remain available independently of the IR catalogue.
         if(category.equals("tv")){brands.add("Samsung");brands.add("LG");}
         List<Choice> options=new ArrayList<>();
         for(String brand:brands)options.add(new Choice(brand,()->{
-            if(category.equals("tv")||category.equals("set_top_box")||category.equals("fan"))chooseMethod(brand,category);
-            else irSetup(brand,category);
+            chooseMethod(brand,category);
         }));
         if(options.isEmpty()){message("No decoded "+categoryLabel(category).toLowerCase(Locale.ROOT)+" profiles are available in this snapshot.");return;}
         choices(categoryLabel(category)+" brand · Mi Remote",options);
@@ -515,7 +517,7 @@ public final class MainActivity extends Activity {
     }
     private void showAcSourceDetails(JSONObject profile) {
         String kind=profile.optJSONObject("control").optString("kind");boolean available=!kind.equals("unavailable");
-        String details=(FamilyAcEncoder.supports(profile.optString("model"))?"An experimental protocol candidate is available for this source template. These controls use a public protocol mapping and have not been tested on your appliance. Only Cool/Heat, 16–30 °C, fan speed and power are offered. Swing, timers and custom hooks are unavailable.\n\n":"")+"Complete source data included offline.\n\n"+(FamilyAcEncoder.supports(profile.optString("model"))?"Exact source-engine equivalence remains unverified; use Try protocol candidate to test the independent encoder.":available?"Controls available: "+(kind.equals("recorded")?"recorded signals":"Panasonic temperature and mode controls")+".":"Data included; controls unavailable. This stateful profile needs an encoder. No signal can be sent from this source-data view.")
+        String details=(FamilyAcEncoder.supports(profile.optString("model"))?"An experimental protocol candidate is available for this source template. These controls use a public protocol mapping and have not been tested on your appliance. Only the implemented controls shown for the selected candidate are offered. Expanded AC112 candidates expose power, Cool/Heat and 16–30 °C; their fan, swing, timers and custom hooks remain unavailable.\n\n":"")+"Complete source data included offline.\n\n"+(FamilyAcEncoder.supports(profile.optString("model"))?"Exact source-engine equivalence remains unverified; use Try protocol candidate to test the independent encoder.":available?"Controls available: "+(kind.equals("recorded")?"recorded signals":"Panasonic temperature and mode controls")+".":"Data included; controls unavailable. This stateful profile needs an encoder. No signal can be sent from this source-data view.")
             +"\n\nSource profile: "+profile.optString("model")+"\nBrand: "+profile.optString("brand")
             +"\nCarrier: "+profile.optInt("carrierHz")+" Hz\nDefinition fields: "+profile.optInt("definitionFieldCount")
             +"\nIR hardware: "+irHardware.title+"\n\nSource IDs are not retail model numbers. Included data does not establish an appliance match.";
@@ -564,8 +566,10 @@ public final class MainActivity extends Activity {
         Choice(String label,Runnable action){this.label=label;this.action=action;}
         @Override public String toString(){return label;}
     }
-    private void choices(String title,List<Choice> options) {
+    private void choices(String title,List<Choice> options) { choices(title,options,""); }
+    private void choices(String title,List<Choice> options,String note) {
         LinearLayout body=column();body.setPadding(dp(18),0,dp(18),0);
+        if(!note.isEmpty()){body.addView(text(note,13,MUTED,false));gap(body,8);}
         EditText search=input("Search this list",false);body.addView(search);
         ListView list=new ListView(this);body.addView(list,new LinearLayout.LayoutParams(-1,dp(330)));
         List<Choice> filtered=new ArrayList<>(options);
@@ -657,6 +661,7 @@ public final class MainActivity extends Activity {
             controls.addView(power);
         }
         if(!profile.optBoolean("supportsFan")) {gap(controls,12);controls.addView(text("This source profile has no verified fan-speed mapping; its captured default is preserved.",12,MUTED,false));}
+        if(profile.optBoolean("expanded"))card("Basic AC112 controls only","Power, Cool/Heat and 16–30 °C are implemented. Fan, swing and timers are not offered. Other packet fields retain source-template values rather than your appliance’s live state. Try both timing variants and confirm actual behavior before saving.");
         if(profile.has("family"))card("Experimental protocol candidate", "Physical appliance response and exact equivalence to Mi Remote are unverified. Test power and each setting. Timers, swing and other custom features are unavailable.");
         gap(content,8);full(content,action(profile.has("family")?"Find a different AC remote":"Find a different Panasonic remote",()->panasonicSetup(selected),false),48);
         gap(content,12);content.addView(text("Source keyset: "+profile.optString("model")+". Protocol and source keyset IDs are candidates; confirm the appliance responds before treating them as a match.",12,MUTED,false));
@@ -688,14 +693,22 @@ public final class MainActivity extends Activity {
     private void panasonicSetup(JSONObject replacement) {
         panasonicSetup(replacement,"");
     }
-    private void panasonicSetup(JSONObject replacement,String initialProfile) {
+    private void panasonicSetup(JSONObject replacement,String initialProfile) { panasonicSetup(replacement,initialProfile,null); }
+    private void panasonicSetup(JSONObject replacement,String initialProfile,List<JSONObject> allowedProfiles) {
         final boolean familyMode=initialProfile.startsWith("family_")||(replacement!=null&&replacement.optString("mode").equals("family_ac"));
         final PanasonicAcEncoder encoder=panasonic;
         if(!familyMode&&encoder==null){message(panasonicFailed?"Panasonic AC definitions could not load. Recorded AC remotes remain available.":"Panasonic AC definitions are loading. Try again shortly.");return;}
         if(familyMode&&familyAc==null){message("AC protocol candidates are loading.");return;}
-        final List<JSONObject> profiles=familyMode?familyAc.profiles():encoder.profiles();
-        if(profiles.isEmpty()){message("No verified Panasonic AC parameter profiles are available.");return;}
         String requestedProfileId=replacement==null?initialProfile:replacement.optString("profile");
+        final List<JSONObject> profiles=allowedProfiles!=null?new ArrayList<>(allowedProfiles):familyMode?familyAc.profiles():encoder.profiles();
+        if(familyMode&&allowedProfiles==null) {
+            JSONObject requested=familyAc.find(requestedProfileId);
+            if(requested==null){message("This AC protocol candidate is unavailable.");return;}
+            String selectedBrand=requested.optString("brand");
+            Iterator<JSONObject> candidates=profiles.iterator();
+            while(candidates.hasNext())if(!candidates.next().optString("brand").equalsIgnoreCase(selectedBrand))candidates.remove();
+        }
+        if(profiles.isEmpty()){message("No implemented AC parameter candidates are available.");return;}
         int initial=0;for(int i=0;i<profiles.size();i++)if(profiles.get(i).optString("id").equals(requestedProfileId))initial=i;
         final int[] current={initial};final boolean[] sending={false},signalSent={false};
         final java.util.concurrent.atomic.AtomicBoolean active=new java.util.concurrent.atomic.AtomicBoolean(true);
@@ -709,7 +722,7 @@ public final class MainActivity extends Activity {
             .setNegativeButton("Close",null).setNeutralButton("Save preview",null).setPositiveButton("Use this remote",null).create();
         Runnable refresh=()->{
             JSONObject profile=profiles.get(current[0]);
-            position.setText("AC remote "+(current[0]+1)+" of "+profiles.size()+" · "+profile.optString("model"));
+            position.setText("AC remote "+(current[0]+1)+" of "+profiles.size()+" · "+profile.optString("model")+(profile.optBoolean("expanded")?" · "+profile.optString("family"):""));
             test.setText(profile.optBoolean("powerToggle")?"Test power toggle · Cool 24 °C":"Test power on · Cool 24 °C");
             test.setEnabled(!sending[0]&&irHardware.hasEmitter&&infrared!=null);
             result.setText(irHardware.hasEmitter?"Tap the test button once, then check the AC yourself.":irHardware.title+". You can save a preview; infrared sending remains disabled.");
@@ -877,6 +890,12 @@ public final class MainActivity extends Activity {
     }
     private void chooseMethod(String brand) { chooseMethod(brand,"tv"); }
     private void chooseMethod(String brand,String category) {
+        if(category.equals("air_conditioner")){
+            List<Choice> acOptions=new ArrayList<>();
+            acOptions.add(new Choice("Find a working remote · Guided testing",()->acGuidedSetup(brand)));
+            acOptions.add(new Choice("Browse AC controls and included data",()->irSetup(brand,category)));
+            choices(brand+" connection",acOptions);return;
+        }
         List<Choice> options=new ArrayList<>();
         if(infrared!=null&&!infrared.forBrand(brand,category).isEmpty()) {
             options.add(new Choice("Find a working remote · Guided testing",()->matchIrProfiles(brand,infrared.forBrand(brand,category))));
@@ -885,6 +904,30 @@ public final class MainActivity extends Activity {
         if(category.equals("tv")&&brand.equalsIgnoreCase("Samsung"))options.add(new Choice("SmartThings · published Samsung API",this::smartThingsSetup));
         if(category.equals("tv")&&brand.equalsIgnoreCase("LG"))options.add(new Choice("webOS · local Wi-Fi pairing",this::lgSetup));
         choices(brand+" connection",options);
+    }
+    private void acGuidedSetup(String brand) {
+        if(infrared==null){message("The IR catalogue is unavailable.");return;}
+        if((acSourceDatabase==null&&!acSourceFailed)||(panasonic==null&&!panasonicFailed)){
+            message("AC candidates are loading. Try again shortly.");return;
+        }
+        AcGuidedCatalog guide=new AcGuidedCatalog(infrared,acSourceDatabase,panasonic,familyAc);
+        List<JSONObject> recorded=guide.recorded(brand),settings=guide.settings(brand);
+        int unavailable=guide.unavailableSourceCount(brand);
+        if(recorded.isEmpty()&&settings.isEmpty()) {
+            new AlertDialog.Builder(this).setTitle(brand+" · Guided testing unavailable")
+                .setMessage("No sendable AC candidate is implemented for this brand. "+unavailable+" source definitions are included as data, but they still need an encoder. This app cannot test or save a working match from those definitions. No compatible signal is invented.")
+                .setPositiveButton("Browse included data",(d,w)->browseAcSource(brand)).setNegativeButton("Close",null).show();return;
+        }
+        List<Choice> options=new ArrayList<>();
+        for(JSONObject profile:settings) {
+            String label=(profile.has("family")?"Experimental settings candidate":"Settings candidate")+" · "+profile.optString("model")+(profile.optBoolean("expanded")?" · "+profile.optString("family"):"");
+            options.add(new Choice(label,()->panasonicSetup(null,profile.optString("id"),settings)));
+        }
+        if(!recorded.isEmpty())options.add(new Choice("Test recorded AC remotes · "+recorded.size()+" candidates",()->matchIrProfiles(brand,recorded)));
+        if(acSourceDatabase!=null&&!acSourceDatabase.profiles(brand).isEmpty())
+            options.add(new Choice("Browse included source data",()->browseAcSource(brand)));
+        String note=guide.sendableCount(brand)+" sendable candidates: "+recorded.size()+" recorded remotes and "+settings.size()+" settings candidates. Aim at the AC and confirm its response before saving. Recorded signals may change several settings at once; settings tests request Cool 24 °C. "+unavailable+" additional source definitions have no encoder and cannot be tested. No appliance state is read.";
+        choices(brand+" · AC guided testing",options,note);
     }
     private void irSetup(String brand,String category) {
         if(infrared==null){message("IR catalogue is unavailable.");return;}
@@ -932,12 +975,13 @@ public final class MainActivity extends Activity {
         final boolean television="tv".equals(profiles.get(0).optString("category"));
         final boolean decoder="set_top_box".equals(profiles.get(0).optString("category"));
         final boolean fan="fan".equals(profiles.get(0).optString("category"));
-        final boolean confirmButtons=television||decoder||fan;
-        final String appliance=fan?"fan":decoder?"decoder":"TV";
+        final boolean airConditioner="air_conditioner".equals(profiles.get(0).optString("category"));
+        final boolean confirmButtons=television||decoder||fan||airConditioner;
+        final String appliance=airConditioner?"AC":fan?"fan":decoder?"decoder":"TV";
         final TvTestSession responses=new TvTestSession();
         LinearLayout body=column();body.setPadding(dp(20),dp(8),dp(20),dp(12));
         TextView position=text("",17,TEXT,true);body.addView(position);gap(body,8);
-        TextView explanation=text(fan?"Aim the phone at the fan IR sensor and observe the fan. Try Power, Speed or Oscillation where recorded. Confirm two different buttons before saving, or the single available button on a limited candidate. If nothing happens, try the next remote.":decoder?"Turn the decoder and TV on. Aim the phone at the decoder IR sensor, not the TV. Try navigation, OK or channel buttons where available. Confirm two different buttons respond before saving. If nothing happens, try the next remote.":television?"Turn the TV on. Aim the phone at its IR sensor from 1–3 metres. Try Volume, Power, Input or navigation where available. Confirm two different buttons respond before saving. If nothing happens, try the next remote.":"Test one recorded button while aiming at the appliance. A keyset is a source capture, not a verified model match. Save only the remote you choose.",13,MUTED,false);
+        TextView explanation=text(airConditioner?"Aim at the AC IR sensor. Each recorded signal may change several settings at once. Choose a recorded state, send it, and confirm the actual AC response before saving. Try Next remote if it does not respond. These captures do not read the AC state.":fan?"Aim the phone at the fan IR sensor and observe the fan. Try Power, Speed or Oscillation where recorded. Confirm two different buttons before saving, or the single available button on a limited candidate. If nothing happens, try the next remote.":decoder?"Turn the decoder and TV on. Aim the phone at the decoder IR sensor, not the TV. Try navigation, OK or channel buttons where available. Confirm two different buttons respond before saving. If nothing happens, try the next remote.":television?"Turn the TV on. Aim the phone at its IR sensor from 1–3 metres. Try Volume, Power, Input or navigation where available. Confirm two different buttons respond before saving. If nothing happens, try the next remote.":"Test one recorded button while aiming at the appliance. A keyset is a source capture, not a verified model match. Save only the remote you choose.",13,MUTED,false);
         body.addView(explanation);gap(body,12);
         Spinner command=new Spinner(this);body.addView(command,new LinearLayout.LayoutParams(-1,dp(52)));
         TextView result=text("Loading signals…",13,MUTED,false);result.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
@@ -955,7 +999,7 @@ public final class MainActivity extends Activity {
         final java.util.concurrent.atomic.AtomicBoolean active=new java.util.concurrent.atomic.AtomicBoolean(true);
         Runnable[] load=new Runnable[1];
         load[0]=()->{
-            int token=request.incrementAndGet();JSONObject metadata=profiles.get(current[0]);signalSent[0]=false;responses.reset(fan?Math.min(2,metadata.optInt("commandCount",2)):2);responded.setEnabled(false);responded.setText(appliance+" responded to this button");
+            int token=request.incrementAndGet();JSONObject metadata=profiles.get(current[0]);signalSent[0]=false;responses.reset(airConditioner?1:fan?Math.min(2,metadata.optInt("commandCount",2)):2);responded.setEnabled(false);responded.setText(appliance+" responded to this button");
             position.setText("Remote "+(current[0]+1)+" of "+profiles.size()+" · "+metadata.optString("model")+(fan&&responses.requiredCount()==1?" · One recorded button only":""));
             result.setText("Loading recorded signals…");test.setEnabled(false);command.setEnabled(false);
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
@@ -975,7 +1019,7 @@ public final class MainActivity extends Activity {
                         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);command.setAdapter(adapter);
                         if(!codes.isEmpty())command.setSelection(initial);
                         command.setEnabled(!codes.isEmpty());test.setEnabled(irHardware.hasEmitter&&!codes.isEmpty());
-                        result.setText(irHardware.hasEmitter?(fan&&responses.requiredCount()==1?"Only one button is recorded for this candidate. Send it and confirm the fan responds. Saving confirms only that function, not a complete remote.":confirmButtons?"Step 1: send the selected recorded button, then confirm only if the "+appliance+" reacts. Choose and test a different button next.":"Choose a recorded button. Tap Send test signal, then check the appliance yourself."):irHardware.title+". You can browse here. To save without testing, choose a remote from the keyset list.");
+                        result.setText(irHardware.hasEmitter?(airConditioner?"Choose a recorded state, send it, then tap AC responded only after observing the actual intended effect. A recorded signal can change several settings at once.":fan&&responses.requiredCount()==1?"Only one button is recorded for this candidate. Send it and confirm the fan responds. Saving confirms only that function, not a complete remote.":confirmButtons?"Step 1: send the selected recorded button, then confirm only if the "+appliance+" reacts. Choose and test a different button next.":"Choose a recorded button. Tap Send test signal, then check the appliance yourself."):irHardware.title+". You can browse here. To save without testing, choose a remote from the keyset list.");
                     });
                 }catch(Exception error){ui(()->{if(active.get()&&token==request.get())result.setText("Could not load this keyset: "+error.getMessage());});}
             });
@@ -985,7 +1029,7 @@ public final class MainActivity extends Activity {
         responded.setOnClickListener(v->{
             if(sending[0]||!responses.awaitingResponse())return;
             responses.confirm();responded.setEnabled(false);
-            result.setText(responses.canSave()?(responses.requiredCount()==1?"The only recorded button is confirmed. This limited candidate controls only that recorded function. Tap Use this remote to save.":"Two different buttons confirmed. Test more buttons or tap Use this remote."):"One button confirmed. Choose a different button above, send it, and confirm the "+appliance+" responds.");
+            result.setText(responses.canSave()?(airConditioner?"AC response confirmed. Test more recorded states if needed, or tap Use this remote. Other settings may still need testing.":responses.requiredCount()==1?"The only recorded button is confirmed. This limited candidate controls only that recorded function. Tap Use this remote to save.":"Two different buttons confirmed. Test more buttons or tap Use this remote."):"One button confirmed. Choose a different button above, send it, and confirm the "+appliance+" responds.");
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(responses.canSave());
         });
         test.setOnClickListener(v->{

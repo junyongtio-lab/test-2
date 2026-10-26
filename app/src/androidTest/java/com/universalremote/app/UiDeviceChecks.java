@@ -37,7 +37,7 @@ final class UiDeviceChecks {
         this.progress=progress;this.automation=instrumentation.getUiAutomation();
         File external=context.getExternalFilesDir(null);
         if(external==null)throw new AssertionError("External app-specific validation directory unavailable");
-        output=new File(external,"palm-validation-v164");
+        output=new File(external,"palm-validation-v165");
         if(!output.isDirectory()&&!output.mkdirs())throw new AssertionError("Could not create UI evidence directory");
         for(String owned:new String[]{"ui-failure.png","ui-failure-tree.txt","ui-verification.json"}) {
             File previous=new File(output,owned);
@@ -54,7 +54,7 @@ final class UiDeviceChecks {
     private int exercise(int coreChecks) throws Exception {
         SharedPreferences preferences=context.getSharedPreferences("devices",Context.MODE_PRIVATE);
         String original=preferences.getString("profiles",null);
-        JSONObject report=new JSONObject().put("package",context.getPackageName()).put("versionName","1.6.4")
+        JSONObject report=new JSONObject().put("package",context.getPackageName()).put("versionName","1.6.5")
             .put("androidCatalogueChecks",coreChecks).put("hardwareState","No IR transmitter detected")
             .put("physicalHardwareTested",false).put("uiChecks",checks).put("passed",false);
         try {
@@ -80,7 +80,7 @@ final class UiDeviceChecks {
             waitFor("No IR transmitter detected",false,false);banner();shot("ui-home.png");
             pass("Home shows the actual absent-emitter hardware banner");
             click("Check IR",false,false,false);
-            waitFor("Palm Remote 1.6.4",true,false);waitFor("Source keyset: "+astro.getString("model"),true,false);
+            waitFor("Palm Remote 1.6.5",true,false);waitFor("Source keyset: "+astro.getString("model"),true,false);
             shot("ui-ir-check.png");click("Done",false,false,false);
             pass("Check IR reports installed version and selected source keyset without transmitting");
 
@@ -198,7 +198,9 @@ final class UiDeviceChecks {
             require(java.util.Objects.equals(beforeSourceBrowsing,preferences.getString("profiles",null)),"Opening AC controls saved a source record");
             pass("Complete AC inventory opens exact recorded controls without treating source-data inclusion as a confirmed appliance match");
             FamilyAcEncoder families=new FamilyAcEncoder(completeAc);
+            int expandedUiSamples=0;
             for(JSONObject candidate:families.profiles()) {
+                if(candidate.optBoolean("expanded")&&(candidate.optInt("variant")!=0||expandedUiSamples++>0))continue;
                 JSONObject source=null;
                 for(JSONObject metadata:completeAc.profiles(null))if(metadata.getString("model").equals(candidate.getString("model")))source=metadata;
                 require(source!=null,"Experimental candidate source missing");
@@ -214,6 +216,42 @@ final class UiDeviceChecks {
                 clickVisibleOrScroll("Power on");disabled("Power on");clickVisibleOrScroll("Power off");disabled("Power off");
                 clickVisibleOrScroll("Experimental protocol candidate");shot("ui-"+candidate.getString("family").toLowerCase(java.util.Locale.ROOT)+"-candidate.png");
                 pass(candidate.getString("family")+" preview preserves its source ID, discloses experimental status, and disables all sending without IR hardware");
+            }
+            AcGuidedCatalog acGuide=new AcGuidedCatalog(catalog,completeAc,encoder,families);
+            for(String brand:new String[]{"Panasonic","LG","DaiKin","Carrier","Midea","Sharp"}) {
+                int savedBefore=profileCount(preferences);
+                instrumentation.runOnMainSync(()->{
+                    try {
+                        java.lang.reflect.Method setup=MainActivity.class.getDeclaredMethod("chooseMethod",String.class,String.class);
+                        setup.setAccessible(true);setup.invoke(activity,brand,"air_conditioner");
+                    }catch(Exception error){throw new RuntimeException(error);}
+                });
+                waitFor(brand+" connection",false,false);
+                click("Find a working remote · Guided testing",false,false,false);
+                if(acGuide.sendableCount(brand)==0) {
+                    waitFor(brand+" · Guided testing unavailable",false,false);
+                    require(find("Use this remote",false,false)==null,"Source-only AC brand offered a working-match save");
+                    shot("ui-ac-"+brand.toLowerCase(java.util.Locale.ROOT)+"-no-encoder.png");
+                    click("Close",false,false,false);
+                }else {
+                    waitFor(brand+" · AC guided testing",false,false);
+                    List<JSONObject> settings=acGuide.settings(brand);
+                    if(!settings.isEmpty()) {
+                        JSONObject p=settings.get(0);
+                        click((p.has("family")?"Experimental settings candidate":"Settings candidate")+" · "+p.getString("model")+(p.optBoolean("expanded")?" · "+p.getString("family"):""),false,false,false);
+                        waitFor("AC remote 1 of "+settings.size()+" · "+p.getString("model")+(p.optBoolean("expanded")?" · "+p.getString("family"):""),false,false);
+                        disabled(p.optBoolean("powerToggle")?"Test power toggle · Cool 24 °C":"Test power on · Cool 24 °C");
+                        disabled("Use this remote");
+                        if(settings.size()==1)disabled("Next remote");
+                    }else {
+                        click("Test recorded AC remotes · "+acGuide.recorded(brand).size()+" candidates",false,false,false);
+                        waitFor("You can browse here",true,false);
+                        disabled("Send test signal");disabled("AC responded to this button");disabled("Use this remote");
+                    }
+                    shot("ui-ac-"+brand.toLowerCase(java.util.Locale.ROOT)+"-guided.png");click("Close",false,false,false);
+                }
+                require(savedBefore==profileCount(preferences),"AC guided browsing saved an untested match");
+                pass(brand+" AC entry routes only sendable candidates or explicitly reports missing encoder support");
             }
             for(String brand:new String[]{"Panasonic","Dyson","Airmate","Aoda","Camel","Wahson"}) {
                 int savedBefore=profileCount(preferences);

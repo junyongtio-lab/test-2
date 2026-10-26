@@ -28,12 +28,14 @@ final class FamilyAcEncoder {
             profiles.put(metadata.getString("model"),p);
         }
         if(profiles.size()!=4)throw new IllegalArgumentException("Protocol candidate source records are missing.");
+        for(JSONObject p:ExpandedAcEncoder.profiles(database))profiles.put(p.getString("id").substring(7),p);
     }
     static int family(String model){for(int i=0;i<MODELS.length;i++)if(MODELS[i].equals(model))return i;return -1;}
-    static boolean supports(String model){return family(model)>=0;}
+    static boolean supports(String model){return family(model)>=0||ExpandedAcEncoder.supports(model);}
     JSONObject find(String model){return profiles.get(model.startsWith("family_")?model.substring(7):model);}
     List<JSONObject> profiles(){return new ArrayList<>(profiles.values());}
     static PanasonicAcEncoder.Signal encode(JSONObject p,PanasonicAcEncoder.State s,boolean powerPress) throws Exception {
+        if(p.optBoolean("expanded"))return ExpandedAcEncoder.encode(p,s);
         int family=family(p.getString("model"));
         if(family<0||s==null||s.mode==null||!(s.mode.equals("cool")||s.mode.equals("heat"))||s.temperature<16||s.temperature>30||s.fan<0||s.fan>3||s.swing!=-1)
             throw new IllegalArgumentException("Unsupported AC protocol candidate or setting.");

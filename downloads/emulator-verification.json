@@ -1,8 +1,9 @@
 {
-  "versionName": "1.6.4",
+  "versionName": "1.6.5",
   "executed": false,
   "reason": "No emulator UI results claimed for this update.",
   "instrumentationApkCompiled": true,
+  "acBrandsInCompiledUiChecks": 6,
   "fanBrandsInCompiledUiChecks": 6,
   "decoderBrandsInCompiledUiChecks": 6,
   "tvBrandsInCompiledUiChecks": 18,

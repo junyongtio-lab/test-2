@@ -22,13 +22,24 @@ jobs:
         run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
       - uses: gradle/actions/setup-gradle@v4
       - name: Build, test and lint
-        run: ./gradlew --no-daemon testDebugUnitTest lintDebug assembleDebug assembleDebugAndroidTest
+        run: |
+          mkdir -p work
+          PALM_EXPANDED_WAVEFORMS="$PWD/work/ac112-waveforms.csv" ./gradlew --no-daemon testDebugUnitTest lintDebug assembleDebug assembleDebugAndroidTest
+      - name: Verify expanded AC packets and strict waveform decodes
+        run: |
+          git init work/ac-reference
+          git -C work/ac-reference remote add origin https://github.com/crankyoldgit/IRremoteESP8266.git
+          git -C work/ac-reference fetch --depth 1 origin 1e2f0f3ef0a93cbf2a8ddb2e95130f8f4c584b3f
+          git -C work/ac-reference checkout --detach FETCH_HEAD
+          python3 tools/ac_expanded/verify_reference.py --reference work/ac-reference --waveforms work/ac112-waveforms.csv
       - name: Verify TV brand coverage
         run: python3 tools/tv_brand_coverage.py --check
       - name: Verify decoder brand coverage
         run: python3 tools/decoder_brand_coverage.py --check
       - name: Verify fan brand coverage
         run: python3 tools/fan_brand_coverage.py --check
+      - name: Verify AC guided coverage and encoder gaps
+        run: python3 tools/ac_guided_coverage.py --check
       - name: Verify Mi database catalogue
         run: |
           python3 -m pip install -r tools/mi_catalogue/requirements.txt
